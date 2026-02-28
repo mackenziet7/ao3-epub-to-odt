@@ -16,43 +16,14 @@ On first run this script installs them automatically.
 """
 
 import sys
+# Force UTF-8 output so special characters like ✓ work on Windows
+sys.stdout.reconfigure(encoding='utf-8')
 import os
 import re
 import time
 import socket
 import subprocess
 from pathlib import Path
-
-
-# ─── Auto-install dependencies into LO's Python ───────────────────────────────
-
-def ensure_deps():
-    packages = {"ebooklib": "ebooklib", "beautifulsoup4": "bs4", "lxml": "lxml"}
-    lo_python = sys.executable
-    missing = []
-    for pip_name, import_name in packages.items():
-        try:
-            __import__(import_name)
-        except ImportError:
-            missing.append(pip_name)
-
-    if not missing:
-        return  # all good
-
-    print(f"Installing missing packages into LO Python: {missing}")
-    subprocess.run([lo_python, "-m", "ensurepip", "--upgrade"], capture_output=True)
-    for pkg in missing:
-        print(f"  pip install {pkg}...", end="", flush=True)
-        r = subprocess.run([lo_python, "-m", "pip", "install", pkg, "-q"],
-                           capture_output=True, text=True)
-        if r.returncode == 0:
-            print(" ok")
-        else:
-            print(f" FAILED:\n{r.stderr}")
-            sys.exit(1)
-    print()
-
-ensure_deps()
 
 # Suppress BeautifulSoup XML-parsed-as-HTML warnings (AO3 epubs are XHTML)
 from bs4 import XMLParsedAsHTMLWarning
@@ -1018,10 +989,10 @@ def main():
         raise
     finally:
         if lo_process:
-            time.sleep(3)  # give LO time to finish writing before kill
-            lo_process.terminate()
-            try: lo_process.wait(timeout=10)
-            except: lo_process.kill()
+            lo_process.kill()
+            try: lo_process.wait(timeout=5)
+            except: pass
+            subprocess.run(["taskkill", "/f", "/im", "soffice.exe"], capture_output=True)
             print("  LO shut down.")
 
     print(f"\n{'='*60}\nDONE\n{'='*60}")
