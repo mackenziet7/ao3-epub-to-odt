@@ -1,0 +1,34 @@
+# PyInstaller build output
+build/
+dist/
+*.spec
+
+# Python cache files
+__pycache__/
+*.py[cod]
+
+# Virtual environments (if you ever add one)
+venv/
+.env/
+
+# VS Code settings (optional — remove this if you want to share your editor config)
+.vscode/
+
+# Windows junk
+Thumbs.db
+desktop.ini
+```
+
+Create a file called `.gitignore` in the root of your project folder and paste that in.
+
+The general rule for what goes on GitHub is: **only include things a user needs to run your project, or that you wrote yourself**. Generated files, build artifacts, and caches can always be recreated so they just add noise.
+
+Your repo should end up looking like:
+```
+ao3-epub-to-odt/
+├── scripts/
+│   └── ao3_to_odt.py
+├── gui.py
+├── launch.bat
+├── .gitignore
+└── README.md

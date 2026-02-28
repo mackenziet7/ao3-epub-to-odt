@@ -16,6 +16,8 @@ On first run this script installs them automatically.
 """
 
 import sys
+# Force UTF-8 output so special characters like ✓ work on Windows
+sys.stdout.reconfigure(encoding='utf-8')
 import os
 import re
 import time
@@ -1018,10 +1020,10 @@ def main():
         raise
     finally:
         if lo_process:
-            time.sleep(3)  # give LO time to finish writing before kill
-            lo_process.terminate()
-            try: lo_process.wait(timeout=10)
-            except: lo_process.kill()
+            lo_process.kill()
+            try: lo_process.wait(timeout=5)
+            except: pass
+            subprocess.run(["taskkill", "/f", "/im", "soffice.exe"], capture_output=True)
             print("  LO shut down.")
 
     print(f"\n{'='*60}\nDONE\n{'='*60}")
