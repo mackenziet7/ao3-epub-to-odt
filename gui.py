@@ -7,6 +7,7 @@ from PyQt6.QtWidgets import (
     QLabel, QLineEdit, QPushButton, QTextEdit
 )
 from PyQt6.QtCore import QThread, pyqtSignal
+from PyQt6.QtGui import QIcon
 from pathlib import Path
 
 
@@ -15,6 +16,7 @@ from pathlib import Path
 LO_PYTHON = r"C:\Program Files\LibreOffice\program\python.exe"
 SCRIPT = Path(__file__).parent / "scripts" / "ao3_to_odt.py"
 LO_DOWNLOAD_URL = "https://www.libreoffice.org/download/download-libreoffice/"
+NO_WINDOW = subprocess.CREATE_NO_WINDOW  # suppress console windows on Windows
 
 
 # ── Helpers ───────────────────────────────────────────────────────────────────
@@ -39,7 +41,11 @@ class ConversionWorker(QThread):
 
     def run(self):
         # Kill any existing LO instances from previous runs
-        subprocess.run(["taskkill", "/f", "/im", "soffice.exe"], capture_output=True)
+        subprocess.run(
+            ["taskkill", "/f", "/im", "soffice.exe"],
+            capture_output=True,
+            creationflags=NO_WINDOW
+        )
         time.sleep(2)  # give LO time to fully exit
 
         process = subprocess.Popen(
@@ -47,7 +53,8 @@ class ConversionWorker(QThread):
             stdout=subprocess.PIPE,
             stderr=subprocess.STDOUT,
             text=True,
-            encoding='utf-8'
+            encoding='utf-8',
+            creationflags=NO_WINDOW
         )
 
         # Read character by character so partial lines (dots, etc.) show up live
@@ -76,7 +83,12 @@ class ConversionWorker(QThread):
             process.wait()
 
         # Clean up LO regardless of outcome
-        subprocess.run(["taskkill", "/f", "/im", "soffice.exe"], capture_output=True)
+        subprocess.run(
+            ["taskkill", "/f", "/im", "soffice.exe"],
+            capture_output=True,
+            creationflags=NO_WINDOW
+        )
+        time.sleep(3)  # give LO time to release file handles before PyInstaller cleans up
 
         self.finished_signal.emit(True)
 
@@ -88,6 +100,11 @@ class MainWindow(QMainWindow):
         super().__init__()
         self.setWindowTitle("AO3 to ODT Converter")
         self.setMinimumSize(600, 400)
+
+        # Set window icon if available
+        icon_path = get_base_path() / "icon.ico"
+        if icon_path.exists():
+            self.setWindowIcon(QIcon(str(icon_path)))
 
         # Central widget — QMainWindow requires one as a container
         central = QWidget()
@@ -203,11 +220,13 @@ class MainWindow(QMainWindow):
         try:
             subprocess.run(
                 [LO_PYTHON, "-m", "ensurepip", "--upgrade"],
-                capture_output=True, timeout=60
+                capture_output=True, timeout=60,
+                creationflags=NO_WINDOW
             )
             result = subprocess.run(
                 [LO_PYTHON, "-m", "pip", "install", "ebooklib", "beautifulsoup4", "lxml", "-q"],
-                capture_output=True, text=True, timeout=120
+                capture_output=True, text=True, timeout=120,
+                creationflags=NO_WINDOW
             )
             if result.returncode == 0:
                 marker.write_text("installed")
