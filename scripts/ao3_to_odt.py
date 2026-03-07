@@ -394,6 +394,9 @@ def parse_epub(epub_path):
             chapter_count += 1
             ch = parse_chapter(item, chapter_count)
             if not ch.title: ch.title = f"Chapter {chapter_count}"
+            # Skip afterword and other AO3 boilerplate sections
+            if ch.title.strip().lower() in ("afterword", "foreword", "preface"):
+                continue
             book.chapters.append(ch)
 
     return book
@@ -676,7 +679,7 @@ def blank_with_style(text_obj, cursor, page_style, page_number=1):
     text_obj.insertControlCharacter(cursor, PARAGRAPH_BREAK, False)
     cursor.setPropertyValue("PageDescName", "")
 
-def build_content(doc, book):
+def build_content(doc, book, include_toc=True):
     text   = doc.getText()
     cursor = text.createTextCursor()
     cursor.gotoStart(False)
@@ -723,16 +726,17 @@ def build_content(doc, book):
     print("  [✓] Front matter")
 
     # ── TOC ── (still FrontMatterPage, no header) ────────────────────────────
-    ins(text, cursor, "", "Standard", page_style="FrontMatterPage")
-    ins(text, cursor, "Contents", "ChapHeads")
-    toc = doc.createInstance("com.sun.star.text.ContentIndex")
-    toc.CreateFromOutline = True
-    toc.CreateFromChapter = False
-    toc.Level             = 1
-    toc.Title             = ""
-    text.insertTextContent(cursor, toc, False)
-    text.insertControlCharacter(cursor, PARAGRAPH_BREAK, False)
-    print("  [✓] TOC")
+    if include_toc:
+        ins(text, cursor, "", "Standard", page_style="FrontMatterPage")
+        ins(text, cursor, "Contents", "ChapHeads")
+        toc = doc.createInstance("com.sun.star.text.ContentIndex")
+        toc.CreateFromOutline = True
+        toc.CreateFromChapter = False
+        toc.Level             = 1
+        toc.Title             = ""
+        text.insertTextContent(cursor, toc, False)
+        text.insertControlCharacter(cursor, PARAGRAPH_BREAK, False)
+        print("  [✓] TOC")
 
     # ── Chapters ──────────────────────────────────────────────────────────────
     # LO API limitation: PageDescName (page style switch) ALWAYS pairs with
@@ -975,7 +979,8 @@ def main():
         print("  Page style done.")
         create_para_styles(doc)
         print("  Para styles done.")
-        build_content(doc, book)
+        include_toc = '--no-toc' not in sys.argv
+        build_content(doc, book, include_toc)
         print("  Content built.")
         setup_headers(doc, book.metadata)
         print("  Headers done.")

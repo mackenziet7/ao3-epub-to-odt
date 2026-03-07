@@ -4,7 +4,7 @@ import time
 from PyQt6.QtWidgets import (
     QApplication, QMainWindow, QWidget,
     QVBoxLayout, QHBoxLayout,
-    QLabel, QLineEdit, QPushButton, QTextEdit
+    QLabel, QLineEdit, QPushButton, QTextEdit, QCheckBox
 )
 from PyQt6.QtCore import QThread, pyqtSignal
 from PyQt6.QtGui import QIcon
@@ -34,10 +34,11 @@ class ConversionWorker(QThread):
     log_signal = pyqtSignal(str)       # emits a line of text to the log
     finished_signal = pyqtSignal(bool) # emits True=success, False=failure
 
-    def __init__(self, epub, odt):
+    def __init__(self, epub, odt, include_toc=True):
         super().__init__()
         self.epub = epub
         self.odt = odt
+        self.include_toc = include_toc
 
     def run(self):
         # Kill any existing LO instances from previous runs
@@ -48,8 +49,12 @@ class ConversionWorker(QThread):
         )
         time.sleep(2)  # give LO time to fully exit
 
+        cmd = [LO_PYTHON, "-u", str(SCRIPT), self.epub, self.odt]
+        if not self.include_toc:
+            cmd.append("--no-toc")
+
         process = subprocess.Popen(
-            [LO_PYTHON, "-u", str(SCRIPT), self.epub, self.odt],
+            cmd,
             stdout=subprocess.PIPE,
             stderr=subprocess.STDOUT,
             text=True,
@@ -134,6 +139,14 @@ class MainWindow(QMainWindow):
         self.btn_save.clicked.connect(self.pick_save)
         save_row.addWidget(self.btn_save)
         main_layout.addLayout(save_row)
+
+        # ── Options row ──
+        options_row = QHBoxLayout()
+        self.chk_toc = QCheckBox("Include Table of Contents")
+        self.chk_toc.setChecked(True)  # on by default
+        options_row.addWidget(self.chk_toc)
+        options_row.addStretch()  # push checkbox to the left
+        main_layout.addLayout(options_row)
 
         # ── Convert button ──
         self.btn_convert = QPushButton("Convert")
@@ -263,7 +276,7 @@ class MainWindow(QMainWindow):
 
         self.log.append("Starting conversion...")
 
-        self.worker = ConversionWorker(epub, odt)
+        self.worker = ConversionWorker(epub, odt, self.chk_toc.isChecked())
         self.worker.log_signal.connect(self.log.append)
         self.worker.finished_signal.connect(self.on_finished)
         self.worker.start()
