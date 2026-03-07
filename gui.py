@@ -1,6 +1,8 @@
 import subprocess
 import sys
 import time
+import tempfile
+import urllib.request
 from PyQt6.QtWidgets import (
     QApplication, QMainWindow, QWidget,
     QVBoxLayout, QHBoxLayout,
@@ -205,10 +207,10 @@ class MainWindow(QMainWindow):
         """
         Install required libraries into LO's Python on first run.
         Uses a marker file in the temp folder so it only runs once.
+        Falls back to downloading get-pip.py if ensurepip is unavailable
+        (affects older LibreOffice versions shipping Python 3.8).
         Returns True if deps are ready, False if installation failed.
         """
-        import tempfile
-
         # Check LO is actually installed before doing anything else
         if not Path(LO_PYTHON).exists():
             self.log.append("ERROR: LibreOffice does not appear to be installed.")
@@ -231,11 +233,28 @@ class MainWindow(QMainWindow):
         QApplication.processEvents()  # force UI to update before blocking
 
         try:
-            subprocess.run(
+            # Try ensurepip first
+            result = subprocess.run(
                 [LO_PYTHON, "-m", "ensurepip", "--upgrade"],
                 capture_output=True, timeout=60,
                 creationflags=NO_WINDOW
             )
+
+            # If ensurepip failed (common on LO with Python 3.8),
+            # fall back to downloading get-pip.py directly
+            if result.returncode != 0:
+                self.log.append("ensurepip unavailable, trying alternative pip install...")
+                self.log.append("(This requires an internet connection)")
+                QApplication.processEvents()
+                get_pip = Path(tempfile.gettempdir()) / "get-pip.py"
+                urllib.request.urlretrieve("https://bootstrap.pypa.io/get-pip.py", get_pip)
+                subprocess.run(
+                    [LO_PYTHON, str(get_pip)],
+                    capture_output=True, timeout=120,
+                    creationflags=NO_WINDOW
+                )
+
+            # Now install the required packages
             result = subprocess.run(
                 [LO_PYTHON, "-m", "pip", "install", "ebooklib", "beautifulsoup4", "lxml", "-q"],
                 capture_output=True, text=True, timeout=120,
