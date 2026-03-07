@@ -13,6 +13,7 @@ This project is based on the formatting guide by [Kira](https://docs.google.com/
 - **Windows 10 or 11**
 - **LibreOffice** installed at the default location (`C:\Program Files\LibreOffice`)
   - Download from [libreoffice.org](https://www.libreoffice.org/download/download-libreoffice/)
+  - This program works best with the newest verison of LibreOffice
 
 That's it for the `.exe`. If running from source, you also need Python 3.10+ with PyQt6 installed.
 
@@ -55,19 +56,16 @@ That's it for the `.exe`. If running from source, you also need Python 3.10+ wit
 
 The tool automates the heavy lifting but a few manual steps are needed before printing. Open the ODT in LibreOffice Writer and work through these in order:
 
-**1. Refresh the Table of Contents**
-Press **F9** (or right-click the TOC and select *Update Index*) to populate it with the real chapter titles and page numbers. The TOC is inserted as a placeholder and will appear blank or incorrect until you do this.
-
-**2. Check odd/even page balance**
+**1. Check odd/even page balance**
 Chapter 1 should start on an odd-numbered (right-hand) page — this is the standard book convention. Check the page number at the bottom of the screen when your cursor is on the first chapter page. If it's even, insert a blank page before it via *Insert > More Breaks > Manual Break* and set the page style to match.
 
-**3. Review the document**
+**2. Review the document**
 Scroll through and check for anything that looks off — unusual spacing, missing scene breaks, chapters running together, or oddly placed author notes in the appendix. The ODT is fully editable so fix anything you find directly.
 
-**4. Export to PDF**
+**3. Export to PDF**
 Go to **File > Export as PDF**. Make sure *Export as PDF/A* is unchecked, and under the *General* tab set the page range to all pages.
 
-**5. Print your book with Bookbinder**
+**4. Print your book with Bookbinder**
 Upload your PDF to [bookbinder.app](https://bookbinder.app/) — this free tool reorders and arranges your pages into printer-ready signatures for bookbinding. Follow the instructions on the site for your chosen binding style.
 
 The ODT format is also supported by Microsoft Word (Windows and Mac) and Google Docs, but LibreOffice Writer is recommended for the most accurate rendering of the styles this tool creates.
@@ -91,9 +89,9 @@ The ODT format is also supported by Microsoft Word (Windows and Mac) and Google 
 - **LibreOffice must be installed at the default path** — `C:\Program Files\LibreOffice`. Non-standard install locations will cause the conversion to fail
 - **One conversion at a time** — clicking Convert while a conversion is running is not supported; wait for the current one to finish
 - **AO3 EPUBs only** — the parser is written specifically for AO3's EPUB structure and will likely not work correctly on EPUBs from other sources
-- **The TOC requires a manual F9 refresh** in LibreOffice Writer to populate page numbers after opening — this cannot be automated
 - **Running headers appear on chapter title pages** — proper book typography suppresses the header on the first page of each chapter; this is currently not implemented and must be removed manually if desired
 - **Odd/even page balance is not checked** — the tool does not verify that chapters start on odd-numbered pages; this must be checked and corrected manually after conversion (see After Conversion steps above)
+- **Fics formatted with double line break** — Fanfics that have double line spacing between paragraphs currently do not format properly with the script. This will be fixed in the future.
 
 ---
 
@@ -122,12 +120,12 @@ Bug reports and pull requests are welcome! If an EPUB isn't converting correctly
 
 - **Customisable formatting in the GUI** — choose page size, margins, font, font size, and line spacing without editing any code
 - **Suppress headers on chapter title pages** — proper book typography has no running header on the first page of each chapter; this should be automatic
-- **Automatic TOC refresh** — trigger the F9 refresh programmatically so the TOC is populated without any manual steps
 - **Odd/even page balancing** — automatically insert blank pages where needed so chapter 1 starts on an odd-numbered (right-hand) page
 - **Mac and Linux support**
 - **Support for non-default LibreOffice install locations**
 - **Batch conversion** — convert multiple EPUBs at once
 - **Fic collections** — combine multiple EPUBs into a single bound book, with each fic as its own section and a shared table of contents
+- **Formatting fixes** - revised appendix format and general spacing issues (see Fics formatted with double line break)
 
 ---
 
