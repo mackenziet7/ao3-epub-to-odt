@@ -618,6 +618,7 @@ def create_para_styles(doc):
     front.ParaFirstLineIndent = 0
     front.ParaLineSpacing     = prop_ls(100)
 
+    # ── ChapHeads: chapter titles only — OutlineLevel=1 so TOC picks them up
     chap = get_or_create_style(doc, "ChapHeads")
     chap.CharHeight           = 18.0
     chap.CharFontName         = "Garamond"
@@ -626,7 +627,20 @@ def create_para_styles(doc):
     chap.ParaFirstLineIndent  = 0
     chap.ParaTopMargin        = pt(24)
     chap.ParaBottomMargin     = pt(18)
-    chap.OutlineLevel         = 1
+    chap.OutlineLevel         = 1        # ← indexed by TOC
+
+    # ── FrontMatterHead: same visual style as ChapHeads but OutlineLevel=0
+    # Used for half-title, full title, and "Contents" heading so they are
+    # NOT picked up by the TOC.
+    fmhead = get_or_create_style(doc, "FrontMatterHead")
+    fmhead.CharHeight          = 18.0
+    fmhead.CharFontName        = "Garamond"
+    fmhead.CharWeight          = 150
+    fmhead.ParaAdjust          = 3
+    fmhead.ParaFirstLineIndent = 0
+    fmhead.ParaTopMargin       = pt(24)
+    fmhead.ParaBottomMargin    = pt(18)
+    fmhead.OutlineLevel        = 0       # ← NOT indexed by TOC
 
     note = get_or_create_style(doc, "AppendixNote")
     note.CharHeight           = 8.0
@@ -679,23 +693,23 @@ def blank_with_style(text_obj, cursor, page_style, page_number=1):
     text_obj.insertControlCharacter(cursor, PARAGRAPH_BREAK, False)
     cursor.setPropertyValue("PageDescName", "")
 
-def build_content(doc, book, include_toc=True):
+def build_content(doc, book, include_toc=True, toc_objects=None):
     text   = doc.getText()
     cursor = text.createTextCursor()
     cursor.gotoStart(False)
 
     m = book.metadata
 
-    # ── Half title (p.1) — FrontMatterPage style (set once), no header ──────
+    # ── Half title (p.1) — FrontMatterHead so it doesn't appear in TOC
     # Page style set on the first blank, then the rest are plain blanks
     blank_with_style(text, cursor, "FrontMatterPage")
     for _ in range(5): blank(text, cursor)
-    ins(text, cursor, m.title.upper(), "ChapHeads")
+    ins(text, cursor, m.title.upper(), "FrontMatterHead")
 
     # ── Full title + author (p.3) ──────────────────────────────────────────────
     ins(text, cursor, "", "Standard", page_style="FrontMatterPage")
     for _ in range(5): blank(text, cursor)
-    ins(text, cursor, m.title,           "ChapHeads")
+    ins(text, cursor, m.title,           "FrontMatterHead")
     ins(text, cursor, f"by {m.author}",  "FrontMatter")
     blank(text, cursor); blank(text, cursor)
     if m.ao3_url:
@@ -725,10 +739,10 @@ def build_content(doc, book, include_toc=True):
         ins(text, cursor, m.summary,  "FrontMatter")
     print("  [✓] Front matter")
 
-    # ── TOC ── (still FrontMatterPage, no header) ────────────────────────────
+    # ── TOC — "Contents" heading uses FrontMatterHead (not indexed by TOC)
     if include_toc:
         ins(text, cursor, "", "Standard", page_style="FrontMatterPage")
-        ins(text, cursor, "Contents", "ChapHeads")
+        ins(text, cursor, "Contents", "FrontMatterHead")
         toc = doc.createInstance("com.sun.star.text.ContentIndex")
         toc.CreateFromOutline = True
         toc.CreateFromChapter = False
@@ -736,6 +750,8 @@ def build_content(doc, book, include_toc=True):
         toc.Title             = ""
         text.insertTextContent(cursor, toc, False)
         text.insertControlCharacter(cursor, PARAGRAPH_BREAK, False)
+        if toc_objects is not None:
+            toc_objects.append(toc)  # save reference for refresh after content is built
         print("  [✓] TOC")
 
     # ── Chapters ──────────────────────────────────────────────────────────────
@@ -980,8 +996,15 @@ def main():
         create_para_styles(doc)
         print("  Para styles done.")
         include_toc = '--no-toc' not in sys.argv
-        build_content(doc, book, include_toc)
+        toc_objects = []
+        build_content(doc, book, include_toc, toc_objects)
         print("  Content built.")
+        if toc_objects:
+            try:
+                toc_objects[0].update()
+                print("  [✓] TOC refreshed")
+            except Exception as e:
+                print(f"  TOC refresh failed (open in LO and press F9): {e}")
         setup_headers(doc, book.metadata)
         print("  Headers done.")
         save_odt(doc, out_path)
@@ -1003,8 +1026,7 @@ def main():
     print(f"\n{'='*60}\nDONE\n{'='*60}")
     print(f"\n  Output: {out_path}")
     print("\n  In LibreOffice Writer:")
-    print("  1. Press F9 to refresh the Table of Contents")
-    print("  2. File > Export as PDF when ready to print")
+    print("  1. File > Export as PDF when ready to print")
 
 if __name__ == "__main__":
     main()
