@@ -16,8 +16,6 @@ On first run this script installs them automatically.
 """
 
 import sys
-# Force UTF-8 output so special characters like ✓ work on Windows
-sys.stdout.reconfigure(encoding='utf-8')
 import os
 import re
 import time
@@ -25,15 +23,11 @@ import socket
 import subprocess
 from pathlib import Path
 
-# Suppress BeautifulSoup XML-parsed-as-HTML warnings (AO3 epubs are XHTML)
-from bs4 import XMLParsedAsHTMLWarning
-import warnings
-warnings.filterwarnings("ignore", category=XMLParsedAsHTMLWarning)
+# Force UTF-8 output so special characters like ✓ work on Windows
+sys.stdout.reconfigure(encoding='utf-8')
 
-# Now safe to import
-import ebooklib
-from ebooklib import epub
-from bs4 import BeautifulSoup
+# Make repo root importable during migration
+sys.path.insert(0, str(Path(__file__).parent.parent))
 
 # UNO — only available in LO's Python
 try:
@@ -49,358 +43,24 @@ except ImportError:
     print('  & "C:\\Program Files\\LibreOffice\\program\\python.exe" ao3_to_odt.py your_fic.epub')
     sys.exit(1)
 
+# Third-party
+import ebooklib
+from ebooklib import epub
+# Suppress BeautifulSoup XML-parsed-as-HTML warnings (AO3 epubs are XHTML)
+from bs4 import BeautifulSoup, XMLParsedAsHTMLWarning
+import warnings
+warnings.filterwarnings("ignore", category=XMLParsedAsHTMLWarning)
 
-# ═══════════════════════════════════════════════════════════════════════════════
-# PART 1 — EPUB PARSER
-# ═══════════════════════════════════════════════════════════════════════════════
+# Local
+from scripts.ao3_to_odt.epub.models import (
+    AO3Metadata, Run, Paragraph, Chapter, AO3Book
+)
 
-from dataclasses import dataclass, field
-from typing import Optional
+from scripts.ao3_to_odt.epub.text_utils import (
+    clean_text, clean_run, SCENE_BREAK_RE
+)
 
-@dataclass
-class AO3Metadata:
-    title: str = ""
-    author: str = ""
-    rating: str = ""
-    warnings: list = field(default_factory=list)
-    category: str = ""
-    fandom: list = field(default_factory=list)
-    relationships: list = field(default_factory=list)
-    characters: list = field(default_factory=list)
-    tags: list = field(default_factory=list)
-    language: str = ""
-    published: str = ""
-    completed: str = ""
-    words: str = ""
-    summary: str = ""
-    ao3_url: str = ""
-
-@dataclass
-class Run:
-    text: str = ""
-    italic: bool = False
-    bold: bool = False
-
-@dataclass
-class Paragraph:
-    type: str = "para"
-    runs: list = field(default_factory=list)
-
-    @property
-    def text(self):
-        return "".join(r.text for r in self.runs)
-
-@dataclass
-class Chapter:
-    index: int = 0
-    title: str = ""
-    prenotes: str = ""
-    body: list = field(default_factory=list)
-    endnotes: str = ""
-
-@dataclass
-class AO3Book:
-    metadata: AO3Metadata = field(default_factory=AO3Metadata)
-    chapters: list = field(default_factory=list)
-    cover_image: Optional[bytes] = None
-    cover_image_ext: str = "jpg"
-
-
-def clean_text(text):
-    """Full clean including strip — use for whole paragraphs/fields."""
-    text = text.replace(' ', ' ').replace('​', '').replace('﻿', '')
-    text = re.sub(r'(?<!\-)\-\-(?!\-)', '—', text)
-    return re.sub(r'  +', ' ', text).strip()
-
-def clean_run(text):
-    """Light clean for inline runs — preserves leading/trailing spaces
-    so italic spans don't eat the space before/after them."""
-    text = text.replace(' ', ' ').replace('​', '').replace('﻿', '')
-    text = re.sub(r'(?<!\-)\-\-(?!\-)', '—', text)
-    text = re.sub(r'  +', ' ', text)
-    return text  # no .strip()
-
-
-# Matches text-based scene breaks: *  *  *, ---, ~~~, ###, etc.
-SCENE_BREAK_RE = re.compile(r'^[\*\-~=#_ ]{2,}$')
-
-def parse_body_html(soup):
-    """
-    Parse body HTML into a list of Paragraphs.
-
-    Scene breaks come from four sources:
-      1. <hr> tags — the standard AO3 HTML scene break
-      2. <p> containing only break characters (* - ~ = _ #)
-      3. <p class="...separator..."> or similar class names
-      4. Images used as decorative dividers (treated as breaks)
-    All are normalised to Paragraph(type='break').
-    """
-    def extract_runs(tag, italic=False, bold=False):
-        runs = []
-        for child in tag.children:
-            if isinstance(child, str):
-                t = clean_run(str(child))
-                if t.strip(): runs.append(Run(text=t, italic=italic, bold=bold))
-            elif hasattr(child, 'name'):
-                if child.name in ('em', 'i'):
-                    runs.extend(extract_runs(child, italic=True, bold=bold))
-                elif child.name in ('strong', 'b'):
-                    runs.extend(extract_runs(child, italic=italic, bold=True))
-                elif child.name == 'br':
-                    runs.append(Run(text='\n', italic=italic, bold=bold))
-                else:
-                    runs.extend(extract_runs(child, italic=italic, bold=bold))
-        return runs
-
-    def is_scene_break_tag(tag):
-        """Return True if this tag represents a scene break."""
-        if tag.name == 'hr':
-            return True
-        if tag.name == 'p':
-            # Class-based: separator, scene-break, divider, etc.
-            classes = ' '.join(tag.get('class', []))
-            if re.search(r'sep|break|divid|rule', classes, re.I):
-                return True
-            # Content-based: only break characters
-            text = tag.get_text(strip=True)
-            if text and SCENE_BREAK_RE.match(text):
-                return True
-            # Empty <p> with only an <img> inside (decorative divider)
-            children = [c for c in tag.children
-                        if hasattr(c, 'name') or str(c).strip()]
-            if len(children) == 1 and hasattr(children[0], 'name') and children[0].name == 'img':
-                return True
-        return False
-
-    paragraphs = []
-    # Iterate over all direct and nested block elements
-    for tag in soup.find_all(['p', 'hr']):
-        if is_scene_break_tag(tag):
-            # Avoid consecutive duplicate breaks
-            if not paragraphs or paragraphs[-1].type != 'break':
-                paragraphs.append(Paragraph(type='break'))
-        elif tag.name == 'p':
-            runs = extract_runs(tag)
-            if not runs: continue
-            full = "".join(r.text for r in runs).strip()
-            if not full: continue
-            paragraphs.append(Paragraph(type='para', runs=runs))
-    return paragraphs
-
-def parse_info_page(soup, meta):
-    def dd_values(dt_tag):
-        dd = dt_tag.find_next_sibling('dd')
-        if not dd: return []
-        links = dd.find_all('a')
-        if links: return [clean_text(a.get_text()) for a in links if a.get_text(strip=True)]
-        text = clean_text(dd.get_text(separator=', '))
-        return [t.strip() for t in text.split(',') if t.strip()]
-
-    def get_field(label, root=None):
-        for dt in (root or soup).find_all('dt'):
-            if label.lower() in dt.get_text().lower():
-                return dd_values(dt)
-        return []
-
-    def get_single(label, root=None):
-        v = get_field(label, root)
-        return v[0] if v else ""
-
-    tags_dl = soup.find('dl', class_=re.compile(r'tags|meta', re.I)) or soup.find('dl')
-    if not tags_dl: return meta
-
-    r = get_single('Rating', tags_dl);      meta.rating = r if r else meta.rating
-    w = get_field('Archive Warning', tags_dl) or get_field('Warning', tags_dl)
-    if w: meta.warnings = w
-    c = get_single('Categor', tags_dl);     meta.category = c if c else meta.category
-    f = get_field('Fandom', tags_dl);       meta.fandom = f if f else meta.fandom
-    rel = get_field('Relationship', tags_dl); meta.relationships = rel if rel else meta.relationships
-    ch = get_field('Character', tags_dl);   meta.characters = ch if ch else meta.characters
-    t = get_field('Additional Tag', tags_dl) or get_field('Freeform', tags_dl)
-    if t: meta.tags = t
-    lang = get_single('Language', tags_dl); meta.language = lang if lang else meta.language
-
-    # Stats — Format A: nested dl.stats | Format B: plain text dd
-    stats_dl = tags_dl.find('dl', class_=re.compile(r'stats', re.I))
-    if stats_dl:
-        pub = get_single('Published', stats_dl)
-        if pub: meta.published = re.sub(r'T.*', '', pub)
-        comp = get_single('Completed', stats_dl) or get_single('Updated', stats_dl)
-        if comp: meta.completed = re.sub(r'T.*', '', comp)
-        words = get_single('Words', stats_dl)
-        if words: meta.words = words.replace(',', '')
-    else:
-        for dt in tags_dl.find_all('dt'):
-            if 'stats' in dt.get_text().lower():
-                dd = dt.find_next_sibling('dd')
-                if dd:
-                    txt = dd.get_text(separator='\n')
-                    m = re.search(r'Published:\s*(\d{4}-\d{2}-\d{2})', txt)
-                    if m and not meta.published: meta.published = m.group(1)
-                    m = re.search(r'Words:\s*([\d,]+)', txt)
-                    if m: meta.words = m.group(1).replace(',', '')
-                    m = re.search(r'Completed:\s*(\d{4}-\d{2}-\d{2})', txt)
-                    if m: meta.completed = m.group(1)
-                    m = re.search(r'Chapters:\s*(\d+)/(\d+)', txt)
-                    if m and not meta.completed and m.group(2) != '?' and m.group(1) == m.group(2):
-                        meta.completed = meta.published
-                break
-
-    if not meta.ao3_url:
-        for a in soup.find_all('a', href=re.compile(r'archiveofourown\.org/works/\d+')):
-            meta.ao3_url = a['href'].split('?')[0]; break
-
-    if not meta.summary:
-        div = soup.find(class_=re.compile(r'summary', re.I))
-        if div:
-            bq = div.find('blockquote') or div
-            meta.summary = clean_text(bq.get_text(separator=' '))
-
-    return meta
-
-def _bq_text(tag):
-    """Get clean text from a blockquote or its first blockquote child."""
-    bq = tag.find('blockquote') if tag.name != 'blockquote' else tag
-    if bq:
-        return clean_text(bq.get_text(separator='\n'))
-    return clean_text(tag.get_text(separator='\n'))
-
-NOTE_LABELS = ('chapter notes', 'chapter summary',
-               'author note', "author's note", 'notes:')
-
-def parse_chapter(item, index):
-    """
-    Parse a chapter document. Works on both AO3 native and Calibre exports.
-
-    Strategy: search the whole document for known patterns rather than
-    relying on container navigation, which breaks across epub variants.
-    """
-    ch = Chapter(index=index)
-    soup = BeautifulSoup(item.get_content(), 'lxml')
-
-    # ── Title ──
-    t = (soup.find(class_=re.compile(r'toc-heading|heading', re.I)) or
-         soup.find('h2') or soup.find('h3'))
-    if t: ch.title = clean_text(t.get_text())
-
-    # ── End notes ──
-    # Search whole document for id="endnotes", "endnotes1", "endnotes2", etc.
-    end_div = soup.find(id=re.compile(r'endnotes', re.I))
-    if end_div:
-        ch.endnotes = _bq_text(end_div)
-        end_div.decompose()
-
-    # Remove "See end of chapter for more notes" link divs
-    for d in soup.find_all(class_='endnote-link'):
-        d.decompose()
-
-    # ── Pre-notes ──
-    # Format A: <div id="notes"> or <div class="notes">
-    nd = soup.find(id='notes') or soup.find(class_=re.compile(r'^notes$', re.I))
-    if nd:
-        ch.prenotes = _bq_text(nd)
-        nd.decompose()
-    else:
-        # Format B: <p>Chapter Notes</p> immediately before <blockquote>
-        # These can be nested inside calibre divs — search all <p> in document
-        note_parts = []
-        for p in soup.find_all('p'):
-            label = p.get_text(strip=True).lower()
-            if any(x in label for x in NOTE_LABELS):
-                # blockquote may be a sibling of p, OR a sibling of p's parent
-                bq = p.find_next_sibling('blockquote')
-                if not bq:
-                    # try parent's next sibling
-                    bq = p.parent.find_next_sibling('blockquote') if p.parent else None
-                if not bq:
-                    # try the very next blockquote anywhere after this p
-                    for sib in p.next_elements:
-                        if hasattr(sib, 'name') and sib.name == 'blockquote':
-                            bq = sib
-                            break
-                        if hasattr(sib, 'name') and sib.name == 'p':
-                            break  # hit next paragraph, stop
-                if bq:
-                    note_parts.append(clean_text(bq.get_text(separator='\n')))
-                    bq.decompose()
-                p.decompose()
-        if note_parts:
-            ch.prenotes = '\n\n'.join(note_parts)
-
-    # ── Body ──
-    # Find the main content area — prefer userstuff1/2, fall back to body
-    body = (soup.find(id='chapters') or
-            soup.find(class_='userstuff2') or
-            soup.find(class_='userstuff1') or
-            soup.find('body'))
-    if body:
-        ch.body = parse_body_html(body)
-
-    return ch
-def parse_epub(epub_path):
-    book = AO3Book()
-    import warnings
-    with warnings.catch_warnings():
-        warnings.simplefilter("ignore")
-        ebook = epub.read_epub(epub_path)
-
-    # OPF base metadata
-    meta = AO3Metadata()
-    titles = ebook.get_metadata('DC', 'title')
-    if titles: meta.title = titles[0][0]
-    creators = ebook.get_metadata('DC', 'creator')
-    if creators: meta.author = creators[0][0]
-    langs = ebook.get_metadata('DC', 'language')
-    if langs: meta.language = langs[0][0]
-    descs = ebook.get_metadata('DC', 'description')
-    if descs:
-        meta.summary = clean_text(BeautifulSoup(descs[0][0], 'lxml').get_text(' '))
-    dates = ebook.get_metadata('DC', 'date')
-    if dates: meta.published = re.sub(r'T.*', '', dates[0][0])
-    book.metadata = meta
-
-    # Cover image
-    for item in ebook.get_items_of_type(ebooklib.ITEM_IMAGE):
-        if 'cover' in item.get_name().lower():
-            book.cover_image = item.get_content()
-            book.cover_image_ext = item.media_type.split('/')[-1].replace('jpeg','jpg')
-            break
-
-    # Process documents
-    chapter_count = 0
-    for item in ebook.get_items_of_type(ebooklib.ITEM_DOCUMENT):
-        content = item.get_content().decode('utf-8', errors='replace')
-        soup = BeautifulSoup(content, 'lxml')
-
-        has_meta_dl   = bool(soup.find('dl', class_=re.compile(r'tags|meta', re.I)))
-        has_userstuff = bool(soup.find(class_=re.compile(r'userstuff', re.I)))
-        is_preface    = bool(soup.find(id='preface'))
-        userstuff_div = soup.find(class_=re.compile(r'userstuff', re.I))
-        has_body      = userstuff_div and len(userstuff_div.find_all('p')) > 2 and not is_preface
-
-        if has_meta_dl:
-            book.metadata = parse_info_page(soup, book.metadata)
-            if not book.metadata.ao3_url:
-                for a in soup.find_all('a', href=re.compile(r'archiveofourown\.org/works/\d+')):
-                    book.metadata.ao3_url = a['href'].split('?')[0]; break
-        elif is_preface and not has_body:
-            if not book.metadata.summary:
-                bq = soup.find('blockquote', class_='userstuff')
-                if bq: book.metadata.summary = clean_text(bq.get_text(' '))
-            if not book.metadata.ao3_url:
-                for a in soup.find_all('a', href=re.compile(r'archiveofourown\.org/works/\d+')):
-                    book.metadata.ao3_url = a['href'].split('?')[0]; break
-        elif has_body or has_userstuff:
-            chapter_count += 1
-            ch = parse_chapter(item, chapter_count)
-            if not ch.title: ch.title = f"Chapter {chapter_count}"
-            # Skip afterword and other AO3 boilerplate sections
-            if ch.title.strip().lower() in ("afterword", "foreword", "preface"):
-                continue
-            book.chapters.append(ch)
-
-    return book
-
+from scripts.ao3_to_odt.epub.parser import parse_epub
 
 # ═══════════════════════════════════════════════════════════════════════════════
 # PART 2 — LIBREOFFICE UNO DOCUMENT BUILDER

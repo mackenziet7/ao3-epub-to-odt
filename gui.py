@@ -16,7 +16,7 @@ from pathlib import Path
 # ── Constants ─────────────────────────────────────────────────────────────────
 
 LO_PYTHON = r"C:\Program Files\LibreOffice\program\python.exe"
-SCRIPT = Path(__file__).parent / "scripts" / "ao3_to_odt.py"
+SCRIPT = Path(__file__).parent / "scripts" / "ao3_to_odt_old.py"
 LO_DOWNLOAD_URL = "https://www.libreoffice.org/download/download-libreoffice/"
 NO_WINDOW = subprocess.CREATE_NO_WINDOW  # suppress console windows on Windows
 
