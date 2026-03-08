@@ -80,6 +80,12 @@ def setup_page_style(doc):
     apply_frontmatter_page_dims(fmv, is_verso=True)
     fmv.HeaderIsOn  = False
 
+    # ── AppendixPage: same dims, NO header ────────────────────────────────────
+    ap = get_or_create_page_style(doc, "AppendixPage")
+    apply_book_page_dims(ap)
+    ap.HeaderIsOn  = False
+    ap.FollowStyle = "AppendixPage"  # stays in appendix mode for all subsequent pages
+
     # ── Disable forced recto starts to prevent automatic blank pages ───────
     for style in [ps, cfp, fmr, fmv]:
         try:

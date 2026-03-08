@@ -11,10 +11,9 @@ page_number: if set, reset the page counter to this number
 """
 def ins(text_obj, cursor, content, style, page_break=False, page_style=None, page_number=None):
     if page_style:
-        # Setting PageDescName triggers a page break and switches page style.
-        # This is the correct LO UNO way — do NOT combine with BreakType.
         cursor.setPropertyValue("PageDescName", page_style)
-        cursor.setPropertyValue("PageNumberOffset", page_number if page_number is not None else 0)
+        if page_number is not None:
+            cursor.setPropertyValue("PageNumberOffset", page_number)
     elif page_break:
         cursor.setPropertyValue("BreakType", 4)   # PAGE_BEFORE
     cursor.setPropertyValue("ParaStyleName", style)
@@ -101,20 +100,14 @@ def build_content(doc, book, include_toc=True, toc_objects=None):
         print("  [✓] TOC")
 
     # ── Chapters ──────────────────────────────────────────────────────────────
-    # LO API limitation: PageDescName (page style switch) ALWAYS pairs with
-    # PageNumberOffset as an explicit reset — there is no "continue" value.
-    # Solution: only use PageDescName for chapter 1 (resets to p.1).
-    # Chapters 2+ use a plain BreakType=4 page break which continues the count.
-    # Trade-off: chapters 2+ show a header on their title page.
     for i, ch in enumerate(book.chapters):
         if i == 0:
-            # Reset page count to 1 at chapter 1, using the default page style
-            ins(text, cursor, "", "Standard", page_style="FrontMatterRecto")
-            default_style_name = get_default_page_style(doc).Name
-            ins(text, cursor, ch.title, "ChapHeads",
-                page_style=default_style_name, page_number=1)
+            # Chapter 1 — suppress header, reset counter to 1
+            ins(text, cursor, ch.title, "ChapHeads", page_style="ChapterFirstPage", page_number=1)
         else:
-            ins(text, cursor, ch.title, "ChapHeads", page_break=True)
+            # Chapters 2+ — switch to ChapterFirstPage but continue page count
+            # page_number=0 tells LO "use the current count, don't reset"
+            ins(text, cursor, ch.title, "ChapHeads", page_style="ChapterFirstPage")
         first_para = True
         for para in ch.body:
             if para.type == 'break':
@@ -144,7 +137,7 @@ def build_content(doc, book, include_toc=True, toc_objects=None):
     for c in noted:
         print(f"    - Ch {c.index} '{c.title}': prenotes={len(c.prenotes)} chars, endnotes={len(c.endnotes)} chars")
     if noted:
-        ins(text, cursor, "Appendix: Notes", "ChapHeads", page_break=True)
+        ins(text, cursor, "Appendix: Notes", "FrontMatterHead", page_style="AppendixPage")
         for ch in noted:
             ins(text, cursor, ch.title, "AppendixHead")
             for label, notes_text in [("Note:", ch.prenotes), ("End Note:", ch.endnotes)]:
@@ -154,9 +147,3 @@ def build_content(doc, book, include_toc=True, toc_objects=None):
                         line = line.strip()
                         if line: ins(text, cursor, line, "AppendixNote")
         print(f"  [✓] Appendix ({len(noted)} chapters with notes)")
-
-    text   = doc.getText()
-    cursor = text.createTextCursor()
-    cursor.gotoStart(False)
-
-    m = book.metadata
