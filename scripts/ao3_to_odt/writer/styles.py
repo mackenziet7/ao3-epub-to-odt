@@ -1,4 +1,4 @@
-from com.sun.star.style.PageStyleLayout import MIRRORED
+from com.sun.star.style.PageStyleLayout import MIRRORED, ALL
 import uno
 
 from .uno_utils import inches, pt, prop, fixed_ls, prop_ls
@@ -39,6 +39,22 @@ def apply_book_page_dims(ps):
     ps.RightMargin     = inches(0.60)
     ps.FooterIsOn      = False
 
+def apply_frontmatter_page_dims(ps, is_verso=False):
+    ps.IsLandscape     = False
+    ps.Width           = inches(5.5)
+    ps.Height          = inches(8.5)
+    ps.PageStyleLayout = ALL          # no recto/verso enforcement → no auto blanks
+    ps.TopMargin       = inches(0.64)
+    ps.BottomMargin    = inches(0.60)
+    # Manually mirror: spine (wider) margin swaps side depending on recto/verso
+    if is_verso:
+        ps.LeftMargin  = inches(0.60)   # outer
+        ps.RightMargin = inches(0.90)   # spine
+    else:
+        ps.LeftMargin  = inches(0.90)   # spine
+        ps.RightMargin = inches(0.60)   # outer
+    ps.FooterIsOn      = False
+
 def setup_page_style(doc):
     # ── Default Page Style: running headers on, mirrored ──────────────────
     ps = get_default_page_style(doc)
@@ -54,11 +70,22 @@ def setup_page_style(doc):
     default_name    = get_default_page_style(doc).Name
     cfp.FollowStyle = default_name
 
-    # ── FrontMatterPage: same dims, NO header, NO page number ─────────────
-    fmp = get_or_create_page_style(doc, "FrontMatterPage")
-    apply_book_page_dims(fmp)
-    fmp.HeaderIsOn  = False
-    fmp.FollowStyle = "FrontMatterPage"
+    # ── FrontMatterRecto: odd/right pages — no header ─────────────────────
+    fmr = get_or_create_page_style(doc, "FrontMatterRecto")
+    apply_frontmatter_page_dims(fmr, is_verso=False)
+    fmr.HeaderIsOn  = False
+
+    # ── FrontMatterVerso: even/left pages — no header ─────────────────────
+    fmv = get_or_create_page_style(doc, "FrontMatterVerso")
+    apply_frontmatter_page_dims(fmv, is_verso=True)
+    fmv.HeaderIsOn  = False
+
+    # ── Disable forced recto starts to prevent automatic blank pages ───────
+    for style in [ps, cfp, fmr, fmv]:
+        try:
+            style.setPropertyValue("FirstIsRightPage", False)
+        except Exception:
+            pass  # property may not exist in this LO version
 
     print("  [✓] Page: 5.5×8.5\", mirrored margins, page styles created")
 

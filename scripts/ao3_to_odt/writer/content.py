@@ -45,13 +45,16 @@ def build_content(doc, book, include_toc=True, toc_objects=None):
 
     m = book.metadata
 
-    # ── Half title (p.1) ──────────────────────────────────────────────────────
-    blank_with_style(text, cursor, "FrontMatterPage")
+    # ── p.i   Half title (recto) ──────────────────────────────────────────────
+    blank_with_style(text, cursor, "FrontMatterRecto", page_number=1)
     for _ in range(5): blank(text, cursor) # Adding a blank page
     ins(text, cursor, m.title.upper(), "FrontMatterHead")
 
-    # ── Full title + author (p.3) ──────────────────────────────────────────────
-    ins(text, cursor, "", "Standard", page_style="FrontMatterPage")
+    # ── p.ii  Blank verso ─────────────────────────────────────────────────────
+    ins(text, cursor, "", "Standard", page_style="FrontMatterVerso")
+
+    # ── p.iii Full title + author (recto) ─────────────────────────────────────
+    ins(text, cursor, "", "Standard", page_style="FrontMatterRecto")
     for _ in range(5): blank(text, cursor)
     ins(text, cursor, m.title,           "FrontMatterHead")
     ins(text, cursor, f"by {m.author}",  "FrontMatter")
@@ -59,8 +62,8 @@ def build_content(doc, book, include_toc=True, toc_objects=None):
     if m.ao3_url:
         ins(text, cursor, m.ao3_url, "FrontMatter")
 
-    # ── Front matter (p.4 verso) ───────────────────────────────────────────────
-    ins(text, cursor, "", "Standard", page_style="FrontMatterPage")
+    # ── p.iv  Copyright / front matter (verso) ────────────────────────────────
+    ins(text, cursor, "", "Standard", page_style="FrontMatterVerso")
     fields = []
     if m.rating:         fields.append(f"Rating: {m.rating}")
     if m.warnings:       fields.append(f"Warnings: {', '.join(m.warnings)}")
@@ -83,10 +86,9 @@ def build_content(doc, book, include_toc=True, toc_objects=None):
         ins(text, cursor, m.summary,  "FrontMatter")
     print("  [✓] Front matter")
 
-    # ── TOC — "Contents" heading uses FrontMatterHead (not indexed by TOC)
+    # ── p.v   TOC (recto) ─────────────────────────────────────────────────────
     if include_toc:
-        ins(text, cursor, "", "Standard", page_style="FrontMatterPage")
-        ins(text, cursor, "Contents", "FrontMatterHead")
+        ins(text, cursor, "Contents", "FrontMatterHead", page_style="FrontMatterRecto")
         toc = doc.createInstance("com.sun.star.text.ContentIndex")
         toc.CreateFromOutline = True
         toc.CreateFromChapter = False
@@ -107,6 +109,7 @@ def build_content(doc, book, include_toc=True, toc_objects=None):
     for i, ch in enumerate(book.chapters):
         if i == 0:
             # Reset page count to 1 at chapter 1, using the default page style
+            ins(text, cursor, "", "Standard", page_style="FrontMatterRecto")
             default_style_name = get_default_page_style(doc).Name
             ins(text, cursor, ch.title, "ChapHeads",
                 page_style=default_style_name, page_number=1)
