@@ -106,6 +106,14 @@ def create_para_styles(doc):
     fmhead.ParaBottomMargin    = pt(18)
     fmhead.OutlineLevel        = 0
 
+    note_label = get_or_create_style(doc, "AppendixNoteLabel")
+    note_label.CharHeight          = 8.0
+    note_label.CharFontName        = "Garamond"
+    note_label.ParaAdjust          = 0
+    note_label.ParaFirstLineIndent = 0
+    note_label.ParaLeftMargin      = 0
+    note_label.ParaLineSpacing     = prop_ls(100)
+
     note = get_or_create_style(doc, "AppendixNote")
     note.CharHeight           = 8.0
     note.CharFontName         = "Garamond"
