@@ -17,9 +17,7 @@ On first run this script installs them automatically.
 
 import sys
 import os
-import re
 import time
-import socket
 import subprocess
 from pathlib import Path
 
@@ -43,41 +41,18 @@ except ImportError:
     print('  & "C:\\Program Files\\LibreOffice\\program\\python.exe" ao3_to_odt.py your_fic.epub')
     sys.exit(1)
 
-# Third-party
-import ebooklib
-from ebooklib import epub
 # Suppress BeautifulSoup XML-parsed-as-HTML warnings (AO3 epubs are XHTML)
-from bs4 import BeautifulSoup, XMLParsedAsHTMLWarning
+from bs4 import XMLParsedAsHTMLWarning
 import warnings
 warnings.filterwarnings("ignore", category=XMLParsedAsHTMLWarning)
 
 # Local
-from scripts.ao3_to_odt.epub.models import (
-    AO3Metadata, Run, Paragraph, Chapter, AO3Book
-)
-
-from scripts.ao3_to_odt.epub.text_utils import (
-    clean_text, clean_run, SCENE_BREAK_RE
-)
-
 from scripts.ao3_to_odt.epub.parser import parse_epub
-
-from scripts.ao3_to_odt.writer.connection import (
-    find_soffice, is_port_open, start_lo_listener, connect_uno
-)
-
-from scripts.ao3_to_odt.writer.uno_utils import inches, pt, prop, fixed_ls, prop_ls
-from scripts.ao3_to_odt.writer.styles import (
-    get_or_create_style, get_default_page_style,
-    get_or_create_page_style, setup_page_style, create_para_styles
-)
-
-from scripts.ao3_to_odt.writer.content import (
-    ins, blank, blank_with_style, build_content
-)
-
+from scripts.ao3_to_odt.writer.connection import find_soffice, is_port_open, start_lo_listener, connect_uno
+from scripts.ao3_to_odt.writer.uno_utils import prop
+from scripts.ao3_to_odt.writer.styles import setup_page_style, create_para_styles
+from scripts.ao3_to_odt.writer.content import build_content
 from scripts.ao3_to_odt.writer.headers import setup_headers
-
 
 # ═══════════════════════════════════════════════════════════════════════════════
 # MAIN

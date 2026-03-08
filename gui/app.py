@@ -1,106 +1,42 @@
 import subprocess
 import sys
+
 import time
 import tempfile
 import urllib.request
+from pathlib import Path
+
 from PyQt6.QtWidgets import (
     QApplication, QMainWindow, QWidget,
     QVBoxLayout, QHBoxLayout,
-    QLabel, QLineEdit, QPushButton, QTextEdit, QCheckBox
+    QLabel, QLineEdit, QPushButton, QTextEdit, QCheckBox, QFileDialog
 )
 from PyQt6.QtCore import QThread, pyqtSignal
 from PyQt6.QtGui import QIcon
+
 from pathlib import Path
+sys.path.insert(0, str(Path(__file__).parent.parent))
+from gui.worker import ConversionWorker
 
 
-# ── Constants ─────────────────────────────────────────────────────────────────
+# ── Constants ──────────────────────────────────────────────────────────────────
 
-LO_PYTHON = r"C:\Program Files\LibreOffice\program\python.exe"
-SCRIPT = Path(__file__).parent / "scripts" / "ao3_to_odt_old.py"
+LO_PYTHON    = r"C:\Program Files\LibreOffice\program\python.exe"
 LO_DOWNLOAD_URL = "https://www.libreoffice.org/download/download-libreoffice/"
-NO_WINDOW = subprocess.CREATE_NO_WINDOW  # suppress console windows on Windows
-
-
-# ── Helpers ───────────────────────────────────────────────────────────────────
+NO_WINDOW    = subprocess.CREATE_NO_WINDOW
 
 def get_base_path():
     """Return the correct base path whether running as .py or bundled .exe."""
     if hasattr(sys, '_MEIPASS'):
         return Path(sys._MEIPASS)
-    return Path(__file__).parent
+    return Path(__file__).parent.parent   # repo root
 
 
-# ── Background worker ─────────────────────────────────────────────────────────
-
-class ConversionWorker(QThread):
-    log_signal = pyqtSignal(str)       # emits a line of text to the log
-    finished_signal = pyqtSignal(bool) # emits True=success, False=failure
-
-    def __init__(self, epub, odt, include_toc=True):
-        super().__init__()
-        self.epub = epub
-        self.odt = odt
-        self.include_toc = include_toc
-
-    def run(self):
-        # Kill any existing LO instances from previous runs
-        subprocess.run(
-            ["taskkill", "/f", "/im", "soffice.exe"],
-            capture_output=True,
-            creationflags=NO_WINDOW
-        )
-        time.sleep(2)  # give LO time to fully exit
-
-        cmd = [LO_PYTHON, "-u", str(SCRIPT), self.epub, self.odt]
-        if not self.include_toc:
-            cmd.append("--no-toc")
-
-        process = subprocess.Popen(
-            cmd,
-            stdout=subprocess.PIPE,
-            stderr=subprocess.STDOUT,
-            text=True,
-            encoding='utf-8',
-            creationflags=NO_WINDOW
-        )
-
-        # Read character by character so partial lines (dots, etc.) show up live
-        current_line = ""
-        while True:
-            char = process.stdout.read(1)
-            if not char:
-                break
-            if char == "\n":
-                if current_line.strip():
-                    self.log_signal.emit(current_line.strip())
-                current_line = ""
-            elif char == "\r":
-                pass  # ignore carriage returns
-            else:
-                current_line += char
-
-        # Emit any remaining text that didn't end with a newline
-        if current_line.strip():
-            self.log_signal.emit(current_line.strip())
-
-        try:
-            process.wait(timeout=30)
-        except subprocess.TimeoutExpired:
-            process.kill()
-            process.wait()
-
-        # Clean up LO regardless of outcome
-        subprocess.run(
-            ["taskkill", "/f", "/im", "soffice.exe"],
-            capture_output=True,
-            creationflags=NO_WINDOW
-        )
-        time.sleep(3)  # give LO time to release file handles before PyInstaller cleans up
-
-        self.finished_signal.emit(True)
+def get_script_path():
+    return get_base_path() / "scripts" / "script_ao3_to_odt.py"
 
 
-# ── Main window ───────────────────────────────────────────────────────────────
+# ── Main window ────────────────────────────────────────────────────────────────
 
 class MainWindow(QMainWindow):
     def __init__(self):
@@ -108,12 +44,10 @@ class MainWindow(QMainWindow):
         self.setWindowTitle("AO3 to ODT Converter")
         self.setMinimumSize(600, 400)
 
-        # Set window icon if available
         icon_path = get_base_path() / "icon.ico"
         if icon_path.exists():
             self.setWindowIcon(QIcon(str(icon_path)))
 
-        # Central widget — QMainWindow requires one as a container
         central = QWidget()
         self.setCentralWidget(central)
         main_layout = QVBoxLayout(central)
@@ -145,9 +79,9 @@ class MainWindow(QMainWindow):
         # ── Options row ──
         options_row = QHBoxLayout()
         self.chk_toc = QCheckBox("Include Table of Contents")
-        self.chk_toc.setChecked(True)  # on by default
+        self.chk_toc.setChecked(True)
         options_row.addWidget(self.chk_toc)
-        options_row.addStretch()  # push checkbox to the left
+        options_row.addStretch()
         main_layout.addLayout(options_row)
 
         # ── Convert button ──
@@ -160,13 +94,12 @@ class MainWindow(QMainWindow):
         self.log.setReadOnly(True)
         main_layout.addWidget(self.log)
 
-    # ── Path helpers ──────────────────────────────────────────────────────────
+    # ── Path helpers ───────────────────────────────────────────────────────────
 
     def get_downloads_folder(self):
         return str(Path.home() / "Downloads")
 
     def suggest_odt_path(self, epub):
-        """Mirror the output filename logic from ao3_to_odt.py."""
         base = Path(epub).parent / (Path(epub).stem + "_book.odt")
         if not base.exists():
             return str(base)
@@ -176,10 +109,9 @@ class MainWindow(QMainWindow):
             counter += 1
         return str(base)
 
-    # ── File dialogs ──────────────────────────────────────────────────────────
+    # ── File dialogs ───────────────────────────────────────────────────────────
 
     def pick_epub(self):
-        from PyQt6.QtWidgets import QFileDialog
         path, _ = QFileDialog.getOpenFileName(
             self,
             "Select your EPUB file",
@@ -191,7 +123,6 @@ class MainWindow(QMainWindow):
             self.save_input.setText(self.suggest_odt_path(path))
 
     def pick_save(self):
-        from PyQt6.QtWidgets import QFileDialog
         path, _ = QFileDialog.getSaveFileName(
             self,
             "Save ODT as",
@@ -201,17 +132,9 @@ class MainWindow(QMainWindow):
         if path:
             self.save_input.setText(path)
 
-    # ── Dependency installer ──────────────────────────────────────────────────
+    # ── Dependency installer ───────────────────────────────────────────────────
 
     def ensure_lo_deps(self):
-        """
-        Install required libraries into LO's Python on first run.
-        Uses a marker file in the temp folder so it only runs once.
-        Falls back to downloading get-pip.py if ensurepip is unavailable
-        (affects older LibreOffice versions shipping Python 3.8).
-        Returns True if deps are ready, False if installation failed.
-        """
-        # Check LO is actually installed before doing anything else
         if not Path(LO_PYTHON).exists():
             self.log.append("ERROR: LibreOffice does not appear to be installed.")
             self.log.append("")
@@ -224,24 +147,20 @@ class MainWindow(QMainWindow):
             return False
 
         marker = Path(tempfile.gettempdir()) / "ao3_odt_deps_installed.txt"
-
         if marker.exists():
-            return True  # already installed on a previous run
+            return True
 
         self.log.append("First run detected — installing required libraries into LibreOffice Python...")
         self.log.append("This will only happen once, please wait...")
-        QApplication.processEvents()  # force UI to update before blocking
+        QApplication.processEvents()
 
         try:
-            # Try ensurepip first
             result = subprocess.run(
                 [LO_PYTHON, "-m", "ensurepip", "--upgrade"],
                 capture_output=True, timeout=60,
                 creationflags=NO_WINDOW
             )
 
-            # If ensurepip failed (common on LO with Python 3.8),
-            # fall back to downloading get-pip.py directly
             if result.returncode != 0:
                 self.log.append("ensurepip unavailable, trying alternative pip install...")
                 self.log.append("(This requires an internet connection)")
@@ -254,7 +173,6 @@ class MainWindow(QMainWindow):
                     creationflags=NO_WINDOW
                 )
 
-            # Now install the required packages
             result = subprocess.run(
                 [LO_PYTHON, "-m", "pip", "install", "ebooklib", "beautifulsoup4", "lxml", "-q"],
                 capture_output=True, text=True, timeout=120,
@@ -272,11 +190,11 @@ class MainWindow(QMainWindow):
             self.log.append(f"ERROR during library installation: {e}")
             return False
 
-    # ── Conversion ────────────────────────────────────────────────────────────
+    # ── Conversion ─────────────────────────────────────────────────────────────
 
     def convert(self):
         epub = self.epub_input.text()
-        odt = self.save_input.text()
+        odt  = self.save_input.text()
 
         if not epub or epub == "No file selected":
             self.log.append("ERROR: Please select an EPUB file first.")
@@ -288,14 +206,18 @@ class MainWindow(QMainWindow):
         self.btn_convert.setEnabled(False)
         self.log.clear()
 
-        # Ensure LO deps are installed before attempting conversion
         if not self.ensure_lo_deps():
             self.btn_convert.setEnabled(True)
             return
 
         self.log.append("Starting conversion...")
 
-        self.worker = ConversionWorker(epub, odt, self.chk_toc.isChecked())
+        self.worker = ConversionWorker(
+            LO_PYTHON,
+            get_script_path(),
+            epub, odt,
+            self.chk_toc.isChecked()
+        )
         self.worker.log_signal.connect(self.log.append)
         self.worker.finished_signal.connect(self.on_finished)
         self.worker.start()
@@ -306,12 +228,3 @@ class MainWindow(QMainWindow):
         else:
             self.log.append("Something went wrong. Check the log above.")
         self.btn_convert.setEnabled(True)
-
-
-# ── Entry point ───────────────────────────────────────────────────────────────
-
-if __name__ == "__main__":
-    app = QApplication(sys.argv)
-    window = MainWindow()
-    window.show()
-    sys.exit(app.exec())
