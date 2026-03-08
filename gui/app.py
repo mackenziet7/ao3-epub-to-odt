@@ -104,8 +104,9 @@ class MainWindow(QMainWindow):
         if not base.exists():
             return str(base)
         counter = 2
+        original_stem = base.stem  
         while base.exists():
-            base = base.with_stem(base.stem + f"_{counter}")
+            base = base.with_stem(original_stem + f"_{counter}")  
             counter += 1
         return str(base)
 

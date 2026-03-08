@@ -114,8 +114,9 @@ def main():
         # If file already exists, add a counter suffix
         if Path(out_path).exists():
             counter = 2
+            original_stem = base.stem
             while Path(out_path).exists():
-                out_path = str(base.with_stem(base.stem + f"_{counter}"))
+                out_path = str(base.with_stem(original_stem + f"_{counter}"))
                 counter += 1
             print(f"  Output file already exists, saving as: {Path(out_path).name}")
 
