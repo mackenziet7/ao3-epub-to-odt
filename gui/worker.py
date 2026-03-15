@@ -72,18 +72,20 @@ class ConversionWorker(QThread):
         if current_line.strip():
             self.log_signal.emit(current_line.strip())
 
+        # Wait for process to fully exit — the script kills LO itself
+        # so we just need to wait for the python subprocess to finish
         try:
-            process.wait(timeout=30)
+            process.wait(timeout=60)
         except subprocess.TimeoutExpired:
+            self.log_signal.emit("Warning: conversion script timed out, forcing stop.")
             process.kill()
             process.wait()
 
-        # Clean up LO regardless of outcome     
+        # Final LO cleanup in case script exited without killing it
         subprocess.run(
             ["taskkill", "/f", "/im", "soffice.exe"],
             capture_output=True,
             creationflags=subprocess.CREATE_NO_WINDOW
         )
-        time.sleep(3)
 
-        self.finished_signal.emit(True)
+        self.finished_signal.emit(True)  

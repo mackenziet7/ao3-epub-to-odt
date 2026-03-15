@@ -215,6 +215,11 @@ class MainWindow(QMainWindow):
 
         self.log.append("Starting conversion...")
 
+        if hasattr(self, 'worker') and self.worker is not None:
+            self.worker.log_signal.disconnect()
+            self.worker.finished_signal.disconnect()
+            self.worker = None
+
         self.worker = ConversionWorker(
             LO_PYTHON,
             get_script_path(),

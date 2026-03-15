@@ -198,9 +198,26 @@ def main():
         setup_headers(doc, book.metadata)
         print("  Headers done.")
         save_odt(doc, out_path)
-        time.sleep(2)      # let OS flush file buffers before closing
-        doc.close(True)
-        print("  Document closed.")
+        time.sleep(2)
+        print("  Closing document...")
+        import threading
+        close_done = threading.Event()
+
+        def close_doc():
+            try:
+                doc.close(True)
+            except Exception:
+                pass
+            finally:
+                close_done.set()
+
+        t = threading.Thread(target=close_doc, daemon=True)
+        t.start()
+        if close_done.wait(timeout=10):
+            print("  Document closed.")
+        else:
+            print("  Document close timed out, continuing anyway.")
+
     except Exception as e:
         print(f"\nERROR during document build:\n  {e}")
         import traceback; traceback.print_exc()
