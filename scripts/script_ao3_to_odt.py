@@ -30,9 +30,6 @@ sys.path.insert(0, str(Path(__file__).parent.parent))
 # UNO — only available in LO's Python
 try:
     import uno
-    from com.sun.star.beans import PropertyValue
-    from com.sun.star.text.ControlCharacter import PARAGRAPH_BREAK
-    from com.sun.star.style.PageStyleLayout import MIRRORED
 except ImportError:
     print("\nERROR: 'uno' module not found.")
     print("You must run this script with LibreOffice's Python, not your system Python.")

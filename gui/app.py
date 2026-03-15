@@ -33,7 +33,9 @@ def get_base_path():
 
 
 def get_script_path():
-    return get_base_path() / "scripts" / "script_ao3_to_odt.py"
+    if hasattr(sys, '_MEIPASS'):
+        return Path(sys._MEIPASS) / "scripts" / "script_ao3_to_odt.py"
+    return Path(__file__).parent.parent / "scripts" / "script_ao3_to_odt.py"
 
 
 # ── Main window ────────────────────────────────────────────────────────────────
