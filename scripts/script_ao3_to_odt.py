@@ -186,8 +186,9 @@ def main():
         create_para_styles(doc)
         print("  Para styles done.")
         include_toc = '--no-toc' not in sys.argv
+        include_qr = '--no-qr' not in sys.argv
         toc_objects = []
-        build_content(doc, book, include_toc, toc_objects)
+        build_content(doc, book, include_toc, toc_objects, include_qr)
         print("  Content built.")
         if toc_objects:
             try:

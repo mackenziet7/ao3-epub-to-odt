@@ -1,7 +1,7 @@
 from com.sun.star.text.ControlCharacter import PARAGRAPH_BREAK
 import uno
 
-from .uno_utils import inches, pt
+from .uno_utils import inches, pt, prop
 from .styles import get_default_page_style
 
 """
@@ -37,7 +37,58 @@ def blank_with_style(text_obj, cursor, page_style, page_number=1):
     text_obj.insertControlCharacter(cursor, PARAGRAPH_BREAK, False)
     cursor.setPropertyValue("PageDescName", "")
 
-def build_content(doc, book, include_toc=True, toc_objects=None):
+def generate_qr_png(url):
+    """
+    Generate a QR code PNG for the given URL and return the path to a
+    temp file. Returns None if qrcode/Pillow is unavailable or URL is empty.
+    """
+    if not url:
+        return None
+    try:
+        import qrcode
+        import tempfile
+        qr = qrcode.QRCode(
+            version=1,
+            error_correction=qrcode.constants.ERROR_CORRECT_M,
+            box_size=10,
+            border=2,
+        )
+        qr.add_data(url)
+        qr.make(fit=True)
+        img = qr.make_image(fill_color="black", back_color="white")
+        tmp = tempfile.NamedTemporaryFile(suffix='.png', delete=False)
+        img.save(tmp.name)
+        tmp.close()
+        return tmp.name
+    except ImportError:
+        print("  QR code skipped: qrcode library not available")
+        return None
+    except Exception as e:
+        print(f"  QR code failed: {e}")
+        return None
+
+
+def insert_image(doc, text, cursor, image_path, width_inches=1.2):
+    import uno
+    from com.sun.star.text.TextContentAnchorType import AS_CHARACTER
+
+    url = uno.systemPathToFileUrl(image_path)
+
+    image = doc.createInstance("com.sun.star.text.TextGraphicObject")
+
+    # 🔑 THIS is the stable way — no GraphicProvider
+    image.GraphicURL = url
+
+    image.AnchorType = AS_CHARACTER
+
+    size = uno.createUnoStruct("com.sun.star.awt.Size")
+    size.Width  = inches(width_inches)
+    size.Height = inches(width_inches)
+    image.Size = size
+
+    text.insertTextContent(cursor, image, False)
+
+def build_content(doc, book, include_toc=True, toc_objects=None, include_qr=True):
     text   = doc.getText()
     cursor = text.createTextCursor()
     cursor.gotoStart(False)
@@ -83,6 +134,29 @@ def build_content(doc, book, include_toc=True, toc_objects=None):
         blank(text, cursor)
         ins(text, cursor, "Summary:", "FrontMatter")
         ins(text, cursor, m.summary,  "FrontMatter")
+
+    # ── QR code ───────────────────────────────────────────────────────────────
+    if include_qr and m.ao3_url:
+        try:
+            qr_path = generate_qr_png(m.ao3_url)
+            if qr_path:
+                import os
+
+                blank(text, cursor)
+
+                # QR image
+                cursor.setPropertyValue("ParaStyleName", "QRCodeBlock")
+                insert_image(doc, text, cursor, qr_path, width_inches=1.0)
+                text.insertControlCharacter(cursor, PARAGRAPH_BREAK, False)
+
+                # Caption
+                ins(text, cursor, "View this work online", "QRCodeCaption")
+
+                os.unlink(qr_path)
+                print("  [✓] QR code")
+
+        except Exception as e:
+            print(f"  [!] QR insertion failed: {e}")
     print("  [✓] Front matter")
 
     # ── p.v   TOC (recto) ─────────────────────────────────────────────────────

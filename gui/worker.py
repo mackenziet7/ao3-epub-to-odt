@@ -10,13 +10,14 @@ class ConversionWorker(QThread):
     log_signal      = pyqtSignal(str)   # emits a line of text to the log
     finished_signal = pyqtSignal(bool)  # emits True=success, False=failure
 
-    def __init__(self, lo_python, script, epub, odt, include_toc=True):
+    def __init__(self, lo_python, script, epub, odt, include_toc=True, include_qr=True):
         super().__init__()
         self.lo_python   = lo_python
         self.script      = script
         self.epub        = epub
         self.odt         = odt
         self.include_toc = include_toc
+        self.include_qr = include_qr
 
     def run(self):
         subprocess.run(
@@ -43,6 +44,8 @@ class ConversionWorker(QThread):
         cmd = [self.lo_python, "-u", str(self.script), self.epub, self.odt]
         if not self.include_toc:
             cmd.append("--no-toc")
+        if not self.include_qr:
+            cmd.append("--no-qr")
 
         process = subprocess.Popen(
             cmd,

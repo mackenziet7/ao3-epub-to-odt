@@ -139,6 +139,25 @@ def create_para_styles(doc):
     fmhead.ParaBottomMargin    = pt(18)
     fmhead.OutlineLevel        = 0
 
+    qr = get_or_create_style(doc, "QRCodeBlock")
+    qr.CharHeight          = 12.0
+    qr.CharFontName        = "Garamond"
+    qr.ParaAdjust          = 3              # CENTER
+    qr.ParaFirstLineIndent = 0
+    qr.ParaTopMargin       = pt(18)         # space above QR
+    qr.ParaBottomMargin    = pt(6)          # tight gap to caption
+    qr.OutlineLevel        = 0
+
+    qrcap = get_or_create_style(doc, "QRCodeCaption")
+    qrcap.CharHeight          = 10.0         # slightly smaller
+    qrcap.CharFontName        = "Garamond"
+    qrcap.CharPosture         = 2            # italic (optional, but very “book-like”)
+    qrcap.ParaAdjust          = 3            # CENTER
+    qrcap.ParaFirstLineIndent = 0
+    qrcap.ParaTopMargin       = pt(0)
+    qrcap.ParaBottomMargin    = pt(18)       # space below block
+    qrcap.OutlineLevel        = 0
+
     note_label = get_or_create_style(doc, "AppendixNoteLabel")
     note_label.CharHeight          = 8.0
     note_label.CharFontName        = "Garamond"

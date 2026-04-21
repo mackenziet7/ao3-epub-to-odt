@@ -83,6 +83,9 @@ class MainWindow(QMainWindow):
         self.chk_toc = QCheckBox("Include Table of Contents")
         self.chk_toc.setChecked(True)
         options_row.addWidget(self.chk_toc)
+        self.chk_qr = QCheckBox("Include QR code")
+        self.chk_qr.setChecked(True)
+        options_row.addWidget(self.chk_qr)
         options_row.addStretch()
         main_layout.addLayout(options_row)
 
@@ -149,7 +152,7 @@ class MainWindow(QMainWindow):
             self.log.append("After installing, restart this application and try again.")
             return False
 
-        marker = Path(tempfile.gettempdir()) / "ao3_odt_deps_installed.txt"
+        marker = Path(tempfile.gettempdir()) / "ao3_odt_deps_v2.txt"
         if marker.exists():
             return True
 
@@ -177,7 +180,8 @@ class MainWindow(QMainWindow):
                 )
 
             result = subprocess.run(
-                [LO_PYTHON, "-m", "pip", "install", "ebooklib", "beautifulsoup4", "lxml", "-q"],
+                [LO_PYTHON, "-m", "pip", "install",
+                "ebooklib", "beautifulsoup4", "lxml", "qrcode[pil]", "-q"],
                 capture_output=True, text=True, timeout=120,
                 creationflags=NO_WINDOW
             )
@@ -224,7 +228,8 @@ class MainWindow(QMainWindow):
             LO_PYTHON,
             get_script_path(),
             epub, odt,
-            self.chk_toc.isChecked()
+            self.chk_toc.isChecked(),
+            self.chk_qr.isChecked(),
         )
         self.worker.log_signal.connect(self.log.append)
         self.worker.finished_signal.connect(self.on_finished)
