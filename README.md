@@ -43,6 +43,23 @@ That's it for the `.exe`. If running from source, you also need Python 3.10+ wit
    python main.py
    ```
 
+
+## Uninstalling
+
+The app itself leaves no registry entries and needs no formal uninstaller — just delete the `.exe` (or source folder) when you're done.
+
+However, two additional locations are written to during normal use and should be removed manually if you want a clean uninstall:
+
+### App data (config and settings)
+
+The app stores its configuration at:
+
+```
+%APPDATA%\AO3toODT\
+```
+
+To delete it, paste that path into File Explorer or a Run dialog (`Win+R`) and delete the folder.
+
 ---
 
 ## Usage
@@ -86,7 +103,6 @@ The ODT format is also supported by Microsoft Word (Windows and Mac) and Google 
 - **LibreOffice must be installed at the default path** — `C:\Program Files\LibreOffice`. Non-standard install locations will cause the conversion to fail
 - **One conversion at a time** — clicking Convert while a conversion is running is not supported; wait for the current one to finish
 - **AO3 EPUBs only** — the parser is written specifically for AO3's EPUB structure and will likely not work correctly on EPUBs from other sources
-- **Fics formatted with double line break** — Fanfics that have double line spacing between paragraphs currently do not format properly with the script. This will be fixed in the future.
 
 ---
 
@@ -114,11 +130,10 @@ Bug reports and pull requests are welcome! If an EPUB isn't converting correctly
 ## Future plans
 
 - **Customisable formatting in the GUI** — choose page size, margins, font, font size, and line spacing without editing any code
-- **Mac and Linux support**
 - **Support for non-default LibreOffice install locations**
 - **Batch conversion** — convert multiple EPUBs at once
 - **Fic collections** — combine multiple EPUBs into a single bound book, with each fic as its own section and a shared table of contents
-- **Scene break handling** — detect and strip decorative scene breaks used between every paragraph, replacing them with standard paragraph spacing
+- **Scene break handling** — detect scene breaks and allow users to insert their own image or character string to customize the typeset
 
 ---
 

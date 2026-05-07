@@ -1,7 +1,6 @@
+# gui/app.py
 import subprocess
 import sys
-
-import time
 import tempfile
 import urllib.request
 from pathlib import Path
@@ -14,22 +13,20 @@ from PyQt6.QtWidgets import (
 from PyQt6.QtCore import QThread, pyqtSignal
 from PyQt6.QtGui import QIcon
 
-from pathlib import Path
 sys.path.insert(0, str(Path(__file__).parent.parent))
 from gui.worker import ConversionWorker
+from gui.config import resolve_lo_python, load_config
+from gui.first_run_dialog import LOPathDialog
 
 
 # ── Constants ──────────────────────────────────────────────────────────────────
+NO_WINDOW = subprocess.CREATE_NO_WINDOW
 
-LO_PYTHON    = r"C:\Program Files\LibreOffice\program\python.exe"
-LO_DOWNLOAD_URL = "https://www.libreoffice.org/download/download-libreoffice/"
-NO_WINDOW    = subprocess.CREATE_NO_WINDOW
 
 def get_base_path():
-    """Return the correct base path whether running as .py or bundled .exe."""
     if hasattr(sys, '_MEIPASS'):
         return Path(sys._MEIPASS)
-    return Path(__file__).parent.parent   # repo root
+    return Path(__file__).parent.parent
 
 
 def get_script_path():
@@ -99,6 +96,31 @@ class MainWindow(QMainWindow):
         self.log.setReadOnly(True)
         main_layout.addWidget(self.log)
 
+        # ── Resolve LO path on startup ──
+        self.lo_python = self._resolve_lo_on_startup()
+
+    def _resolve_lo_on_startup(self) -> Path | None:
+        """
+        Tries to find LO python.exe. Shows the dialog if it can't.
+        Returns the resolved Path, or None if the user cancelled.
+        """
+        lo = resolve_lo_python()
+
+        if lo is not None:
+            return lo
+
+        # Check if we had a previously saved (now invalid) path
+        cfg = load_config()
+        invalid = cfg.get("lo_python")
+
+        dialog = LOPathDialog(self, invalid_path=invalid)
+        if dialog.exec():
+            # User saved a new valid path — load it
+            return Path(load_config()["lo_python"])
+
+        # User cancelled — app will still open but convert will be blocked
+        return None
+
     # ── Path helpers ───────────────────────────────────────────────────────────
 
     def get_downloads_folder(self):
@@ -109,9 +131,9 @@ class MainWindow(QMainWindow):
         if not base.exists():
             return str(base)
         counter = 2
-        original_stem = base.stem  
+        original_stem = base.stem
         while base.exists():
-            base = base.with_stem(original_stem + f"_{counter}")  
+            base = base.with_stem(original_stem + f"_{counter}")
             counter += 1
         return str(base)
 
@@ -141,15 +163,15 @@ class MainWindow(QMainWindow):
     # ── Dependency installer ───────────────────────────────────────────────────
 
     def ensure_lo_deps(self):
-        if not Path(LO_PYTHON).exists():
-            self.log.append("ERROR: LibreOffice does not appear to be installed.")
-            self.log.append("")
-            self.log.append("This tool requires LibreOffice to be installed at:")
-            self.log.append(f"  {LO_PYTHON}")
-            self.log.append("")
+        if self.lo_python is None:
+            self.log.append("ERROR: No LibreOffice installation found.")
+            self.log.append("Please restart the app to set the path.")
+            return False
+
+        if not self.lo_python.exists():
+            self.log.append("ERROR: LibreOffice could not be found.")
+            self.log.append(f"  {self.lo_python}")
             self.log.append(f"Download it from: {LO_DOWNLOAD_URL}")
-            self.log.append("")
-            self.log.append("After installing, restart this application and try again.")
             return False
 
         marker = Path(tempfile.gettempdir()) / "ao3_odt_deps_v2.txt"
@@ -162,7 +184,7 @@ class MainWindow(QMainWindow):
 
         try:
             result = subprocess.run(
-                [LO_PYTHON, "-m", "ensurepip", "--upgrade"],
+                [self.lo_python, "-m", "ensurepip", "--upgrade"],
                 capture_output=True, timeout=60,
                 creationflags=NO_WINDOW
             )
@@ -174,13 +196,13 @@ class MainWindow(QMainWindow):
                 get_pip = Path(tempfile.gettempdir()) / "get-pip.py"
                 urllib.request.urlretrieve("https://bootstrap.pypa.io/get-pip.py", get_pip)
                 subprocess.run(
-                    [LO_PYTHON, str(get_pip)],
+                    [self.lo_python, str(get_pip)],
                     capture_output=True, timeout=120,
                     creationflags=NO_WINDOW
                 )
 
             result = subprocess.run(
-                [LO_PYTHON, "-m", "pip", "install",
+                [self.lo_python, "-m", "pip", "install",
                 "ebooklib", "beautifulsoup4", "lxml", "qrcode[pil]", "-q"],
                 capture_output=True, text=True, timeout=120,
                 creationflags=NO_WINDOW
@@ -202,6 +224,11 @@ class MainWindow(QMainWindow):
     def convert(self):
         epub = self.epub_input.text()
         odt  = self.save_input.text()
+
+        if self.lo_python is None:
+            self.log.append("ERROR: LibreOffice path is not set.")
+            self.log.append("Please restart the app to set the path.")
+            return
 
         if not epub or epub == "No file selected":
             self.log.append("ERROR: Please select an EPUB file first.")
@@ -225,7 +252,7 @@ class MainWindow(QMainWindow):
             self.worker = None
 
         self.worker = ConversionWorker(
-            LO_PYTHON,
+            self.lo_python,
             get_script_path(),
             epub, odt,
             self.chk_toc.isChecked(),
