@@ -11,7 +11,7 @@ This project is based on the formatting guide by [Kira](https://docs.google.com/
 ## Requirements
 
 - **Windows 10 or 11**
-- **LibreOffice** installed at the default location (`C:\Program Files\LibreOffice`)
+- **LibreOffice** installed
   - Download from [libreoffice.org](https://www.libreoffice.org/download/download-libreoffice/)
   - This program works best with the newest version of LibreOffice
 
@@ -90,7 +90,8 @@ The ODT format is also supported by Microsoft Word (Windows and Mac) and Google 
 
 - **Half title and full title pages** with proper blank verso pages between them
 - **Front matter** with fic metadata (rating, tags, relationships, word count, etc.)
-- **Table of contents** starting on a recto (right-hand) page
+- **Optional QR code to AO3** takes you right to the fanfic on AO3
+- **Optional Table of contents** starting on a recto (right-hand) page
 - **Chapters** with proper book typography (Garamond 11.5pt, 16pt leading, first-line indents, scene breaks) — chapter 1 always starts on a recto page
 - **Suppressed headers** on chapter opening pages, with running headers (title on right pages, author on left pages) on all other body pages
 - **Appendix** collecting all author notes from chapters that have them, with suppressed headers throughout
@@ -100,8 +101,6 @@ The ODT format is also supported by Microsoft Word (Windows and Mac) and Google 
 ## Known limitations
 
 - **Windows only** — the tool uses LibreOffice's UNO API via a local socket connection which is currently only configured for Windows paths
-- **LibreOffice must be installed at the default path** — `C:\Program Files\LibreOffice`. Non-standard install locations will cause the conversion to fail
-- **One conversion at a time** — clicking Convert while a conversion is running is not supported; wait for the current one to finish
 - **AO3 EPUBs only** — the parser is written specifically for AO3's EPUB structure and will likely not work correctly on EPUBs from other sources
 
 ---
@@ -130,8 +129,6 @@ Bug reports and pull requests are welcome! If an EPUB isn't converting correctly
 ## Future plans
 
 - **Customisable formatting in the GUI** — choose page size, margins, font, font size, and line spacing without editing any code
-- **Support for non-default LibreOffice install locations**
-- **Batch conversion** — convert multiple EPUBs at once
 - **Fic collections** — combine multiple EPUBs into a single bound book, with each fic as its own section and a shared table of contents
 - **Scene break handling** — detect scene breaks and allow users to insert their own image or character string to customize the typeset
 
