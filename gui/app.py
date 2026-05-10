@@ -5,13 +5,13 @@ import tempfile
 import urllib.request
 from pathlib import Path
 
-from PyQt6.QtWidgets import (
+from PySide6.QtWidgets import (
     QApplication, QMainWindow, QWidget,
     QVBoxLayout, QHBoxLayout,
     QLabel, QLineEdit, QPushButton, QTextEdit, QCheckBox, QFileDialog,
     QListWidget, QAbstractItemView, QProgressBar
 )
-from PyQt6.QtGui import QIcon
+from PySide6.QtGui import QIcon
 
 sys.path.insert(0, str(Path(__file__).parent.parent))
 from gui.worker import ConversionWorker

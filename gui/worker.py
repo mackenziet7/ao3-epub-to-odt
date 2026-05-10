@@ -4,11 +4,11 @@ import glob
 import subprocess
 import time
 from pathlib import Path
-from PyQt6.QtCore import QThread, pyqtSignal
+from PySide6.QtCore import QThread, Signal
 
 class ConversionWorker(QThread):
-    log_signal      = pyqtSignal(str)   # emits a line of text to the log
-    finished_signal = pyqtSignal(bool)  # emits True=success, False=failure
+    log_signal      = Signal(str)   # emits a line of text to the log
+    finished_signal = Signal(bool)  # emits True=success, False=failure
 
     def __init__(self, lo_python, script, epub, odt, include_toc=True, include_qr=True):
         super().__init__()

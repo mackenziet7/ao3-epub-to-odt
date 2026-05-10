@@ -1,12 +1,11 @@
 from pathlib import Path
 
-from PyQt6.QtWidgets import (
+from PySide6.QtWidgets import (
     QDialog, QVBoxLayout, QHBoxLayout,
-    QLabel, QLineEdit, QPushButton, QFileDialog, QDialogButtonBox
+    QLabel, QLineEdit, QPushButton, QFileDialog
 )
-
-from PyQt6.QtGui import QDesktopServices
-from PyQt6.QtCore import QUrl
+from PySide6.QtGui import QDesktopServices
+from PySide6.QtCore import QUrl
 
 from gui.config import save_config
 
