@@ -1,0 +1,11 @@
+<RCC>
+    <qresource prefix="icons">
+        <file>res/icons/settings_dark.svg</file>
+        <file>res/icons/settings_light.svg</file>
+    </qresource>
+
+    <qresource prefix="/styles">
+        <file>styles/light.qss</file>
+        <file>styles/dark.qss</file>
+    </qresource>
+</RCC>
