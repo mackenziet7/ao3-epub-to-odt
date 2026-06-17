@@ -14,3 +14,8 @@ QPushButton[iconButton="true"]:hover {
 QPushButton[iconButton="true"]:pressed {
     background-color: rgba(128, 128, 128, 80);
 }
+
+QSplitter::handle:horizontal {
+    background-color: #444444;
+    width: 1px;
+}
