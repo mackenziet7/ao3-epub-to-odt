@@ -2,14 +2,14 @@ from pathlib import Path
 from PySide6.QtUiTools import QUiLoader
 from PySide6.QtWidgets import QApplication
 
-import resources_rc
+from gui.ui import resources_rc
 print(resources_rc.__file__)
 
 from PySide6.QtGui import QIcon
 
 app = QApplication([])
 
-ui_path = Path(__file__).parent / "gui" / "ui" / "main_window.ui"
+ui_path = (Path(__file__).parent/ "gui"/ "ui"/ "screens"/ "main_window.ui")
 
 loader = QUiLoader()
 window = loader.load(str(ui_path))
@@ -28,5 +28,5 @@ modeGroup.addButton(window.findChild(QPushButton, 'modeCollectionButton'))
 modeGroup.setExclusive(True)
 
 window.show()
-app.setStyleSheet(open("gui/ui/styles/dark.qss").read())
+app.setStyleSheet(open("gui/ui/res/styles/dark.qss").read())
 app.exec()

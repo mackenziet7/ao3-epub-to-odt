@@ -1,11 +1,10 @@
 <RCC>
-    <qresource prefix="icons">
-        <file>res/icons/settings_dark.svg</file>
-        <file>res/icons/settings_light.svg</file>
-    </qresource>
-
-    <qresource prefix="/styles">
-        <file>styles/light.qss</file>
-        <file>styles/dark.qss</file>
-    </qresource>
+  <qresource prefix="/">
+    <file>res/icons/settings_dark.svg</file>
+    <file>res/icons/settings_light.svg</file>
+    <file>res/icons/app.ico</file>
+    <file>res/styles/dark.qss</file>
+    <file>res/styles/light.qss</file>
+  </qresource>
+  <qresource prefix="newPrefix"/>
 </RCC>
