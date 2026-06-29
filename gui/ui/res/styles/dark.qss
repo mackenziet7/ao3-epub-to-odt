@@ -1,5 +1,4 @@
-
-
+/* Buttons */
 QPushButton[iconButton="true"] {
     border: none;
     background: transparent;
@@ -15,6 +14,15 @@ QPushButton[iconButton="true"]:pressed {
     background-color: rgba(128, 128, 128, 80);
 }
 
+/* Text Styles */ 
+QLabel[textRole="title"] {
+    font-size: 18px;
+    font-weight: bold;
+    color: #F3F3F3;
+}
+
+
+/* Misc */
 QSplitter::handle:horizontal {
     background-color: #444444;
     width: 1px;

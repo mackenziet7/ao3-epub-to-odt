@@ -1,8 +1,12 @@
 <RCC>
   <qresource prefix="/">
+    <file>res/icons/app.ico</file>
     <file>res/icons/settings_dark.svg</file>
     <file>res/icons/settings_light.svg</file>
-    <file>res/icons/app.ico</file>
+
+    <file>res/icons/back_dark.svg</file>
+    <file>res/icons/back_light.svg</file>
+    
     <file>res/styles/dark.qss</file>
     <file>res/styles/light.qss</file>
   </qresource>
