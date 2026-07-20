@@ -92,6 +92,7 @@ class MainWindow:
         self._lr_margin_ratio = 1.0
         self._wire_page0()
         self._wire_page1()
+        self._wire_page2()
         self._wire_navigation()
 
     # ------------------------------------------------------------------
@@ -101,9 +102,10 @@ class MainWindow:
     def _wire_page0(self):
         w = self.window
 
-        splitter = w.findChild(QSplitter, "splitter")
-        splitter.setCollapsible(0, False)
-        splitter.setCollapsible(1, False)
+        splitterPage0 = w.findChild(QSplitter, "splitter")
+        splitterPage0.setCollapsible(0, False)
+        splitterPage0.setCollapsible(1, False)
+        splitterPage0.setSizes([500, 400])
 
         mode_group = QButtonGroup(w)
         for name in ("modeSingleButton", "modeBatchButton", "modeCollectionButton"):
@@ -118,9 +120,10 @@ class MainWindow:
     def _wire_page1(self):
         w = self.window
 
-        splitterSetup = w.findChild(QSplitter, "splitterSetup")
-        splitterSetup.setCollapsible(0, False)
-        splitterSetup.setCollapsible(1, False)
+        splitterPage1 = w.findChild(QSplitter, "splitterSetup")
+        splitterPage1.setCollapsible(0, False)
+        splitterPage1.setCollapsible(1, False)
+        splitterPage1.setSizes([500, 400])
 
         # Page size combo (custom width/height are now always visible —
         # the old show/hide customSizeWidget was removed in the layout
@@ -229,19 +232,40 @@ class MainWindow:
         layout.insertWidget(idx, self._preview)
 
     # ------------------------------------------------------------------
+    # Page 2 — Basic Typography Setup screen
+    # ------------------------------------------------------------------
+
+    def _wire_page2(self):
+            w = self.window
+            splitterPage3 = w.findChild(QSplitter, "splitterPage3")
+            splitterPage3.setCollapsible(0, False)
+            splitterPage3.setCollapsible(1, False)
+            splitterPage3.setSizes([500, 400])
+
+    # ------------------------------------------------------------------
     # Navigation
     # ------------------------------------------------------------------
 
     def _wire_navigation(self):
-        w     = self.window
-        stack = w.findChild(QStackedWidget, "stackedWidget")
+            w     = self.window
+            stack = w.findChild(QStackedWidget, "stackedWidget")
+            stack.setCurrentIndex(0)  # always start on the main screen
 
-        w.findChild(QPushButton, "buttonNext").clicked.connect(
-            lambda: stack.setCurrentIndex(1)
-        )
-        w.findChild(QPushButton, "buttonBack").clicked.connect(
-            lambda: stack.setCurrentIndex(0)
-        )
+            nav_pairs = [
+                ("buttonNext",   1),  # main → page setup
+                ("buttonBack",   0),  # page setup → main
+                ("buttonNext_2", 2),  # page setup → typography basic
+                ("buttonBack_2", 1),  # typography basic → page setup
+                # buttonNext_3 intentionally not wired yet — no page 3 to go to
+            ]
+
+            for button_name, target_index in nav_pairs:
+                button = w.findChild(QPushButton, button_name)
+                if button is None:
+                    continue
+                button.clicked.connect(
+                    lambda checked=False, idx=target_index: stack.setCurrentIndex(idx)
+                )
 
     # ------------------------------------------------------------------
     # Lock icon toggle
