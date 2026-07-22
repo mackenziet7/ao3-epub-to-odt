@@ -13,7 +13,7 @@ from PySide6.QtWidgets import (
     QApplication, QSplitter, QButtonGroup, QPushButton,
     QCheckBox, QComboBox, QLabel, QDoubleSpinBox, QWidget,
     QStackedWidget, QBoxLayout, QRadioButton, QAbstractSpinBox,
-    QToolTip
+    QToolTip, QFontComboBox
 )
 from PySide6.QtUiTools import QUiLoader
 from PySide6.QtGui import QIcon, QCursor
@@ -236,36 +236,63 @@ class MainWindow:
     # ------------------------------------------------------------------
 
     def _wire_page2(self):
-            w = self.window
-            splitterPage3 = w.findChild(QSplitter, "splitterPage3")
-            splitterPage3.setCollapsible(0, False)
-            splitterPage3.setCollapsible(1, False)
-            splitterPage3.setSizes([500, 400])
+        w = self.window
+        splitterPage3 = w.findChild(QSplitter, "splitterPage3")
+        splitterPage3.setCollapsible(0, False)
+        splitterPage3.setCollapsible(1, False)
+        splitterPage3.setSizes([500, 400])
+
+        # Typography controls
+        self._headerFontCombo = w.findChild(QFontComboBox, "headerFontComboBox")
+        self._bodyFontCombo = w.findChild(QFontComboBox, "bodyFontComboBox")
+        self._headerSizeSpin = w.findChild(QDoubleSpinBox, "headerFontSize")
+        self._bodySizeSpin = w.findChild(QDoubleSpinBox, "bodyFontSize")
+
+        # Preview Labels
+        self._headerPreviewLabel = w.findChild(QLabel, "labelHeaderPreview")
+        self._bodyPreviewLabel = w.findChild(QLabel, "labelBodyPreview")
+
+        # Wire preview
+        self._headerFontCombo.currentFontChanged.connect(self._update_typography_preview)
+        self._bodyFontCombo.currentFontChanged.connect(self._update_typography_preview)
+        self._headerSizeSpin.valueChanged.connect(self._update_typography_preview)
+        self._bodySizeSpin.valueChanged.connect(self._update_typography_preview)
+
+        self._update_typography_preview()
+
+    def _update_typography_preview(self):
+        header_font = self._headerFontCombo.currentFont()
+        header_font.setPointSize(self._headerSizeSpin.value())
+        self._headerPreviewLabel.setFont(header_font)
+
+        body_font = self._bodyFontCombo.currentFont()
+        body_font.setPointSize(self._bodySizeSpin.value())
+        self._bodyPreviewLabel.setFont(body_font)
 
     # ------------------------------------------------------------------
     # Navigation
     # ------------------------------------------------------------------
 
     def _wire_navigation(self):
-            w     = self.window
-            stack = w.findChild(QStackedWidget, "stackedWidget")
-            stack.setCurrentIndex(0)  # always start on the main screen
+        w     = self.window
+        stack = w.findChild(QStackedWidget, "stackedWidget")
+        stack.setCurrentIndex(0)  # always start on the main screen
 
-            nav_pairs = [
-                ("buttonNext",   1),  # main → page setup
-                ("buttonBack",   0),  # page setup → main
-                ("buttonNext_2", 2),  # page setup → typography basic
-                ("buttonBack_2", 1),  # typography basic → page setup
-                # buttonNext_3 intentionally not wired yet — no page 3 to go to
-            ]
+        nav_pairs = [
+            ("buttonNext",   1),  # main → page setup
+            ("buttonBack",   0),  # page setup → main
+            ("buttonNext_2", 2),  # page setup → typography basic
+            ("buttonBack_2", 1),  # typography basic → page setup
+            # buttonNext_3 intentionally not wired yet — no page 3 to go to
+        ]
 
-            for button_name, target_index in nav_pairs:
-                button = w.findChild(QPushButton, button_name)
-                if button is None:
-                    continue
-                button.clicked.connect(
-                    lambda checked=False, idx=target_index: stack.setCurrentIndex(idx)
-                )
+        for button_name, target_index in nav_pairs:
+            button = w.findChild(QPushButton, button_name)
+            if button is None:
+                continue
+            button.clicked.connect(
+                lambda checked=False, idx=target_index: stack.setCurrentIndex(idx)
+            )
 
     # ------------------------------------------------------------------
     # Lock icon toggle

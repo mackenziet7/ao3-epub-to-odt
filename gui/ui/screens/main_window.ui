@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1072</width>
-    <height>704</height>
+    <width>1068</width>
+    <height>696</height>
    </rect>
   </property>
   <property name="minimumSize">
@@ -1154,7 +1154,7 @@ so bound pages have a wider inner margin.</string>
                  </widget>
                 </item>
                 <item>
-                 <widget class="QFontComboBox" name="fontComboBox"/>
+                 <widget class="QFontComboBox" name="headerFontComboBox"/>
                 </item>
                 <item>
                  <spacer name="horizontalSpacer_17">
@@ -1197,7 +1197,17 @@ so bound pages have a wider inner margin.</string>
                  </widget>
                 </item>
                 <item>
-                 <widget class="QDoubleSpinBox" name="headerFontSize"/>
+                 <widget class="QDoubleSpinBox" name="headerFontSize">
+                  <property name="suffix">
+                   <string>pt</string>
+                  </property>
+                  <property name="minimum">
+                   <double>6.000000000000000</double>
+                  </property>
+                  <property name="maximum">
+                   <double>72.000000000000000</double>
+                  </property>
+                 </widget>
                 </item>
                 <item>
                  <spacer name="horizontalSpacer_19">
@@ -1273,7 +1283,7 @@ so bound pages have a wider inner margin.</string>
                  </widget>
                 </item>
                 <item>
-                 <widget class="QFontComboBox" name="fontComboBox_2"/>
+                 <widget class="QFontComboBox" name="bodyFontComboBox"/>
                 </item>
                 <item>
                  <spacer name="horizontalSpacer_15">
@@ -1318,7 +1328,17 @@ so bound pages have a wider inner margin.</string>
                </widget>
               </item>
               <item>
-               <widget class="QDoubleSpinBox" name="BodyFontSize"/>
+               <widget class="QDoubleSpinBox" name="bodyFontSize">
+                <property name="suffix">
+                 <string>pt</string>
+                </property>
+                <property name="minimum">
+                 <double>6.000000000000000</double>
+                </property>
+                <property name="maximum">
+                 <double>72.000000000000000</double>
+                </property>
+               </widget>
               </item>
               <item>
                <spacer name="horizontalSpacer_14">
@@ -1424,6 +1444,9 @@ so bound pages have a wider inner margin.</string>
              <widget class="QLabel" name="labelPreview_2">
               <property name="text">
                <string>Preview</string>
+              </property>
+              <property name="textRole" stdset="0">
+               <string>title</string>
               </property>
              </widget>
             </item>
