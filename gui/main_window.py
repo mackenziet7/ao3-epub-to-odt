@@ -9,12 +9,7 @@ Entry point: call run() from main.py.
 
 from pathlib import Path
 
-from PySide6.QtWidgets import (
-    QApplication, QSplitter, QButtonGroup, QPushButton,
-    QCheckBox, QComboBox, QLabel, QDoubleSpinBox, QWidget,
-    QStackedWidget, QBoxLayout, QRadioButton, QAbstractSpinBox,
-    QToolTip, QFontComboBox
-)
+from PySide6.QtWidgets import *
 from PySide6.QtUiTools import QUiLoader
 from PySide6.QtGui import QIcon, QCursor
 from PySide6.QtCore import QEvent, QObject, Qt
@@ -42,6 +37,9 @@ ALL_SPIN_NAMES    = MARGIN_SPIN_NAMES + CUSTOM_SPIN_NAMES
 
 _LOCK_ICON   = ":/res/icons/lock_dark.svg"
 _UNLOCK_ICON = ":/res/icons/lock_open_dark.svg"
+
+_CIRCLE_EMPTY_ICON   = ":/res/icons/circle_dark.svg"
+_CIRCLE_CHECKED_ICON = ":/res/icons/circle_checked.svg"
 
 
 class _SpinRangeNotifier(QObject):
@@ -93,6 +91,7 @@ class MainWindow:
         self._wire_page0()
         self._wire_page1()
         self._wire_page2()
+        self._wire_page3()
         self._wire_navigation()
 
     # ------------------------------------------------------------------
@@ -270,6 +269,33 @@ class MainWindow:
         self._bodyPreviewLabel.setFont(body_font)
 
     # ------------------------------------------------------------------
+    # Page 3 — Typography Advanced ("More Options") screen
+    # ------------------------------------------------------------------
+    def _wire_page3(self):
+        w = self.window
+        splitterPage3 = w.findChild(QSplitter, "splitterTypographyMore")
+        splitterPage3.setCollapsible(0, False)
+        splitterPage3.setCollapsible(1, False)
+        splitterPage3.setSizes([200, 700])
+
+        self._groupList = w.findChild(QListWidget, "groupListWidget")
+        self._groupList.setSelectionMode(QAbstractItemView.SelectionMode.SingleSelection)
+
+        self._groupTitleLabel = w.findChild(QLabel, "labelTypographyGroupTitle")
+
+        empty_icon = QIcon(_CIRCLE_EMPTY_ICON)
+        for i in range(self._groupList.count()):
+            self._groupList.item(i).setIcon(empty_icon)
+
+        self._groupList.setCurrentRow(0)  # start on "Main Book"
+        self._groupList.currentRowChanged.connect(self._on_typography_group_changed)
+
+    def _on_typography_group_changed(self, row: int):
+        group_names = ["Main Book", "Front Matter", "Appendix"]
+        if 0 <= row < len(group_names):
+            self._groupTitleLabel.setText(group_names[row])
+
+    # ------------------------------------------------------------------
     # Navigation
     # ------------------------------------------------------------------
 
@@ -283,7 +309,8 @@ class MainWindow:
             ("buttonBack",   0),  # page setup → main
             ("buttonNext_2", 2),  # page setup → typography basic
             ("buttonBack_2", 1),  # typography basic → page setup
-            # buttonNext_3 intentionally not wired yet — no page 3 to go to
+            ("buttonMoreOptions", 3),  # typography basic → typography more options
+            ("buttonBack_3", 2),  # typography more options → typography basic
         ]
 
         for button_name, target_index in nav_pairs:

@@ -22,8 +22,31 @@ QLabel[textRole="title"] {
 }
 
 
+/* List Widget */
+QListWidget[flatList="true"] {
+    border: none;
+    background: transparent;
+    outline: none;               /* removes the dotted focus rectangle */
+}
+
+QListWidget[flatList="true"]::item {
+    padding: 8px 12px;
+    border-radius: 6px;
+    margin: 2px 0px;
+}
+
+QListWidget[flatList="true"]::item:hover {
+    background: #3a3a3a;         /* adjust to match your existing hover colors */
+}
+
+QListWidget[flatList="true"]::item:selected {
+    background: #4a4a4a;         /* adjust to match your button "checked" color */
+    color: white;
+}
+
 /* Misc */
 QSplitter::handle:horizontal {
     background-color: #444444;
     width: 1px;
 }
+
