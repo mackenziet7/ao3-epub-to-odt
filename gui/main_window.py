@@ -281,19 +281,79 @@ class MainWindow:
         self._groupList = w.findChild(QListWidget, "groupListWidget")
         self._groupList.setSelectionMode(QAbstractItemView.SelectionMode.SingleSelection)
 
-        self._groupTitleLabel = w.findChild(QLabel, "labelTypographyGroupTitle")
-
         empty_icon = QIcon(_CIRCLE_EMPTY_ICON)
         for i in range(self._groupList.count()):
             self._groupList.item(i).setIcon(empty_icon)
 
+        self._groupContentStack = w.findChild(QStackedWidget, "stackedWidget_2")
+        self._groupContentStack.setCurrentIndex(0)
+
         self._groupList.setCurrentRow(0)  # start on "Main Book"
         self._groupList.currentRowChanged.connect(self._on_typography_group_changed)
 
+        self._typography_group_checked = [False, False, False]
+        self._typography_current_row = None
+
+        w.findChild(QPushButton, "buttonNext_4").clicked.connect(
+            self._on_typography_advanced_next
+        )
+        w.findChild(QPushButton, "buttonBack_3").clicked.connect(
+            self._on_typography_advanced_back
+        )
+
     def _on_typography_group_changed(self, row: int):
-        group_names = ["Main Book", "Front Matter", "Appendix"]
-        if 0 <= row < len(group_names):
-            self._groupTitleLabel.setText(group_names[row])
+        if self._typography_current_row is not None:
+            self._mark_typography_group_checked(self._typography_current_row)
+
+        self._typography_current_row = row
+        self._groupContentStack.setCurrentIndex(row)
+
+    def _mark_typography_group_checked(self, row: int):
+        self._typography_group_checked[row] = True
+        self._groupList.item(row).setIcon(QIcon(_CIRCLE_CHECKED_ICON))
+
+    def _on_typography_advanced_next(self):
+        current_row = self._groupList.currentRow()
+
+        if current_row < self._groupList.count() - 1:
+            self._groupList.setCurrentRow(current_row + 1)
+        else:
+            self._mark_typography_group_checked(current_row)
+            if not all(self._typography_group_checked):
+                QMessageBox.warning(
+                    self.window,
+                    "Incomplete Sections",
+                    "Some sections still have default settings. You can continue anyway, or go back and review them.",
+                )
+
+    def _on_typography_advanced_back(self):
+        reply = QMessageBox.question(
+            self.window,
+            "Discard Changes?",
+            "Any per-style changes made here will be lost. Continue?",
+            QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No,
+        )
+        if reply != QMessageBox.StandardButton.Yes:
+            return
+
+        # Reset checklist state
+        self._typography_group_checked = [False, False, False]
+        self._typography_current_row = None
+        empty_icon = QIcon(_CIRCLE_EMPTY_ICON)
+        for i in range(self._groupList.count()):
+            self._groupList.item(i).setIcon(empty_icon)
+
+        self._groupList.setCurrentRow(0)
+        self._groupContentStack.setCurrentIndex(0)
+
+        # NOTE: actual per-style field values aren't reset here yet —
+        # that requires the overrides/backend system we haven't built.
+        # For now this only resets the checklist UI state.
+
+        w = self.window
+        stack = w.findChild(QStackedWidget, "stackedWidget")
+        stack.setCurrentIndex(2)
+
 
     # ------------------------------------------------------------------
     # Navigation

@@ -1,6 +1,6 @@
 <RCC>
   <qresource prefix="/">
-    <file>res/icons/check_circle.svg</file>
+    <file>res/icons/circle_checked.svg</file>
     <file>res/icons/circle_dark.svg</file>
     <file>res/icons/circle_light.svg</file>
     <file>res/icons/app.ico</file>
