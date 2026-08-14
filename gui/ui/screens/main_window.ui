@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>996</width>
-    <height>672</height>
+    <width>884</width>
+    <height>605</height>
    </rect>
   </property>
   <property name="minimumSize">
@@ -28,9 +28,9 @@
     <item>
      <widget class="QStackedWidget" name="stackedWidget">
       <property name="currentIndex">
-       <number>3</number>
+       <number>4</number>
       </property>
-      <widget class="QWidget" name="page_1">
+      <widget class="QWidget" name="page_0">
        <layout class="QVBoxLayout" name="verticalLayout_2">
         <item>
          <widget class="QSplitter" name="splitter">
@@ -292,7 +292,7 @@
         </item>
        </layout>
       </widget>
-      <widget class="QWidget" name="page_2">
+      <widget class="QWidget" name="page_1">
        <layout class="QVBoxLayout" name="verticalLayout_page2">
         <property name="spacing">
          <number>0</number>
@@ -1025,7 +1025,7 @@ so bound pages have a wider inner margin.</string>
         </item>
        </layout>
       </widget>
-      <widget class="QWidget" name="page_3">
+      <widget class="QWidget" name="page_2">
        <layout class="QVBoxLayout" name="verticalLayout_page3">
         <property name="spacing">
          <number>0</number>
@@ -1059,7 +1059,7 @@ so bound pages have a wider inner margin.</string>
              <number>9</number>
             </property>
             <item>
-             <layout class="QHBoxLayout" name="horizontalLayout_4">
+             <layout class="QHBoxLayout" name="backRow">
               <item>
                <widget class="QPushButton" name="buttonBack_2">
                 <property name="minimumSize">
@@ -1121,7 +1121,7 @@ so bound pages have a wider inner margin.</string>
              </widget>
             </item>
             <item>
-             <layout class="QVBoxLayout" name="verticalLayout_6">
+             <layout class="QVBoxLayout" name="headerStyle">
               <item>
                <widget class="QLabel" name="labelHeaderStyle">
                 <property name="text">
@@ -1130,7 +1130,7 @@ so bound pages have a wider inner margin.</string>
                </widget>
               </item>
               <item>
-               <layout class="QHBoxLayout" name="horizontalLayout_8">
+               <layout class="QHBoxLayout" name="font_3">
                 <item>
                  <spacer name="horizontalSpacer_16">
                   <property name="orientation">
@@ -1155,7 +1155,13 @@ so bound pages have a wider inner margin.</string>
                  </widget>
                 </item>
                 <item>
-                 <widget class="QFontComboBox" name="headerFontComboBox"/>
+                 <widget class="QFontComboBox" name="headerFontComboBox">
+                  <property name="currentFont">
+                   <font>
+                    <family>Times New Roman</family>
+                   </font>
+                  </property>
+                 </widget>
                 </item>
                 <item>
                  <spacer name="horizontalSpacer_17">
@@ -1173,7 +1179,7 @@ so bound pages have a wider inner margin.</string>
                </layout>
               </item>
               <item>
-               <layout class="QHBoxLayout" name="horizontalLayout_9">
+               <layout class="QHBoxLayout" name="size_3">
                 <item>
                  <spacer name="horizontalSpacer_18">
                   <property name="orientation">
@@ -1210,6 +1216,9 @@ so bound pages have a wider inner margin.</string>
                   </property>
                   <property name="singleStep">
                    <double>0.500000000000000</double>
+                  </property>
+                  <property name="value">
+                   <double>18.000000000000000</double>
                   </property>
                  </widget>
                 </item>
@@ -1256,7 +1265,7 @@ so bound pages have a wider inner margin.</string>
                </widget>
               </item>
               <item>
-               <layout class="QHBoxLayout" name="horizontalLayout_5">
+               <layout class="QHBoxLayout" name="font_4">
                 <item>
                  <spacer name="horizontalSpacer_12">
                   <property name="orientation">
@@ -1287,7 +1296,13 @@ so bound pages have a wider inner margin.</string>
                  </widget>
                 </item>
                 <item>
-                 <widget class="QFontComboBox" name="bodyFontComboBox"/>
+                 <widget class="QFontComboBox" name="bodyFontComboBox">
+                  <property name="currentFont">
+                   <font>
+                    <family>Times New Roman</family>
+                   </font>
+                  </property>
+                 </widget>
                 </item>
                 <item>
                  <spacer name="horizontalSpacer_15">
@@ -1307,7 +1322,7 @@ so bound pages have a wider inner margin.</string>
              </layout>
             </item>
             <item>
-             <layout class="QHBoxLayout" name="horizontalLayout_7">
+             <layout class="QHBoxLayout" name="size_4">
               <item>
                <spacer name="horizontalSpacer_13">
                 <property name="orientation">
@@ -1345,6 +1360,9 @@ so bound pages have a wider inner margin.</string>
                 <property name="singleStep">
                  <double>0.500000000000000</double>
                 </property>
+                <property name="value">
+                 <double>11.500000000000000</double>
+                </property>
                </widget>
               </item>
               <item>
@@ -1379,7 +1397,7 @@ so bound pages have a wider inner margin.</string>
              </spacer>
             </item>
             <item>
-             <layout class="QHBoxLayout" name="horizontalLayout_10">
+             <layout class="QHBoxLayout" name="moreOptions">
               <item>
                <widget class="QPushButton" name="buttonMoreOptions">
                 <property name="sizePolicy">
@@ -1499,11 +1517,7 @@ so bound pages have a wider inner margin.</string>
             <item>
              <widget class="QLabel" name="labelBodyPreview">
               <property name="text">
-               <string> Lorem ipsum dolor sit amet, consectetur adipiscing elit. Maecenas augue odio, finibus quis euismod at, suscipit eu elit. Nulla eleifend porta turpis, ut laoreet odio sagittis quis. Aliquam erat volutpat. Etiam pharetra, augue ullamcorper dapibus vestibulum, elit orci luctus libero, sed ornare orci nisi nec nulla. Pellentesque in justo neque. Morbi hendrerit tempus quam, quis ultrices nisl aliquam sit amet. Mauris euismod dapibus ex a fermentum. Mauris at eleifend neque. Praesent vitae turpis venenatis, congue elit in, molestie odio.
-
-In pellentesque at turpis ac sagittis. Vivamus interdum lorem et diam commodo pharetra. Phasellus nisi nisl, sodales eu purus quis, gravida ornare lacus. Donec eu lobortis nulla, a aliquet nulla. Phasellus tempor convallis neque, et cursus mi facilisis id. Nullam molestie, libero quis gravida posuere, ante velit hendrerit enim, sed condimentum velit nisi non sem. Etiam ullamcorper nibh ac quam finibus, eu aliquet ligula auctor. Ut blandit dui est, a consequat mauris cursus ac.
-
-Mauris nisi ipsum, ultricies at fermentum id, sagittis eu orci. Curabitur auctor id quam eu sagittis. Nulla porta eu est eu dignissim. Pellentesque sit amet eros non dolor vestibulum elementum. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Maecenas eget ultricies lectus, non dapibus odio. Proin fringilla dolor nec ante lacinia, ut imperdiet purus laoreet. Aliquam at libero placerat, convallis ipsum vel, sagittis dui. Etiam volutpat pulvinar diam ac mollis. </string>
+               <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Lorem ipsum dolor sit amet, consectetur adipiscing elit. Maecenas augue odio, finibus quis euismod at, suscipit eu elit. Nulla eleifend porta turpis, ut laoreet odio sagittis quis. Aliquam erat volutpat. Etiam pharetra, augue ullamcorper dapibus vestibulum, elit orci luctus libero, sed ornare orci nisi nec nulla. Pellentesque in justo neque. Morbi hendrerit tempus quam, quis ultrices nisl aliquam sit amet. Mauris euismod dapibus ex a fermentum. Mauris at eleifend neque. Praesent vitae turpis venenatis, congue elit in, molestie odio.&lt;/p&gt;&lt;p&gt;     In pellentesque at turpis ac sagittis. Vivamus interdum lorem et diam commodo pharetra. Phasellus nisi nisl, sodales eu purus quis, gravida ornare lacus. Donec eu lobortis nulla, a aliquet nulla. Phasellus tempor convallis neque, et cursus mi facilisis id. Nullam molestie, libero quis gravida posuere, ante velit hendrerit enim, sed condimentum velit nisi non sem. Etiam ullamcorper nibh ac quam finibus, eu aliquet ligula auctor. Ut blandit dui est, a consequat mauris cursus ac.&lt;/p&gt;&lt;p&gt;     Mauris nisi ipsum, ultricies at fermentum id, sagittis eu orci. Curabitur auctor id quam eu sagittis. Nulla porta eu est eu dignissim. Pellentesque sit amet eros non dolor vestibulum elementum. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Maecenas eget ultricies lectus, non dapibus odio. Proin fringilla dolor nec ante lacinia, ut imperdiet purus laoreet. Aliquam at libero placerat, convallis ipsum vel, sagittis dui. Etiam volutpat pulvinar diam ac mollis. &lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
               </property>
               <property name="wordWrap">
                <bool>true</bool>
@@ -1555,7 +1569,7 @@ Mauris nisi ipsum, ultricies at fermentum id, sagittis eu orci. Curabitur auctor
         </item>
        </layout>
       </widget>
-      <widget class="QWidget" name="current">
+      <widget class="QWidget" name="page_3">
        <layout class="QVBoxLayout" name="verticalLayout_7">
         <item>
          <widget class="QSplitter" name="splitterTypographyMore">
@@ -1691,6 +1705,13 @@ Mauris nisi ipsum, ultricies at fermentum id, sagittis eu orci. Curabitur auctor
               </item>
              </widget>
             </item>
+            <item>
+             <widget class="QPushButton" name="buttonNext_4">
+              <property name="text">
+               <string>Next</string>
+              </property>
+             </widget>
+            </item>
            </layout>
           </widget>
           <widget class="QWidget" name="rightPanel" native="true">
@@ -1704,13 +1725,19 @@ Mauris nisi ipsum, ultricies at fermentum id, sagittis eu orci. Curabitur auctor
             <property name="leftMargin">
              <number>20</number>
             </property>
+            <property name="topMargin">
+             <number>0</number>
+            </property>
             <property name="rightMargin">
-             <number>9</number>
+             <number>0</number>
+            </property>
+            <property name="bottomMargin">
+             <number>0</number>
             </property>
             <item>
              <widget class="QStackedWidget" name="stackedWidget_2">
               <property name="currentIndex">
-               <number>0</number>
+               <number>1</number>
               </property>
               <widget class="QWidget" name="mainBookPage">
                <layout class="QVBoxLayout" name="verticalLayout_4">
@@ -1739,8 +1766,8 @@ Mauris nisi ipsum, ultricies at fermentum id, sagittis eu orci. Curabitur auctor
                     <rect>
                      <x>0</x>
                      <y>0</y>
-                     <width>626</width>
-                     <height>618</height>
+                     <width>362</width>
+                     <height>561</height>
                     </rect>
                    </property>
                    <layout class="QVBoxLayout" name="verticalLayout_9">
@@ -1792,13 +1819,252 @@ Mauris nisi ipsum, ultricies at fermentum id, sagittis eu orci. Curabitur auctor
                      </spacer>
                     </item>
                     <item>
+                     <widget class="QGroupBox" name="chapHeadersBox">
+                      <property name="title">
+                       <string>Chapter Headers</string>
+                      </property>
+                      <layout class="QVBoxLayout" name="verticalLayout_11">
+                       <item>
+                        <layout class="QHBoxLayout" name="font">
+                         <item>
+                          <widget class="QLabel" name="labelHeaderFont_2">
+                           <property name="text">
+                            <string>Font: </string>
+                           </property>
+                          </widget>
+                         </item>
+                         <item>
+                          <widget class="QFontComboBox" name="chapHeadFontComboBox">
+                           <property name="currentFont">
+                            <font>
+                             <family>Times New Roman</family>
+                            </font>
+                           </property>
+                          </widget>
+                         </item>
+                         <item>
+                          <spacer name="horizontalSpacer_27">
+                           <property name="orientation">
+                            <enum>Qt::Orientation::Horizontal</enum>
+                           </property>
+                           <property name="sizeHint" stdset="0">
+                            <size>
+                             <width>40</width>
+                             <height>20</height>
+                            </size>
+                           </property>
+                          </spacer>
+                         </item>
+                        </layout>
+                       </item>
+                       <item>
+                        <layout class="QHBoxLayout" name="size">
+                         <item>
+                          <widget class="QLabel" name="labelHeaderSize_2">
+                           <property name="text">
+                            <string>Size: </string>
+                           </property>
+                          </widget>
+                         </item>
+                         <item>
+                          <widget class="QDoubleSpinBox" name="headerFontSize_2">
+                           <property name="suffix">
+                            <string>pt</string>
+                           </property>
+                           <property name="minimum">
+                            <double>6.000000000000000</double>
+                           </property>
+                           <property name="maximum">
+                            <double>72.000000000000000</double>
+                           </property>
+                           <property name="singleStep">
+                            <double>0.500000000000000</double>
+                           </property>
+                           <property name="value">
+                            <double>18.000000000000000</double>
+                           </property>
+                          </widget>
+                         </item>
+                         <item>
+                          <spacer name="horizontalSpacer_28">
+                           <property name="orientation">
+                            <enum>Qt::Orientation::Horizontal</enum>
+                           </property>
+                           <property name="sizeHint" stdset="0">
+                            <size>
+                             <width>40</width>
+                             <height>20</height>
+                            </size>
+                           </property>
+                          </spacer>
+                         </item>
+                        </layout>
+                       </item>
+                       <item>
+                        <widget class="QCheckBox" name="boldCheckBox">
+                         <property name="text">
+                          <string>Bold</string>
+                         </property>
+                        </widget>
+                       </item>
+                       <item>
+                        <layout class="QHBoxLayout" name="alignment">
+                         <item>
+                          <widget class="QLabel" name="labelHeaderAlignment">
+                           <property name="text">
+                            <string>Alignment: </string>
+                           </property>
+                          </widget>
+                         </item>
+                         <item>
+                          <widget class="QComboBox" name="headerAlignmentComboBox">
+                           <property name="currentIndex">
+                            <number>1</number>
+                           </property>
+                           <item>
+                            <property name="text">
+                             <string>Left</string>
+                            </property>
+                           </item>
+                           <item>
+                            <property name="text">
+                             <string>Center</string>
+                            </property>
+                           </item>
+                           <item>
+                            <property name="text">
+                             <string>Right</string>
+                            </property>
+                           </item>
+                           <item>
+                            <property name="text">
+                             <string>Justify</string>
+                            </property>
+                           </item>
+                          </widget>
+                         </item>
+                         <item>
+                          <spacer name="horizontalSpacer_29">
+                           <property name="orientation">
+                            <enum>Qt::Orientation::Horizontal</enum>
+                           </property>
+                           <property name="sizeHint" stdset="0">
+                            <size>
+                             <width>40</width>
+                             <height>20</height>
+                            </size>
+                           </property>
+                          </spacer>
+                         </item>
+                        </layout>
+                       </item>
+                       <item>
+                        <layout class="QHBoxLayout" name="topMargin">
+                         <item>
+                          <widget class="QLabel" name="labelHeaderTopMargin">
+                           <property name="text">
+                            <string>Top Margin: </string>
+                           </property>
+                          </widget>
+                         </item>
+                         <item>
+                          <widget class="QDoubleSpinBox" name="headerTopMarginSpinBox">
+                           <property name="suffix">
+                            <string>in</string>
+                           </property>
+                           <property name="maximum">
+                            <double>5.000000000000000</double>
+                           </property>
+                           <property name="singleStep">
+                            <double>0.100000000000000</double>
+                           </property>
+                           <property name="value">
+                            <double>0.330000000000000</double>
+                           </property>
+                          </widget>
+                         </item>
+                         <item>
+                          <spacer name="horizontalSpacer_30">
+                           <property name="orientation">
+                            <enum>Qt::Orientation::Horizontal</enum>
+                           </property>
+                           <property name="sizeHint" stdset="0">
+                            <size>
+                             <width>40</width>
+                             <height>20</height>
+                            </size>
+                           </property>
+                          </spacer>
+                         </item>
+                        </layout>
+                       </item>
+                       <item>
+                        <layout class="QHBoxLayout" name="bottomMargin">
+                         <item>
+                          <widget class="QLabel" name="labelHeaderBotMargin">
+                           <property name="text">
+                            <string>Bottom Margin: </string>
+                           </property>
+                          </widget>
+                         </item>
+                         <item>
+                          <widget class="QDoubleSpinBox" name="headerBottomMarginSpinBox">
+                           <property name="suffix">
+                            <string>in</string>
+                           </property>
+                           <property name="maximum">
+                            <double>5.000000000000000</double>
+                           </property>
+                           <property name="singleStep">
+                            <double>0.100000000000000</double>
+                           </property>
+                           <property name="value">
+                            <double>0.250000000000000</double>
+                           </property>
+                          </widget>
+                         </item>
+                         <item>
+                          <spacer name="horizontalSpacer_31">
+                           <property name="orientation">
+                            <enum>Qt::Orientation::Horizontal</enum>
+                           </property>
+                           <property name="sizeHint" stdset="0">
+                            <size>
+                             <width>40</width>
+                             <height>20</height>
+                            </size>
+                           </property>
+                          </spacer>
+                         </item>
+                        </layout>
+                       </item>
+                      </layout>
+                     </widget>
+                    </item>
+                    <item>
+                     <spacer name="verticalSpacer_13">
+                      <property name="orientation">
+                       <enum>Qt::Orientation::Vertical</enum>
+                      </property>
+                      <property name="sizeType">
+                       <enum>QSizePolicy::Policy::Fixed</enum>
+                      </property>
+                      <property name="sizeHint" stdset="0">
+                       <size>
+                        <width>20</width>
+                        <height>20</height>
+                       </size>
+                      </property>
+                     </spacer>
+                    </item>
+                    <item>
                      <widget class="QGroupBox" name="bodyBox">
                       <property name="title">
                        <string>Body</string>
                       </property>
                       <layout class="QVBoxLayout" name="verticalLayout_10">
                        <item>
-                        <layout class="QHBoxLayout" name="horizontalLayout_13">
+                        <layout class="QHBoxLayout" name="font_2">
                          <item>
                           <widget class="QLabel" name="labelBodyFont_2">
                            <property name="text">
@@ -1807,7 +2073,13 @@ Mauris nisi ipsum, ultricies at fermentum id, sagittis eu orci. Curabitur auctor
                           </widget>
                          </item>
                          <item>
-                          <widget class="QFontComboBox" name="bodyFontComboBox_2"/>
+                          <widget class="QFontComboBox" name="bodyFontComboBox_2">
+                           <property name="currentFont">
+                            <font>
+                             <family>Times New Roman</family>
+                            </font>
+                           </property>
+                          </widget>
                          </item>
                          <item>
                           <spacer name="horizontalSpacer_21">
@@ -1825,7 +2097,7 @@ Mauris nisi ipsum, ultricies at fermentum id, sagittis eu orci. Curabitur auctor
                         </layout>
                        </item>
                        <item>
-                        <layout class="QHBoxLayout" name="horizontalLayout_14">
+                        <layout class="QHBoxLayout" name="size_2">
                          <item>
                           <widget class="QLabel" name="labelBodySize_2">
                            <property name="text">
@@ -1847,6 +2119,9 @@ Mauris nisi ipsum, ultricies at fermentum id, sagittis eu orci. Curabitur auctor
                            <property name="singleStep">
                             <double>0.500000000000000</double>
                            </property>
+                           <property name="value">
+                            <double>11.500000000000000</double>
+                           </property>
                           </widget>
                          </item>
                          <item>
@@ -1865,7 +2140,7 @@ Mauris nisi ipsum, ultricies at fermentum id, sagittis eu orci. Curabitur auctor
                         </layout>
                        </item>
                        <item>
-                        <layout class="QHBoxLayout" name="horizontalLayout_15">
+                        <layout class="QHBoxLayout" name="alignment_2">
                          <item>
                           <widget class="QLabel" name="labelBodyAlignment">
                            <property name="text">
@@ -1913,7 +2188,7 @@ Mauris nisi ipsum, ultricies at fermentum id, sagittis eu orci. Curabitur auctor
                         </layout>
                        </item>
                        <item>
-                        <layout class="QHBoxLayout" name="horizontalLayout_16">
+                        <layout class="QHBoxLayout" name="firstLineIndent">
                          <item>
                           <widget class="QLabel" name="labelFirstLineIndent">
                            <property name="text">
@@ -1928,6 +2203,9 @@ Mauris nisi ipsum, ultricies at fermentum id, sagittis eu orci. Curabitur auctor
                            </property>
                            <property name="singleStep">
                             <double>0.100000000000000</double>
+                           </property>
+                           <property name="value">
+                            <double>0.300000000000000</double>
                            </property>
                           </widget>
                          </item>
@@ -1947,7 +2225,7 @@ Mauris nisi ipsum, ultricies at fermentum id, sagittis eu orci. Curabitur auctor
                         </layout>
                        </item>
                        <item>
-                        <layout class="QHBoxLayout" name="horizontalLayout_17">
+                        <layout class="QHBoxLayout" name="lineSpacing">
                          <item>
                           <widget class="QLabel" name="labelLineSpacing">
                            <property name="text">
@@ -1962,6 +2240,9 @@ Mauris nisi ipsum, ultricies at fermentum id, sagittis eu orci. Curabitur auctor
                            </property>
                            <property name="singleStep">
                             <double>0.100000000000000</double>
+                           </property>
+                           <property name="value">
+                            <double>0.220000000000000</double>
                            </property>
                           </widget>
                          </item>
@@ -1981,7 +2262,7 @@ Mauris nisi ipsum, ultricies at fermentum id, sagittis eu orci. Curabitur auctor
                         </layout>
                        </item>
                        <item>
-                        <layout class="QHBoxLayout" name="horizontalLayout_18">
+                        <layout class="QHBoxLayout" name="lineIndentCheck">
                          <item>
                           <widget class="QCheckBox" name="firstLineIndentCheckBox">
                            <property name="toolTip">
@@ -2036,7 +2317,80 @@ Mauris nisi ipsum, ultricies at fermentum id, sagittis eu orci. Curabitur auctor
                      </widget>
                     </item>
                     <item>
-                     <spacer name="verticalSpacer_13">
+                     <spacer name="verticalSpacer_14">
+                      <property name="orientation">
+                       <enum>Qt::Orientation::Vertical</enum>
+                      </property>
+                      <property name="sizeHint" stdset="0">
+                       <size>
+                        <width>20</width>
+                        <height>40</height>
+                       </size>
+                      </property>
+                     </spacer>
+                    </item>
+                   </layout>
+                  </widget>
+                 </widget>
+                </item>
+               </layout>
+              </widget>
+              <widget class="QWidget" name="frontMatterPage">
+               <layout class="QVBoxLayout" name="verticalLayout_5">
+                <property name="leftMargin">
+                 <number>0</number>
+                </property>
+                <property name="topMargin">
+                 <number>0</number>
+                </property>
+                <property name="rightMargin">
+                 <number>0</number>
+                </property>
+                <property name="bottomMargin">
+                 <number>0</number>
+                </property>
+                <item>
+                 <widget class="QScrollArea" name="scrollArea_2">
+                  <property name="frameShape">
+                   <enum>QFrame::Shape::NoFrame</enum>
+                  </property>
+                  <property name="widgetResizable">
+                   <bool>true</bool>
+                  </property>
+                  <widget class="QWidget" name="scrollAreaWidgetContents_2">
+                   <property name="geometry">
+                    <rect>
+                     <x>0</x>
+                     <y>0</y>
+                     <width>355</width>
+                     <height>834</height>
+                    </rect>
+                   </property>
+                   <layout class="QVBoxLayout" name="verticalLayout_12">
+                    <property name="leftMargin">
+                     <number>0</number>
+                    </property>
+                    <property name="topMargin">
+                     <number>0</number>
+                    </property>
+                    <property name="rightMargin">
+                     <number>0</number>
+                    </property>
+                    <property name="bottomMargin">
+                     <number>0</number>
+                    </property>
+                    <item>
+                     <widget class="QLabel" name="labelFrontMatter">
+                      <property name="text">
+                       <string>Front Matter</string>
+                      </property>
+                      <property name="textRole" stdset="0">
+                       <string>title</string>
+                      </property>
+                     </widget>
+                    </item>
+                    <item>
+                     <spacer name="verticalSpacer_15">
                       <property name="orientation">
                        <enum>Qt::Orientation::Vertical</enum>
                       </property>
@@ -2052,25 +2406,31 @@ Mauris nisi ipsum, ultricies at fermentum id, sagittis eu orci. Curabitur auctor
                      </spacer>
                     </item>
                     <item>
-                     <widget class="QGroupBox" name="chapHeadersBox">
+                     <widget class="QGroupBox" name="frontMatterHeaderBox">
                       <property name="title">
-                       <string>Chapter Headers</string>
+                       <string>Front Matter Head</string>
                       </property>
-                      <layout class="QVBoxLayout" name="verticalLayout_11">
+                      <layout class="QVBoxLayout" name="verticalLayout_6">
                        <item>
-                        <layout class="QHBoxLayout" name="horizontalLayout_19">
+                        <layout class="QHBoxLayout" name="horizontalLayout_16">
                          <item>
-                          <widget class="QLabel" name="labelHeaderFont_2">
+                          <widget class="QLabel" name="labelFrontMatterHeadFont">
                            <property name="text">
                             <string>Font: </string>
                            </property>
                           </widget>
                          </item>
                          <item>
-                          <widget class="QFontComboBox" name="chapHeadFontComboBox"/>
+                          <widget class="QFontComboBox" name="fontComboBox">
+                           <property name="currentFont">
+                            <font>
+                             <family>Times New Roman</family>
+                            </font>
+                           </property>
+                          </widget>
                          </item>
                          <item>
-                          <spacer name="horizontalSpacer_27">
+                          <spacer name="horizontalSpacer_42">
                            <property name="orientation">
                             <enum>Qt::Orientation::Horizontal</enum>
                            </property>
@@ -2085,16 +2445,19 @@ Mauris nisi ipsum, ultricies at fermentum id, sagittis eu orci. Curabitur auctor
                         </layout>
                        </item>
                        <item>
-                        <layout class="QHBoxLayout" name="horizontalLayout_20">
+                        <layout class="QHBoxLayout" name="horizontalLayout_4">
                          <item>
-                          <widget class="QLabel" name="labelHeaderSize_2">
+                          <widget class="QLabel" name="frontMatterSizeLabel">
                            <property name="text">
                             <string>Size: </string>
                            </property>
                           </widget>
                          </item>
                          <item>
-                          <widget class="QDoubleSpinBox" name="headerFontSize_2">
+                          <widget class="QDoubleSpinBox" name="frontMatterHeadSizeLabel_2">
+                           <property name="prefix">
+                            <string/>
+                           </property>
                            <property name="suffix">
                             <string>pt</string>
                            </property>
@@ -2104,13 +2467,13 @@ Mauris nisi ipsum, ultricies at fermentum id, sagittis eu orci. Curabitur auctor
                            <property name="maximum">
                             <double>72.000000000000000</double>
                            </property>
-                           <property name="singleStep">
-                            <double>0.500000000000000</double>
+                           <property name="value">
+                            <double>18.000000000000000</double>
                            </property>
                           </widget>
                          </item>
                          <item>
-                          <spacer name="horizontalSpacer_28">
+                          <spacer name="horizontalSpacer_34">
                            <property name="orientation">
                             <enum>Qt::Orientation::Horizontal</enum>
                            </property>
@@ -2125,23 +2488,26 @@ Mauris nisi ipsum, ultricies at fermentum id, sagittis eu orci. Curabitur auctor
                         </layout>
                        </item>
                        <item>
-                        <widget class="QCheckBox" name="boldCheckBox">
+                        <widget class="QCheckBox" name="boldCheckBox_2">
                          <property name="text">
                           <string>Bold</string>
                          </property>
                         </widget>
                        </item>
                        <item>
-                        <layout class="QHBoxLayout" name="horizontalLayout_21">
+                        <layout class="QHBoxLayout" name="horizontalLayout_7">
                          <item>
-                          <widget class="QLabel" name="labelHeaderAlignment">
+                          <widget class="QLabel" name="labelFrontMatterHeadAlignment">
                            <property name="text">
                             <string>Alignment: </string>
                            </property>
                           </widget>
                          </item>
                          <item>
-                          <widget class="QComboBox" name="headerAlignmentComboBox">
+                          <widget class="QComboBox" name="frontMatterHeadAlignment">
+                           <property name="currentIndex">
+                            <number>1</number>
+                           </property>
                            <item>
                             <property name="text">
                              <string>Left</string>
@@ -2165,7 +2531,7 @@ Mauris nisi ipsum, ultricies at fermentum id, sagittis eu orci. Curabitur auctor
                           </widget>
                          </item>
                          <item>
-                          <spacer name="horizontalSpacer_29">
+                          <spacer name="horizontalSpacer_35">
                            <property name="orientation">
                             <enum>Qt::Orientation::Horizontal</enum>
                            </property>
@@ -2180,16 +2546,16 @@ Mauris nisi ipsum, ultricies at fermentum id, sagittis eu orci. Curabitur auctor
                         </layout>
                        </item>
                        <item>
-                        <layout class="QHBoxLayout" name="horizontalLayout_22">
+                        <layout class="QHBoxLayout" name="horizontalLayout_8">
                          <item>
-                          <widget class="QLabel" name="labelHeaderTopMargin">
+                          <widget class="QLabel" name="labelFrontMatterHeaderTopMargin">
                            <property name="text">
                             <string>Top Margin: </string>
                            </property>
                           </widget>
                          </item>
                          <item>
-                          <widget class="QDoubleSpinBox" name="headerTopMarginSpinBox">
+                          <widget class="QDoubleSpinBox" name="FrontMatterHeaderTopMarginSpinBox">
                            <property name="suffix">
                             <string>in</string>
                            </property>
@@ -2199,10 +2565,13 @@ Mauris nisi ipsum, ultricies at fermentum id, sagittis eu orci. Curabitur auctor
                            <property name="singleStep">
                             <double>0.100000000000000</double>
                            </property>
+                           <property name="value">
+                            <double>0.330000000000000</double>
+                           </property>
                           </widget>
                          </item>
                          <item>
-                          <spacer name="horizontalSpacer_30">
+                          <spacer name="horizontalSpacer_36">
                            <property name="orientation">
                             <enum>Qt::Orientation::Horizontal</enum>
                            </property>
@@ -2217,29 +2586,26 @@ Mauris nisi ipsum, ultricies at fermentum id, sagittis eu orci. Curabitur auctor
                         </layout>
                        </item>
                        <item>
-                        <layout class="QHBoxLayout" name="horizontalLayout_23">
+                        <layout class="QHBoxLayout" name="horizontalLayout_9">
                          <item>
-                          <widget class="QLabel" name="labelHeaderBotMargin">
+                          <widget class="QLabel" name="labelFrontMatterHeaderBotMargin">
                            <property name="text">
                             <string>Bottom Margin: </string>
                            </property>
                           </widget>
                          </item>
                          <item>
-                          <widget class="QDoubleSpinBox" name="headerBottomMarginSpinBox">
-                           <property name="suffix">
-                            <string>in</string>
-                           </property>
+                          <widget class="QDoubleSpinBox" name="FrontMatterHeaderBotMarginSpinBox">
                            <property name="maximum">
                             <double>5.000000000000000</double>
                            </property>
-                           <property name="singleStep">
-                            <double>0.100000000000000</double>
+                           <property name="value">
+                            <double>0.250000000000000</double>
                            </property>
                           </widget>
                          </item>
                          <item>
-                          <spacer name="horizontalSpacer_31">
+                          <spacer name="horizontalSpacer_37">
                            <property name="orientation">
                             <enum>Qt::Orientation::Horizontal</enum>
                            </property>
@@ -2257,7 +2623,417 @@ Mauris nisi ipsum, ultricies at fermentum id, sagittis eu orci. Curabitur auctor
                      </widget>
                     </item>
                     <item>
-                     <spacer name="verticalSpacer_14">
+                     <spacer name="verticalSpacer_17">
+                      <property name="orientation">
+                       <enum>Qt::Orientation::Vertical</enum>
+                      </property>
+                      <property name="sizeType">
+                       <enum>QSizePolicy::Policy::Fixed</enum>
+                      </property>
+                      <property name="sizeHint" stdset="0">
+                       <size>
+                        <width>20</width>
+                        <height>20</height>
+                       </size>
+                      </property>
+                     </spacer>
+                    </item>
+                    <item>
+                     <widget class="QGroupBox" name="frontMatterBox">
+                      <property name="title">
+                       <string>Front Matter</string>
+                      </property>
+                      <layout class="QVBoxLayout" name="verticalLayout_14">
+                       <property name="leftMargin">
+                        <number>8</number>
+                       </property>
+                       <item>
+                        <layout class="QHBoxLayout" name="horizontalLayout_18">
+                         <item>
+                          <widget class="QLabel" name="label_3labelFrontMatterFont">
+                           <property name="text">
+                            <string>Font: </string>
+                           </property>
+                          </widget>
+                         </item>
+                         <item>
+                          <widget class="QFontComboBox" name="fontComboBox_2">
+                           <property name="currentFont">
+                            <font>
+                             <family>Times New Roman</family>
+                            </font>
+                           </property>
+                          </widget>
+                         </item>
+                         <item>
+                          <spacer name="horizontalSpacer_43">
+                           <property name="orientation">
+                            <enum>Qt::Orientation::Horizontal</enum>
+                           </property>
+                           <property name="sizeHint" stdset="0">
+                            <size>
+                             <width>40</width>
+                             <height>20</height>
+                            </size>
+                           </property>
+                          </spacer>
+                         </item>
+                        </layout>
+                       </item>
+                       <item>
+                        <layout class="QHBoxLayout" name="horizontalLayout_24">
+                         <item>
+                          <widget class="QLabel" name="labelFrontMatterSize">
+                           <property name="text">
+                            <string>Size: </string>
+                           </property>
+                          </widget>
+                         </item>
+                         <item>
+                          <widget class="QDoubleSpinBox" name="frontMatterSize">
+                           <property name="suffix">
+                            <string>pt</string>
+                           </property>
+                           <property name="minimum">
+                            <double>6.000000000000000</double>
+                           </property>
+                           <property name="maximum">
+                            <double>72.000000000000000</double>
+                           </property>
+                           <property name="singleStep">
+                            <double>0.500000000000000</double>
+                           </property>
+                           <property name="value">
+                            <double>18.000000000000000</double>
+                           </property>
+                          </widget>
+                         </item>
+                         <item>
+                          <spacer name="horizontalSpacer_32">
+                           <property name="orientation">
+                            <enum>Qt::Orientation::Horizontal</enum>
+                           </property>
+                           <property name="sizeHint" stdset="0">
+                            <size>
+                             <width>40</width>
+                             <height>20</height>
+                            </size>
+                           </property>
+                          </spacer>
+                         </item>
+                        </layout>
+                       </item>
+                       <item>
+                        <layout class="QHBoxLayout" name="horizontalLayout_25">
+                         <item>
+                          <widget class="QLabel" name="labelFrontMatterAlignment">
+                           <property name="text">
+                            <string>Alignment: </string>
+                           </property>
+                          </widget>
+                         </item>
+                         <item>
+                          <widget class="QComboBox" name="frontMatterAlignment">
+                           <item>
+                            <property name="text">
+                             <string>Left</string>
+                            </property>
+                           </item>
+                           <item>
+                            <property name="text">
+                             <string>Center</string>
+                            </property>
+                           </item>
+                           <item>
+                            <property name="text">
+                             <string>Right</string>
+                            </property>
+                           </item>
+                           <item>
+                            <property name="text">
+                             <string>Justify</string>
+                            </property>
+                           </item>
+                          </widget>
+                         </item>
+                         <item>
+                          <spacer name="horizontalSpacer_33">
+                           <property name="orientation">
+                            <enum>Qt::Orientation::Horizontal</enum>
+                           </property>
+                           <property name="sizeHint" stdset="0">
+                            <size>
+                             <width>40</width>
+                             <height>20</height>
+                            </size>
+                           </property>
+                          </spacer>
+                         </item>
+                        </layout>
+                       </item>
+                      </layout>
+                     </widget>
+                    </item>
+                    <item>
+                     <spacer name="verticalSpacer_18">
+                      <property name="orientation">
+                       <enum>Qt::Orientation::Vertical</enum>
+                      </property>
+                      <property name="sizeType">
+                       <enum>QSizePolicy::Policy::Fixed</enum>
+                      </property>
+                      <property name="sizeHint" stdset="0">
+                       <size>
+                        <width>20</width>
+                        <height>20</height>
+                       </size>
+                      </property>
+                     </spacer>
+                    </item>
+                    <item>
+                     <widget class="QGroupBox" name="qrCodeBox">
+                      <property name="title">
+                       <string>QR Code</string>
+                      </property>
+                      <layout class="QVBoxLayout" name="verticalLayout_15">
+                       <item>
+                        <layout class="QHBoxLayout" name="horizontalLayout_5">
+                         <item>
+                          <widget class="QLabel" name="labelQRAlignment">
+                           <property name="text">
+                            <string>Alignment: </string>
+                           </property>
+                          </widget>
+                         </item>
+                         <item>
+                          <widget class="QComboBox" name="qrAlignment">
+                           <property name="currentIndex">
+                            <number>1</number>
+                           </property>
+                           <item>
+                            <property name="text">
+                             <string>Left</string>
+                            </property>
+                           </item>
+                           <item>
+                            <property name="text">
+                             <string>Center</string>
+                            </property>
+                           </item>
+                           <item>
+                            <property name="text">
+                             <string>Right</string>
+                            </property>
+                           </item>
+                           <item>
+                            <property name="text">
+                             <string>Justify</string>
+                            </property>
+                           </item>
+                          </widget>
+                         </item>
+                         <item>
+                          <spacer name="horizontalSpacer_38">
+                           <property name="orientation">
+                            <enum>Qt::Orientation::Horizontal</enum>
+                           </property>
+                           <property name="sizeHint" stdset="0">
+                            <size>
+                             <width>40</width>
+                             <height>20</height>
+                            </size>
+                           </property>
+                          </spacer>
+                         </item>
+                        </layout>
+                       </item>
+                       <item>
+                        <layout class="QHBoxLayout" name="horizontalLayout_10">
+                         <item>
+                          <widget class="QLabel" name="labelQRTopMargin">
+                           <property name="text">
+                            <string>Top Margin: </string>
+                           </property>
+                          </widget>
+                         </item>
+                         <item>
+                          <widget class="QDoubleSpinBox" name="qrTopMarginSpinBox">
+                           <property name="suffix">
+                            <string>in</string>
+                           </property>
+                           <property name="maximum">
+                            <double>5.000000000000000</double>
+                           </property>
+                           <property name="singleStep">
+                            <double>0.100000000000000</double>
+                           </property>
+                           <property name="value">
+                            <double>0.250000000000000</double>
+                           </property>
+                          </widget>
+                         </item>
+                         <item>
+                          <spacer name="horizontalSpacer_39">
+                           <property name="orientation">
+                            <enum>Qt::Orientation::Horizontal</enum>
+                           </property>
+                           <property name="sizeHint" stdset="0">
+                            <size>
+                             <width>40</width>
+                             <height>20</height>
+                            </size>
+                           </property>
+                          </spacer>
+                         </item>
+                        </layout>
+                       </item>
+                       <item>
+                        <layout class="QHBoxLayout" name="horizontalLayout_13">
+                         <item>
+                          <widget class="QLabel" name="labelQRBotMargin">
+                           <property name="text">
+                            <string>Bottom Margin: </string>
+                           </property>
+                          </widget>
+                         </item>
+                         <item>
+                          <widget class="QDoubleSpinBox" name="qrBotMarginSpinBox">
+                           <property name="suffix">
+                            <string>in</string>
+                           </property>
+                           <property name="maximum">
+                            <double>5.000000000000000</double>
+                           </property>
+                           <property name="singleStep">
+                            <double>0.100000000000000</double>
+                           </property>
+                           <property name="value">
+                            <double>0.080000000000000</double>
+                           </property>
+                          </widget>
+                         </item>
+                         <item>
+                          <spacer name="horizontalSpacer_40">
+                           <property name="orientation">
+                            <enum>Qt::Orientation::Horizontal</enum>
+                           </property>
+                           <property name="sizeHint" stdset="0">
+                            <size>
+                             <width>40</width>
+                             <height>20</height>
+                            </size>
+                           </property>
+                          </spacer>
+                         </item>
+                        </layout>
+                       </item>
+                      </layout>
+                     </widget>
+                    </item>
+                    <item>
+                     <spacer name="verticalSpacer_19">
+                      <property name="orientation">
+                       <enum>Qt::Orientation::Vertical</enum>
+                      </property>
+                      <property name="sizeType">
+                       <enum>QSizePolicy::Policy::Fixed</enum>
+                      </property>
+                      <property name="sizeHint" stdset="0">
+                       <size>
+                        <width>20</width>
+                        <height>20</height>
+                       </size>
+                      </property>
+                     </spacer>
+                    </item>
+                    <item>
+                     <widget class="QGroupBox" name="qrCaptionBox">
+                      <property name="title">
+                       <string>QR Caption</string>
+                      </property>
+                      <layout class="QVBoxLayout" name="verticalLayout_16">
+                       <item>
+                        <layout class="QHBoxLayout" name="horizontalLayout_19">
+                         <item>
+                          <widget class="QLabel" name="labelQRCaptionFont">
+                           <property name="text">
+                            <string>Font: </string>
+                           </property>
+                          </widget>
+                         </item>
+                         <item>
+                          <widget class="QFontComboBox" name="fontComboBox_3">
+                           <property name="currentFont">
+                            <font>
+                             <family>Times New Roman</family>
+                            </font>
+                           </property>
+                          </widget>
+                         </item>
+                         <item>
+                          <spacer name="horizontalSpacer_44">
+                           <property name="orientation">
+                            <enum>Qt::Orientation::Horizontal</enum>
+                           </property>
+                           <property name="sizeHint" stdset="0">
+                            <size>
+                             <width>40</width>
+                             <height>20</height>
+                            </size>
+                           </property>
+                          </spacer>
+                         </item>
+                        </layout>
+                       </item>
+                       <item>
+                        <layout class="QHBoxLayout" name="horizontalLayout_15">
+                         <item>
+                          <widget class="QLabel" name="labelQRCaptionSize">
+                           <property name="text">
+                            <string>Size: </string>
+                           </property>
+                          </widget>
+                         </item>
+                         <item>
+                          <widget class="QDoubleSpinBox" name="qrCaptionSize">
+                           <property name="suffix">
+                            <string>pt</string>
+                           </property>
+                           <property name="maximum">
+                            <double>72.000000000000000</double>
+                           </property>
+                          </widget>
+                         </item>
+                         <item>
+                          <spacer name="horizontalSpacer_41">
+                           <property name="orientation">
+                            <enum>Qt::Orientation::Horizontal</enum>
+                           </property>
+                           <property name="sizeHint" stdset="0">
+                            <size>
+                             <width>40</width>
+                             <height>20</height>
+                            </size>
+                           </property>
+                          </spacer>
+                         </item>
+                        </layout>
+                       </item>
+                       <item>
+                        <widget class="QCheckBox" name="italicCheckBox">
+                         <property name="text">
+                          <string>Italic</string>
+                         </property>
+                         <property name="checked">
+                          <bool>true</bool>
+                         </property>
+                        </widget>
+                       </item>
+                      </layout>
+                     </widget>
+                    </item>
+                    <item>
+                     <spacer name="verticalSpacer_16">
                       <property name="orientation">
                        <enum>Qt::Orientation::Vertical</enum>
                       </property>
@@ -2269,43 +3045,646 @@ Mauris nisi ipsum, ultricies at fermentum id, sagittis eu orci. Curabitur auctor
                       </property>
                      </spacer>
                     </item>
-                    <item>
-                     <widget class="QPushButton" name="buttonNext_4">
-                      <property name="text">
-                       <string>Next</string>
-                      </property>
-                     </widget>
-                    </item>
                    </layout>
                   </widget>
                  </widget>
                 </item>
                </layout>
               </widget>
-              <widget class="QWidget" name="frontMatterPage">
-               <layout class="QVBoxLayout" name="verticalLayout_5">
-                <item>
-                 <widget class="QLabel" name="labelFrontMatter">
-                  <property name="text">
-                   <string>Front Matter</string>
-                  </property>
-                  <property name="textRole" stdset="0">
-                   <string>title</string>
-                  </property>
-                 </widget>
-                </item>
-               </layout>
-              </widget>
               <widget class="QWidget" name="appendixPage">
                <layout class="QVBoxLayout" name="verticalLayout_8">
+                <property name="leftMargin">
+                 <number>0</number>
+                </property>
+                <property name="topMargin">
+                 <number>0</number>
+                </property>
+                <property name="rightMargin">
+                 <number>0</number>
+                </property>
+                <property name="bottomMargin">
+                 <number>0</number>
+                </property>
                 <item>
-                 <widget class="QLabel" name="labelAppendix">
-                  <property name="text">
-                   <string>Appendix</string>
+                 <widget class="QScrollArea" name="scrollArea_3">
+                  <property name="frameShape">
+                   <enum>QFrame::Shape::NoFrame</enum>
                   </property>
-                  <property name="textRole" stdset="0">
-                   <string>title</string>
+                  <property name="widgetResizable">
+                   <bool>true</bool>
                   </property>
+                  <widget class="QWidget" name="scrollAreaWidgetContents_3">
+                   <property name="geometry">
+                    <rect>
+                     <x>0</x>
+                     <y>0</y>
+                     <width>355</width>
+                     <height>700</height>
+                    </rect>
+                   </property>
+                   <layout class="QVBoxLayout" name="verticalLayout_13">
+                    <property name="leftMargin">
+                     <number>0</number>
+                    </property>
+                    <property name="topMargin">
+                     <number>0</number>
+                    </property>
+                    <property name="rightMargin">
+                     <number>0</number>
+                    </property>
+                    <property name="bottomMargin">
+                     <number>0</number>
+                    </property>
+                    <item>
+                     <widget class="QLabel" name="labelAppendix">
+                      <property name="text">
+                       <string>Appendix</string>
+                      </property>
+                      <property name="textRole" stdset="0">
+                       <string>title</string>
+                      </property>
+                     </widget>
+                    </item>
+                    <item>
+                     <spacer name="verticalSpacer_21">
+                      <property name="orientation">
+                       <enum>Qt::Orientation::Vertical</enum>
+                      </property>
+                      <property name="sizeType">
+                       <enum>QSizePolicy::Policy::Fixed</enum>
+                      </property>
+                      <property name="sizeHint" stdset="0">
+                       <size>
+                        <width>20</width>
+                        <height>20</height>
+                       </size>
+                      </property>
+                     </spacer>
+                    </item>
+                    <item>
+                     <widget class="QGroupBox" name="appendixHeaderLabel">
+                      <property name="title">
+                       <string>Appendix Header</string>
+                      </property>
+                      <layout class="QVBoxLayout" name="verticalLayout_17">
+                       <item>
+                        <layout class="QHBoxLayout" name="horizontalLayout_17">
+                         <item>
+                          <widget class="QLabel" name="labelAppendixHeaderFont">
+                           <property name="text">
+                            <string>Font: </string>
+                           </property>
+                          </widget>
+                         </item>
+                         <item>
+                          <widget class="QFontComboBox" name="appendixHeaderFontComboBox">
+                           <property name="currentFont">
+                            <font>
+                             <family>Times New Roman</family>
+                            </font>
+                           </property>
+                          </widget>
+                         </item>
+                         <item>
+                          <spacer name="horizontalSpacer_45">
+                           <property name="orientation">
+                            <enum>Qt::Orientation::Horizontal</enum>
+                           </property>
+                           <property name="sizeHint" stdset="0">
+                            <size>
+                             <width>40</width>
+                             <height>20</height>
+                            </size>
+                           </property>
+                          </spacer>
+                         </item>
+                        </layout>
+                       </item>
+                       <item>
+                        <layout class="QHBoxLayout" name="horizontalLayout_14">
+                         <item>
+                          <widget class="QLabel" name="labelAppendixHeaderSize">
+                           <property name="text">
+                            <string>Size: </string>
+                           </property>
+                          </widget>
+                         </item>
+                         <item>
+                          <widget class="QDoubleSpinBox" name="appendixHeadSize">
+                           <property name="suffix">
+                            <string>pt</string>
+                           </property>
+                           <property name="minimum">
+                            <double>6.000000000000000</double>
+                           </property>
+                           <property name="maximum">
+                            <double>72.000000000000000</double>
+                           </property>
+                           <property name="value">
+                            <double>18.000000000000000</double>
+                           </property>
+                          </widget>
+                         </item>
+                         <item>
+                          <spacer name="horizontalSpacer_46">
+                           <property name="orientation">
+                            <enum>Qt::Orientation::Horizontal</enum>
+                           </property>
+                           <property name="sizeHint" stdset="0">
+                            <size>
+                             <width>40</width>
+                             <height>20</height>
+                            </size>
+                           </property>
+                          </spacer>
+                         </item>
+                        </layout>
+                       </item>
+                       <item>
+                        <widget class="QCheckBox" name="boldCheckBox_3">
+                         <property name="text">
+                          <string>Bold</string>
+                         </property>
+                        </widget>
+                       </item>
+                       <item>
+                        <layout class="QHBoxLayout" name="horizontalLayout_31">
+                         <item>
+                          <widget class="QLabel" name="labelAppendixAlignment">
+                           <property name="text">
+                            <string>Alignment: </string>
+                           </property>
+                          </widget>
+                         </item>
+                         <item>
+                          <widget class="QComboBox" name="appendixHeadAlignment">
+                           <property name="currentIndex">
+                            <number>1</number>
+                           </property>
+                           <item>
+                            <property name="text">
+                             <string>Left</string>
+                            </property>
+                           </item>
+                           <item>
+                            <property name="text">
+                             <string>Center</string>
+                            </property>
+                           </item>
+                           <item>
+                            <property name="text">
+                             <string>Right</string>
+                            </property>
+                           </item>
+                           <item>
+                            <property name="text">
+                             <string>Justify</string>
+                            </property>
+                           </item>
+                          </widget>
+                         </item>
+                         <item>
+                          <spacer name="horizontalSpacer_51">
+                           <property name="orientation">
+                            <enum>Qt::Orientation::Horizontal</enum>
+                           </property>
+                           <property name="sizeHint" stdset="0">
+                            <size>
+                             <width>40</width>
+                             <height>20</height>
+                            </size>
+                           </property>
+                          </spacer>
+                         </item>
+                        </layout>
+                       </item>
+                       <item>
+                        <layout class="QHBoxLayout" name="horizontalLayout_20">
+                         <item>
+                          <widget class="QLabel" name="labelAppendixTopMargin">
+                           <property name="text">
+                            <string>Top Margin: </string>
+                           </property>
+                          </widget>
+                         </item>
+                         <item>
+                          <widget class="QDoubleSpinBox" name="AppendixHeaderTopMarginSpinBox">
+                           <property name="suffix">
+                            <string>in</string>
+                           </property>
+                           <property name="maximum">
+                            <double>5.000000000000000</double>
+                           </property>
+                           <property name="singleStep">
+                            <double>0.100000000000000</double>
+                           </property>
+                           <property name="value">
+                            <double>0.330000000000000</double>
+                           </property>
+                          </widget>
+                         </item>
+                         <item>
+                          <spacer name="horizontalSpacer_47">
+                           <property name="orientation">
+                            <enum>Qt::Orientation::Horizontal</enum>
+                           </property>
+                           <property name="sizeHint" stdset="0">
+                            <size>
+                             <width>40</width>
+                             <height>20</height>
+                            </size>
+                           </property>
+                          </spacer>
+                         </item>
+                        </layout>
+                       </item>
+                       <item>
+                        <layout class="QHBoxLayout" name="horizontalLayout_21">
+                         <item>
+                          <widget class="QLabel" name="label_3">
+                           <property name="text">
+                            <string>Bottom Margin: </string>
+                           </property>
+                          </widget>
+                         </item>
+                         <item>
+                          <widget class="QDoubleSpinBox" name="doubleSpinBox">
+                           <property name="maximum">
+                            <double>5.000000000000000</double>
+                           </property>
+                           <property name="singleStep">
+                            <double>0.100000000000000</double>
+                           </property>
+                           <property name="value">
+                            <double>0.250000000000000</double>
+                           </property>
+                          </widget>
+                         </item>
+                         <item>
+                          <spacer name="horizontalSpacer_48">
+                           <property name="orientation">
+                            <enum>Qt::Orientation::Horizontal</enum>
+                           </property>
+                           <property name="sizeHint" stdset="0">
+                            <size>
+                             <width>40</width>
+                             <height>20</height>
+                            </size>
+                           </property>
+                          </spacer>
+                         </item>
+                        </layout>
+                       </item>
+                      </layout>
+                     </widget>
+                    </item>
+                    <item>
+                     <spacer name="verticalSpacer_22">
+                      <property name="orientation">
+                       <enum>Qt::Orientation::Vertical</enum>
+                      </property>
+                      <property name="sizeType">
+                       <enum>QSizePolicy::Policy::Fixed</enum>
+                      </property>
+                      <property name="sizeHint" stdset="0">
+                       <size>
+                        <width>20</width>
+                        <height>20</height>
+                       </size>
+                      </property>
+                     </spacer>
+                    </item>
+                    <item>
+                     <widget class="QGroupBox" name="appendixNoteLabelBox">
+                      <property name="title">
+                       <string>Appendix Note Label</string>
+                      </property>
+                      <layout class="QVBoxLayout" name="verticalLayout_18">
+                       <item>
+                        <layout class="QHBoxLayout" name="horizontalLayout_26">
+                         <item>
+                          <widget class="QLabel" name="labelAppendixNote">
+                           <property name="text">
+                            <string>Font: </string>
+                           </property>
+                          </widget>
+                         </item>
+                         <item>
+                          <widget class="QFontComboBox" name="appendixNoteLabelFontComboBox">
+                           <property name="currentFont">
+                            <font>
+                             <family>Times New Roman</family>
+                            </font>
+                           </property>
+                          </widget>
+                         </item>
+                         <item>
+                          <spacer name="horizontalSpacer_49">
+                           <property name="orientation">
+                            <enum>Qt::Orientation::Horizontal</enum>
+                           </property>
+                           <property name="sizeHint" stdset="0">
+                            <size>
+                             <width>40</width>
+                             <height>20</height>
+                            </size>
+                           </property>
+                          </spacer>
+                         </item>
+                        </layout>
+                       </item>
+                       <item>
+                        <layout class="QHBoxLayout" name="horizontalLayout_23">
+                         <item>
+                          <widget class="QLabel" name="labelAppendixNoteLabelSize">
+                           <property name="text">
+                            <string>Size: </string>
+                           </property>
+                          </widget>
+                         </item>
+                         <item>
+                          <widget class="QDoubleSpinBox" name="appendixNoteLabelSize">
+                           <property name="suffix">
+                            <string>pt</string>
+                           </property>
+                           <property name="minimum">
+                            <double>6.000000000000000</double>
+                           </property>
+                           <property name="maximum">
+                            <double>72.000000000000000</double>
+                           </property>
+                           <property name="value">
+                            <double>8.000000000000000</double>
+                           </property>
+                          </widget>
+                         </item>
+                         <item>
+                          <spacer name="horizontalSpacer_50">
+                           <property name="orientation">
+                            <enum>Qt::Orientation::Horizontal</enum>
+                           </property>
+                           <property name="sizeHint" stdset="0">
+                            <size>
+                             <width>40</width>
+                             <height>20</height>
+                            </size>
+                           </property>
+                          </spacer>
+                         </item>
+                        </layout>
+                       </item>
+                       <item>
+                        <layout class="QHBoxLayout" name="horizontalLayout_22">
+                         <item>
+                          <widget class="QLabel" name="labelAppendixNoteLabel">
+                           <property name="text">
+                            <string>Alignment: </string>
+                           </property>
+                          </widget>
+                         </item>
+                         <item>
+                          <widget class="QComboBox" name="appendixNoteLabelAlignment">
+                           <item>
+                            <property name="text">
+                             <string>Left</string>
+                            </property>
+                           </item>
+                           <item>
+                            <property name="text">
+                             <string>Center</string>
+                            </property>
+                           </item>
+                           <item>
+                            <property name="text">
+                             <string>Right</string>
+                            </property>
+                           </item>
+                           <item>
+                            <property name="text">
+                             <string>Justify</string>
+                            </property>
+                           </item>
+                          </widget>
+                         </item>
+                         <item>
+                          <spacer name="horizontalSpacer_52">
+                           <property name="orientation">
+                            <enum>Qt::Orientation::Horizontal</enum>
+                           </property>
+                           <property name="sizeHint" stdset="0">
+                            <size>
+                             <width>40</width>
+                             <height>20</height>
+                            </size>
+                           </property>
+                          </spacer>
+                         </item>
+                        </layout>
+                       </item>
+                      </layout>
+                     </widget>
+                    </item>
+                    <item>
+                     <spacer name="verticalSpacer_23">
+                      <property name="orientation">
+                       <enum>Qt::Orientation::Vertical</enum>
+                      </property>
+                      <property name="sizeType">
+                       <enum>QSizePolicy::Policy::Fixed</enum>
+                      </property>
+                      <property name="sizeHint" stdset="0">
+                       <size>
+                        <width>20</width>
+                        <height>20</height>
+                       </size>
+                      </property>
+                     </spacer>
+                    </item>
+                    <item>
+                     <widget class="QGroupBox" name="appendixNoteBox">
+                      <property name="title">
+                       <string>Appendix Note</string>
+                      </property>
+                      <layout class="QVBoxLayout" name="verticalLayout_19">
+                       <item>
+                        <layout class="QHBoxLayout" name="horizontalLayout_29">
+                         <item>
+                          <widget class="QLabel" name="labelAppendixNoteFont">
+                           <property name="text">
+                            <string>Font: </string>
+                           </property>
+                          </widget>
+                         </item>
+                         <item>
+                          <widget class="QFontComboBox" name="appendixNoteFontComboBox">
+                           <property name="currentFont">
+                            <font>
+                             <family>Times New Roman</family>
+                            </font>
+                           </property>
+                          </widget>
+                         </item>
+                         <item>
+                          <spacer name="horizontalSpacer_53">
+                           <property name="orientation">
+                            <enum>Qt::Orientation::Horizontal</enum>
+                           </property>
+                           <property name="sizeHint" stdset="0">
+                            <size>
+                             <width>40</width>
+                             <height>20</height>
+                            </size>
+                           </property>
+                          </spacer>
+                         </item>
+                        </layout>
+                       </item>
+                       <item>
+                        <layout class="QHBoxLayout" name="horizontalLayout_28">
+                         <item>
+                          <widget class="QLabel" name="labelAppendixLabelSize">
+                           <property name="text">
+                            <string>Size:</string>
+                           </property>
+                          </widget>
+                         </item>
+                         <item>
+                          <widget class="QDoubleSpinBox" name="appendixNoteSize">
+                           <property name="suffix">
+                            <string>pt</string>
+                           </property>
+                           <property name="minimum">
+                            <double>6.000000000000000</double>
+                           </property>
+                           <property name="maximum">
+                            <double>72.000000000000000</double>
+                           </property>
+                           <property name="value">
+                            <double>8.000000000000000</double>
+                           </property>
+                          </widget>
+                         </item>
+                         <item>
+                          <spacer name="horizontalSpacer_54">
+                           <property name="orientation">
+                            <enum>Qt::Orientation::Horizontal</enum>
+                           </property>
+                           <property name="sizeHint" stdset="0">
+                            <size>
+                             <width>40</width>
+                             <height>20</height>
+                            </size>
+                           </property>
+                          </spacer>
+                         </item>
+                        </layout>
+                       </item>
+                       <item>
+                        <layout class="QHBoxLayout" name="horizontalLayout_27">
+                         <item>
+                          <widget class="QLabel" name="labelAppendixNoteAlignment">
+                           <property name="text">
+                            <string>Alignment: </string>
+                           </property>
+                          </widget>
+                         </item>
+                         <item>
+                          <widget class="QComboBox" name="appendixNoteAlignment_2">
+                           <item>
+                            <property name="text">
+                             <string>Left</string>
+                            </property>
+                           </item>
+                           <item>
+                            <property name="text">
+                             <string>Center</string>
+                            </property>
+                           </item>
+                           <item>
+                            <property name="text">
+                             <string>Right</string>
+                            </property>
+                           </item>
+                           <item>
+                            <property name="text">
+                             <string>Justify</string>
+                            </property>
+                           </item>
+                          </widget>
+                         </item>
+                         <item>
+                          <spacer name="horizontalSpacer_55">
+                           <property name="orientation">
+                            <enum>Qt::Orientation::Horizontal</enum>
+                           </property>
+                           <property name="sizeHint" stdset="0">
+                            <size>
+                             <width>40</width>
+                             <height>20</height>
+                            </size>
+                           </property>
+                          </spacer>
+                         </item>
+                        </layout>
+                       </item>
+                       <item>
+                        <layout class="QHBoxLayout" name="horizontalLayout_30">
+                         <item>
+                          <widget class="QLabel" name="labelAppendixNoteLeftMargin">
+                           <property name="text">
+                            <string>Left Margin: </string>
+                           </property>
+                          </widget>
+                         </item>
+                         <item>
+                          <widget class="QDoubleSpinBox" name="doubleSpinBox_2">
+                           <property name="suffix">
+                            <string>in</string>
+                           </property>
+                           <property name="maximum">
+                            <double>5.000000000000000</double>
+                           </property>
+                           <property name="singleStep">
+                            <double>0.100000000000000</double>
+                           </property>
+                           <property name="value">
+                            <double>0.250000000000000</double>
+                           </property>
+                          </widget>
+                         </item>
+                         <item>
+                          <spacer name="horizontalSpacer_56">
+                           <property name="orientation">
+                            <enum>Qt::Orientation::Horizontal</enum>
+                           </property>
+                           <property name="sizeHint" stdset="0">
+                            <size>
+                             <width>40</width>
+                             <height>20</height>
+                            </size>
+                           </property>
+                          </spacer>
+                         </item>
+                        </layout>
+                       </item>
+                      </layout>
+                     </widget>
+                    </item>
+                    <item>
+                     <spacer name="verticalSpacer_20">
+                      <property name="orientation">
+                       <enum>Qt::Orientation::Vertical</enum>
+                      </property>
+                      <property name="sizeHint" stdset="0">
+                       <size>
+                        <width>20</width>
+                        <height>40</height>
+                       </size>
+                      </property>
+                     </spacer>
+                    </item>
+                   </layout>
+                  </widget>
                  </widget>
                 </item>
                </layout>
@@ -2314,6 +3693,265 @@ Mauris nisi ipsum, ultricies at fermentum id, sagittis eu orci. Curabitur auctor
             </item>
            </layout>
           </widget>
+         </widget>
+        </item>
+       </layout>
+      </widget>
+      <widget class="QWidget" name="page_4">
+       <layout class="QVBoxLayout" name="verticalLayout_20">
+        <item>
+         <layout class="QHBoxLayout" name="horizontalLayout_32">
+          <item>
+           <layout class="QHBoxLayout" name="horizontalLayout_33">
+            <item>
+             <widget class="QPushButton" name="buttonBack_4">
+              <property name="minimumSize">
+               <size>
+                <width>24</width>
+                <height>24</height>
+               </size>
+              </property>
+              <property name="maximumSize">
+               <size>
+                <width>36</width>
+                <height>36</height>
+               </size>
+              </property>
+              <property name="text">
+               <string/>
+              </property>
+              <property name="icon">
+               <iconset resource="../resources.qrc">
+                <normaloff>:/res/icons/back_dark.svg</normaloff>:/res/icons/back_dark.svg</iconset>
+              </property>
+              <property name="iconSize">
+               <size>
+                <width>24</width>
+                <height>24</height>
+               </size>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <spacer name="horizontalSpacer_57">
+              <property name="orientation">
+               <enum>Qt::Orientation::Horizontal</enum>
+              </property>
+              <property name="sizeHint" stdset="0">
+               <size>
+                <width>40</width>
+                <height>20</height>
+               </size>
+              </property>
+             </spacer>
+            </item>
+           </layout>
+          </item>
+         </layout>
+        </item>
+        <item>
+         <widget class="QLabel" name="labelAdditionalOptions">
+          <property name="text">
+           <string>Additional Options</string>
+          </property>
+          <property name="textRole" stdset="0">
+           <string>title</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <spacer name="verticalSpacer_25">
+          <property name="orientation">
+           <enum>Qt::Orientation::Vertical</enum>
+          </property>
+          <property name="sizeType">
+           <enum>QSizePolicy::Policy::Fixed</enum>
+          </property>
+          <property name="sizeHint" stdset="0">
+           <size>
+            <width>20</width>
+            <height>20</height>
+           </size>
+          </property>
+         </spacer>
+        </item>
+        <item>
+         <widget class="QCheckBox" name="tableofContentsCheckBox">
+          <property name="text">
+           <string>Include Table of Contents</string>
+          </property>
+          <property name="checked">
+           <bool>true</bool>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QCheckBox" name="qrCheckBox">
+          <property name="text">
+           <string>Include QR Code</string>
+          </property>
+          <property name="checked">
+           <bool>true</bool>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QCheckBox" name="savePresetCheckBox">
+          <property name="text">
+           <string>Save Choices as Preset</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QWidget" name="presetNameWidget" native="true">
+          <layout class="QHBoxLayout" name="horizontalLayout_36">
+           <property name="topMargin">
+            <number>0</number>
+           </property>
+           <property name="bottomMargin">
+            <number>0</number>
+           </property>
+           <item>
+            <spacer name="horizontalSpacer_59">
+             <property name="orientation">
+              <enum>Qt::Orientation::Horizontal</enum>
+             </property>
+             <property name="sizeType">
+              <enum>QSizePolicy::Policy::Fixed</enum>
+             </property>
+             <property name="sizeHint" stdset="0">
+              <size>
+               <width>20</width>
+               <height>20</height>
+              </size>
+             </property>
+            </spacer>
+           </item>
+           <item>
+            <widget class="QLineEdit" name="lineEditPresetName">
+             <property name="text">
+              <string>Preset name</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <spacer name="horizontalSpacer_60">
+             <property name="orientation">
+              <enum>Qt::Orientation::Horizontal</enum>
+             </property>
+             <property name="sizeHint" stdset="0">
+              <size>
+               <width>40</width>
+               <height>20</height>
+              </size>
+             </property>
+            </spacer>
+           </item>
+          </layout>
+         </widget>
+        </item>
+        <item>
+         <spacer name="verticalSpacer_24">
+          <property name="orientation">
+           <enum>Qt::Orientation::Vertical</enum>
+          </property>
+          <property name="sizeHint" stdset="0">
+           <size>
+            <width>20</width>
+            <height>40</height>
+           </size>
+          </property>
+         </spacer>
+        </item>
+        <item>
+         <widget class="QPushButton" name="buttonNext_5">
+          <property name="text">
+           <string>Next</string>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </widget>
+      <widget class="QWidget" name="page_5">
+       <layout class="QVBoxLayout" name="verticalLayout_21">
+        <item>
+         <widget class="QLabel" name="labelConversionProgress">
+          <property name="text">
+           <string>Conversion Progress</string>
+          </property>
+          <property name="textRole" stdset="0">
+           <string>title</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QTextBrowser" name="textBrowser"/>
+        </item>
+        <item>
+         <widget class="QProgressBar" name="progressBar">
+          <property name="value">
+           <number>24</number>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QLabel" name="labelCompletionProgress">
+          <property name="text">
+           <string>Conversion in progress. Please wait until completion before closing program.</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <layout class="QHBoxLayout" name="horizontalLayout_35">
+          <item>
+           <spacer name="horizontalSpacer_58">
+            <property name="orientation">
+             <enum>Qt::Orientation::Horizontal</enum>
+            </property>
+            <property name="sizeHint" stdset="0">
+             <size>
+              <width>40</width>
+              <height>20</height>
+             </size>
+            </property>
+           </spacer>
+          </item>
+          <item>
+           <widget class="QPushButton" name="buttonExport">
+            <property name="text">
+             <string>Export Log to .txt</string>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </item>
+        <item>
+         <spacer name="verticalSpacer_26">
+          <property name="orientation">
+           <enum>Qt::Orientation::Vertical</enum>
+          </property>
+          <property name="sizeType">
+           <enum>QSizePolicy::Policy::Fixed</enum>
+          </property>
+          <property name="sizeHint" stdset="0">
+           <size>
+            <width>20</width>
+            <height>20</height>
+           </size>
+          </property>
+         </spacer>
+        </item>
+        <item>
+         <layout class="QHBoxLayout" name="horizontalLayout_34"/>
+        </item>
+        <item>
+         <widget class="QPushButton" name="buttonComplete">
+          <property name="enabled">
+           <bool>true</bool>
+          </property>
+          <property name="text">
+           <string>Complete</string>
+          </property>
          </widget>
         </item>
        </layout>

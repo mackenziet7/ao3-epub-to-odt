@@ -92,6 +92,7 @@ class MainWindow:
         self._wire_page1()
         self._wire_page2()
         self._wire_page3()
+        self._wire_page4()
         self._wire_navigation()
 
     # ------------------------------------------------------------------
@@ -292,7 +293,7 @@ class MainWindow:
         self._groupList.currentRowChanged.connect(self._on_typography_group_changed)
 
         self._typography_group_checked = [False, False, False]
-        self._typography_current_row = None
+        self._typography_current_row = 0
 
         w.findChild(QPushButton, "buttonNext_4").clicked.connect(
             self._on_typography_advanced_next
@@ -317,14 +318,22 @@ class MainWindow:
 
         if current_row < self._groupList.count() - 1:
             self._groupList.setCurrentRow(current_row + 1)
-        else:
-            self._mark_typography_group_checked(current_row)
-            if not all(self._typography_group_checked):
-                QMessageBox.warning(
-                    self.window,
-                    "Incomplete Sections",
-                    "Some sections still have default settings. You can continue anyway, or go back and review them.",
-                )
+            return
+
+        self._mark_typography_group_checked(current_row)
+
+        if not all(self._typography_group_checked):
+            reply = QMessageBox.question(
+                self.window,
+                "Incomplete Sections",
+                "Some sections still have default settings. Would you like to continue anyways?.",
+                QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No,
+                QMessageBox.StandardButton.No,
+            )
+            if reply != QMessageBox.StandardButton.Yes:
+                return  # user chose to go back and review — stay on this page
+
+        self.window.findChild(QStackedWidget, "stackedWidget").setCurrentIndex(4)
 
     def _on_typography_advanced_back(self):
         reply = QMessageBox.question(
@@ -354,6 +363,21 @@ class MainWindow:
         stack = w.findChild(QStackedWidget, "stackedWidget")
         stack.setCurrentIndex(2)
 
+    # ------------------------------------------------------------------
+    # Page 4 — Additional Options screen
+    # ------------------------------------------------------------------
+    def _wire_page4(self):
+        w = self.window
+        self._checkSavePreset = w.findChild(QCheckBox, "savePresetCheckBox")
+        self._presetNameWidget = w.findChild(QWidget, "presetNameWidget")
+
+        self._presetNameWidget.setVisible(self._checkSavePreset.isChecked())
+        self._checkSavePreset.toggled.connect(self._presetNameWidget.setVisible)
+
+    # ------------------------------------------------------------------
+    # Page 5 — Conversion Progress
+    # ------------------------------------------------------------------
+
 
     # ------------------------------------------------------------------
     # Navigation
@@ -367,10 +391,18 @@ class MainWindow:
         nav_pairs = [
             ("buttonNext",   1),  # main → page setup
             ("buttonBack",   0),  # page setup → main
+
             ("buttonNext_2", 2),  # page setup → typography basic
             ("buttonBack_2", 1),  # typography basic → page setup
+
             ("buttonMoreOptions", 3),  # typography basic → typography more options
+            ("buttonNext_3", 4),  # typography basic → additional options
             ("buttonBack_3", 2),  # typography more options → typography basic
+
+            ("buttonNext_5", 5),  # typography more options → additional options
+            ("buttonBack_4", 3),  # additional options → typography #TODO store last typography page state so this takes to appropriate page
+            
+            ("buttonComplete", 0) 
         ]
 
         for button_name, target_index in nav_pairs:
