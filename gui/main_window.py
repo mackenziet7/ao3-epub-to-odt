@@ -243,10 +243,10 @@ class MainWindow:
         splitterPage3.setSizes([500, 400])
 
         # Typography controls
-        self._headerFontCombo = w.findChild(QFontComboBox, "headerFontComboBox")
-        self._bodyFontCombo = w.findChild(QFontComboBox, "bodyFontComboBox")
-        self._headerSizeSpin = w.findChild(QDoubleSpinBox, "headerFontSize")
-        self._bodySizeSpin = w.findChild(QDoubleSpinBox, "bodyFontSize")
+        self._headerFontCombo = w.findChild(QFontComboBox, "comboHeaderFont")
+        self._bodyFontCombo = w.findChild(QFontComboBox, "comboBodyFont")
+        self._headerSizeSpin = w.findChild(QDoubleSpinBox, "spinHeaderFontSize")
+        self._bodySizeSpin = w.findChild(QDoubleSpinBox, "spinBodyFontSize")
 
         # Preview Labels
         self._headerPreviewLabel = w.findChild(QLabel, "labelHeaderPreview")
@@ -286,7 +286,7 @@ class MainWindow:
         for i in range(self._groupList.count()):
             self._groupList.item(i).setIcon(empty_icon)
 
-        self._groupContentStack = w.findChild(QStackedWidget, "stackedWidget_2")
+        self._groupContentStack = w.findChild(QStackedWidget, "groupContentStack")
         self._groupContentStack.setCurrentIndex(0)
 
         self._groupList.setCurrentRow(0)  # start on "Main Book"
@@ -368,7 +368,7 @@ class MainWindow:
     # ------------------------------------------------------------------
     def _wire_page4(self):
         w = self.window
-        self._checkSavePreset = w.findChild(QCheckBox, "savePresetCheckBox")
+        self._checkSavePreset = w.findChild(QCheckBox, "checkSavePreset")
         self._presetNameWidget = w.findChild(QWidget, "presetNameWidget")
 
         self._presetNameWidget.setVisible(self._checkSavePreset.isChecked())
