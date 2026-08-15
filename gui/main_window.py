@@ -326,7 +326,7 @@ class MainWindow:
             reply = QMessageBox.question(
                 self.window,
                 "Incomplete Sections",
-                "Some sections still have default settings. Would you like to continue anyways?.",
+                "Some sections still have default settings. Would you like to continue anyways?",
                 QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No,
                 QMessageBox.StandardButton.No,
             )
@@ -391,6 +391,9 @@ class MainWindow:
         nav_pairs = [
             ("buttonNext",   1),  # main → page setup
             ("buttonBack",   0),  # page setup → main
+
+            ("buttonSettings", 6), # main → settings
+            ("buttonBack_5", 0),  # settings → main
 
             ("buttonNext_2", 2),  # page setup → typography basic
             ("buttonBack_2", 1),  # typography basic → page setup
