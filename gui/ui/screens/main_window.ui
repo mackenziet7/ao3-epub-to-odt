@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>867</width>
-    <height>662</height>
+    <height>633</height>
    </rect>
   </property>
   <property name="minimumSize">
@@ -28,7 +28,7 @@
     <item>
      <widget class="QStackedWidget" name="stackedWidget">
       <property name="currentIndex">
-       <number>6</number>
+       <number>5</number>
       </property>
       <widget class="QWidget" name="page_0">
        <layout class="QVBoxLayout" name="verticalLayout_2">
@@ -49,7 +49,10 @@
              <number>20</number>
             </property>
             <property name="leftMargin">
-             <number>9</number>
+             <number>0</number>
+            </property>
+            <property name="topMargin">
+             <number>0</number>
             </property>
             <property name="rightMargin">
              <number>20</number>
@@ -259,8 +262,11 @@
             <property name="leftMargin">
              <number>20</number>
             </property>
+            <property name="topMargin">
+             <number>0</number>
+            </property>
             <property name="rightMargin">
-             <number>9</number>
+             <number>0</number>
             </property>
             <property name="bottomMargin">
              <number>0</number>
@@ -317,16 +323,16 @@
              <number>12</number>
             </property>
             <property name="leftMargin">
-             <number>9</number>
+             <number>0</number>
             </property>
             <property name="topMargin">
-             <number>9</number>
+             <number>0</number>
             </property>
             <property name="rightMargin">
              <number>20</number>
             </property>
             <property name="bottomMargin">
-             <number>9</number>
+             <number>0</number>
             </property>
             <item>
              <layout class="QHBoxLayout" name="horizontalLayout">
@@ -999,8 +1005,14 @@ so bound pages have a wider inner margin.</string>
             <property name="leftMargin">
              <number>20</number>
             </property>
+            <property name="topMargin">
+             <number>0</number>
+            </property>
             <property name="rightMargin">
-             <number>9</number>
+             <number>0</number>
+            </property>
+            <property name="bottomMargin">
+             <number>0</number>
             </property>
             <item>
              <widget class="QLabel" name="labelPreview">
@@ -1050,16 +1062,16 @@ so bound pages have a wider inner margin.</string>
              <number>12</number>
             </property>
             <property name="leftMargin">
-             <number>9</number>
+             <number>0</number>
             </property>
             <property name="topMargin">
-             <number>9</number>
+             <number>0</number>
             </property>
             <property name="rightMargin">
              <number>20</number>
             </property>
             <property name="bottomMargin">
-             <number>9</number>
+             <number>0</number>
             </property>
             <item>
              <layout class="QHBoxLayout" name="backRow">
@@ -1465,8 +1477,14 @@ so bound pages have a wider inner margin.</string>
             <property name="leftMargin">
              <number>20</number>
             </property>
+            <property name="topMargin">
+             <number>0</number>
+            </property>
             <property name="rightMargin">
-             <number>9</number>
+             <number>0</number>
+            </property>
+            <property name="bottomMargin">
+             <number>0</number>
             </property>
             <item>
              <widget class="QLabel" name="labelPreview_2">
@@ -1597,16 +1615,16 @@ so bound pages have a wider inner margin.</string>
              <number>12</number>
             </property>
             <property name="leftMargin">
-             <number>9</number>
+             <number>0</number>
             </property>
             <property name="topMargin">
-             <number>9</number>
+             <number>0</number>
             </property>
             <property name="rightMargin">
              <number>20</number>
             </property>
             <property name="bottomMargin">
-             <number>9</number>
+             <number>0</number>
             </property>
             <item>
              <layout class="QHBoxLayout" name="horizontalLayout_12">
@@ -1769,13 +1787,13 @@ so bound pages have a wider inner margin.</string>
                     <rect>
                      <x>0</x>
                      <y>0</y>
-                     <width>362</width>
-                     <height>561</height>
+                     <width>506</width>
+                     <height>597</height>
                     </rect>
                    </property>
                    <layout class="QVBoxLayout" name="verticalLayout_9">
                     <property name="spacing">
-                     <number>0</number>
+                     <number>6</number>
                     </property>
                     <property name="leftMargin">
                      <number>0</number>
@@ -3729,9 +3747,12 @@ so bound pages have a wider inner margin.</string>
               </property>
               <property name="iconSize">
                <size>
-                <width>24</width>
-                <height>24</height>
+                <width>36</width>
+                <height>36</height>
                </size>
+              </property>
+              <property name="iconButton" stdset="0">
+               <bool>true</bool>
               </property>
              </widget>
             </item>
@@ -3888,6 +3909,22 @@ so bound pages have a wider inner margin.</string>
          </widget>
         </item>
         <item>
+         <spacer name="verticalSpacer_31">
+          <property name="orientation">
+           <enum>Qt::Orientation::Vertical</enum>
+          </property>
+          <property name="sizeType">
+           <enum>QSizePolicy::Policy::Fixed</enum>
+          </property>
+          <property name="sizeHint" stdset="0">
+           <size>
+            <width>20</width>
+            <height>10</height>
+           </size>
+          </property>
+         </spacer>
+        </item>
+        <item>
          <widget class="QTextBrowser" name="textBrowser"/>
         </item>
         <item>
@@ -3972,7 +4009,7 @@ so bound pages have a wider inner margin.</string>
              <x>0</x>
              <y>0</y>
              <width>831</width>
-             <height>551</height>
+             <height>522</height>
             </rect>
            </property>
            <layout class="QVBoxLayout" name="verticalLayout_23">
@@ -4010,9 +4047,12 @@ so bound pages have a wider inner margin.</string>
                 </property>
                 <property name="iconSize">
                  <size>
-                  <width>24</width>
-                  <height>24</height>
+                  <width>36</width>
+                  <height>36</height>
                  </size>
+                </property>
+                <property name="iconButton" stdset="0">
+                 <bool>true</bool>
                 </property>
                </widget>
               </item>
@@ -4052,7 +4092,7 @@ so bound pages have a wider inner margin.</string>
               <property name="sizeHint" stdset="0">
                <size>
                 <width>20</width>
-                <height>20</height>
+                <height>10</height>
                </size>
               </property>
              </spacer>
@@ -4348,7 +4388,7 @@ so bound pages have a wider inner margin.</string>
                 </property>
                 <property name="sizeHint" stdset="0">
                  <size>
-                  <width>20</width>
+                  <width>10</width>
                   <height>20</height>
                  </size>
                 </property>
