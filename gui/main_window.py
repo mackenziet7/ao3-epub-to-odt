@@ -16,6 +16,7 @@ from PySide6.QtGui import QIcon
 from gui.ui import resources_rc  # noqa: F401 — registers Qt resources
 from gui.wiring.page0_wiring import wire_page0
 from gui.wiring.page1_wiring import wire_page1
+from gui.wiring.page2_wiring import wire_page2
 
 _UI_PATH = Path(__file__).parent / "ui" / "screens" / "main_window.ui"
 _QSS_PATH = Path(__file__).parent / "ui" / "res" / "styles" / "dark.qss"
@@ -42,48 +43,10 @@ class MainWindow:
         self._lr_margin_ratio = 1.0
         wire_page0(self)
         wire_page1(self)
-        self._wire_page2()
+        wire_page2(self)
         self._wire_page3()
         self._wire_page4()
         self._wire_navigation()
-
-    # ------------------------------------------------------------------
-    # Page 2 — Basic Typography Setup screen
-    # ------------------------------------------------------------------
-
-    def _wire_page2(self):
-        w = self.window
-        splitterPage3 = w.findChild(QSplitter, "splitterPage3")
-        splitterPage3.setCollapsible(0, False)
-        splitterPage3.setCollapsible(1, False)
-        splitterPage3.setSizes([500, 400])
-
-        # Typography controls
-        self._headerFontCombo = w.findChild(QFontComboBox, "comboHeaderFont")
-        self._bodyFontCombo = w.findChild(QFontComboBox, "comboBodyFont")
-        self._headerSizeSpin = w.findChild(QDoubleSpinBox, "spinHeaderFontSize")
-        self._bodySizeSpin = w.findChild(QDoubleSpinBox, "spinBodyFontSize")
-
-        # Preview Labels
-        self._headerPreviewLabel = w.findChild(QLabel, "labelHeaderPreview")
-        self._bodyPreviewLabel = w.findChild(QLabel, "labelBodyPreview")
-
-        # Wire preview
-        self._headerFontCombo.currentFontChanged.connect(self._update_typography_preview)
-        self._bodyFontCombo.currentFontChanged.connect(self._update_typography_preview)
-        self._headerSizeSpin.valueChanged.connect(self._update_typography_preview)
-        self._bodySizeSpin.valueChanged.connect(self._update_typography_preview)
-
-        self._update_typography_preview()
-
-    def _update_typography_preview(self):
-        header_font = self._headerFontCombo.currentFont()
-        header_font.setPointSize(self._headerSizeSpin.value())
-        self._headerPreviewLabel.setFont(header_font)
-
-        body_font = self._bodyFontCombo.currentFont()
-        body_font.setPointSize(self._bodySizeSpin.value())
-        self._bodyPreviewLabel.setFont(body_font)
 
     # ------------------------------------------------------------------
     # Page 3 — Typography Advanced ("More Options") screen
