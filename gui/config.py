@@ -11,7 +11,7 @@ def load_config() -> dict:
     p = config_path()
     if p.exists():
         try: 
-            json.loads(p.read_text(encoding="utf-8"))
+            return json.loads(p.read_text(encoding="utf-8"))
         except Exception:
             return {}
     return {}

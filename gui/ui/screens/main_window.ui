@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>867</width>
-    <height>633</height>
+    <width>871</width>
+    <height>641</height>
    </rect>
   </property>
   <property name="minimumSize">
@@ -28,7 +28,7 @@
     <item>
      <widget class="QStackedWidget" name="stackedWidget">
       <property name="currentIndex">
-       <number>5</number>
+       <number>0</number>
       </property>
       <widget class="QWidget" name="page_0">
        <layout class="QVBoxLayout" name="verticalLayout_2">
@@ -222,7 +222,18 @@
                </widget>
               </item>
               <item>
-               <widget class="QLineEdit" name="lineEditOutputFolder"/>
+               <widget class="QLineEdit" name="lineEditOutputFolder">
+                <property name="enabled">
+                 <bool>true</bool>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QPushButton" name="buttonBrowse">
+                <property name="text">
+                 <string>Browse</string>
+                </property>
+               </widget>
               </item>
              </layout>
             </item>
@@ -275,6 +286,9 @@
              <widget class="QLabel" name="quickConvertLabel">
               <property name="text">
                <string>Quick Convert</string>
+              </property>
+              <property name="textRole" stdset="0">
+               <string>title</string>
               </property>
              </widget>
             </item>
@@ -1787,8 +1801,8 @@ so bound pages have a wider inner margin.</string>
                     <rect>
                      <x>0</x>
                      <y>0</y>
-                     <width>506</width>
-                     <height>597</height>
+                     <width>362</width>
+                     <height>591</height>
                     </rect>
                    </property>
                    <layout class="QVBoxLayout" name="verticalLayout_9">
@@ -4008,8 +4022,8 @@ so bound pages have a wider inner margin.</string>
             <rect>
              <x>0</x>
              <y>0</y>
-             <width>831</width>
-             <height>522</height>
+             <width>264</width>
+             <height>409</height>
             </rect>
            </property>
            <layout class="QVBoxLayout" name="verticalLayout_23">

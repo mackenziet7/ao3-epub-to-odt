@@ -17,6 +17,7 @@ from PySide6.QtCore import QEvent, QObject, Qt
 from gui.ui import resources_rc  # noqa: F401 — registers Qt resources
 from gui.widgets.page_preview_widget import PagePreviewWidget, PAGE_SIZES_MM
 
+from gui.wiring.page0_wiring import wire_page0
 
 _UI_PATH = Path(__file__).parent / "ui" / "screens" / "main_window.ui"
 _QSS_PATH = Path(__file__).parent / "ui" / "res" / "styles" / "dark.qss"
@@ -88,30 +89,13 @@ class MainWindow:
         self._page_size_aspect_ratio = 1.0
         self._tb_margin_ratio = 1.0
         self._lr_margin_ratio = 1.0
-        self._wire_page0()
+        wire_page0(self)
         self._wire_page1()
         self._wire_page2()
         self._wire_page3()
         self._wire_page4()
         self._wire_navigation()
 
-    # ------------------------------------------------------------------
-    # Page 0 — main screen
-    # ------------------------------------------------------------------
-
-    def _wire_page0(self):
-        w = self.window
-
-        splitterPage0 = w.findChild(QSplitter, "splitter")
-        splitterPage0.setCollapsible(0, False)
-        splitterPage0.setCollapsible(1, False)
-        splitterPage0.setSizes([500, 400])
-
-        mode_group = QButtonGroup(w)
-        for name in ("modeSingleButton", "modeBatchButton", "modeCollectionButton"):
-            mode_group.addButton(w.findChild(QPushButton, name))
-        mode_group.setExclusive(True)
-        self._mode_group = mode_group  # keep reference
 
     # ------------------------------------------------------------------
     # Page 1 — Page Setup screen
@@ -389,6 +373,7 @@ class MainWindow:
         stack.setCurrentIndex(0)  # always start on the main screen
 
         nav_pairs = [
+            ("buttonConvert", 5), # main → convert
             ("buttonNext",   1),  # main → page setup
             ("buttonBack",   0),  # page setup → main
 
