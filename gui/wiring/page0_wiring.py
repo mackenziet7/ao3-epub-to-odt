@@ -7,13 +7,17 @@ from PySide6.QtWidgets import (
     QSplitter,
     QLineEdit,
     QListWidgetItem,
+    QStackedWidget,
 )
 from PySide6.QtCore import Qt
 from pathlib import Path
 from gui.config import (
     load_config,
-    config_path
+    config_path,
+    load_preset,
 )
+
+from gui.wiring.page5_wiring import start_conversion
 
 # ------------------------------------------------------------------
 # Page 0 — main screen
@@ -46,30 +50,37 @@ def wire_page0(main_window):
     # Add/remove files
     file_list = w.findChild(QListWidget, "listWidgetFileInput")
     w.findChild(QPushButton, "buttonAdd").clicked.connect(
-        lambda: add_files(w, file_list)
+        lambda: add_files(w, file_list, main_window)
     )
     w.findChild(QPushButton, "buttonRemove").clicked.connect(
-        lambda: remove_selected_files(w, file_list)
+        lambda: remove_selected_files(w, file_list, main_window)
     )
 
     # Output folder
     w.findChild(QPushButton, "buttonBrowse").clicked.connect(
         lambda: pick_folder(w)
     )
+    w.findChild(QLineEdit, "lineEditOutputFolder").textChanged.connect(
+        lambda _text: update_action_buttons(w, main_window)
+    )
 
     # Presets
     
     w.findChild(QListWidget, "presetList").itemSelectionChanged.connect(
-        lambda: update_convert_button(w)
+        lambda: update_action_buttons(w, main_window)
     )
     populate_preset_list(w)
-    update_convert_button(w) #update after populating
+    update_action_buttons(w, main_window)  #update after populating
+
+    w.findChild(QPushButton, "buttonConvert").clicked.connect(
+        lambda: _quick_convert(main_window)
+    )
 
 
 # ------------------------------------------------------------------
 # Add and remove files
 # ------------------------------------------------------------------
-def add_files(window, file_list):
+def add_files(window, file_list, main_window):
     """
     Opens a file picker that allows selecting multiple EPUBs at once.
     getOpenFileNames (plural) returns a list of paths rather than one.
@@ -92,8 +103,9 @@ def add_files(window, file_list):
             existing.add(path) # for duplicate prevention
 
     update_mode_buttons(window, file_list)
+    update_action_buttons(window, main_window)
 
-def remove_selected_files(window, file_list):
+def remove_selected_files(window, file_list, main_window):
     """
     Removes whichever rows the user has selected.
     iterate in reverse order so that removing one item doesn't shift
@@ -103,6 +115,7 @@ def remove_selected_files(window, file_list):
         file_list.takeItem(file_list.row(item))
 
     update_mode_buttons(window, file_list)
+    update_action_buttons(window, main_window)
 
 def update_mode_buttons(window, file_list):
     """
@@ -148,8 +161,50 @@ def populate_preset_list(window):
         preset_item.setData(Qt.ItemDataRole.UserRole, str(item)) # adds path to hidden data on each item
         preset_list.addItem(preset_item)
 
-def update_convert_button(window):
+def update_action_buttons(window, main_window):
+    file_list = window.findChild(QListWidget, "listWidgetFileInput")
     preset_list = window.findChild(QListWidget, "presetList")
+    folder_text = window.findChild(QLineEdit, "lineEditOutputFolder").text()
+
+    has_files = file_list.count() > 0
+    has_valid_folder = Path(folder_text).is_dir()
+    has_preset = bool(preset_list.selectedItems())
+    has_lo = main_window._lo_python is not None
+
+    next_button = window.findChild(QPushButton, "buttonNext")
     convert_button = window.findChild(QPushButton, "buttonConvert")
-    convert_button.setEnabled(bool(preset_list.selectedItems()))
-    
+
+    next_reasons = []
+    if not has_files:
+        next_reasons.append("Add at least one EPUB file")
+    if not has_valid_folder:
+        next_reasons.append("Select a valid output folder")
+    if not has_lo:
+        next_reasons.append("LibreOffice path not set")
+
+    convert_reasons = list(next_reasons)
+    if not has_preset:
+        convert_reasons.append("Select a preset")
+
+    next_button.setEnabled(not next_reasons)
+    next_button.setToolTip("\n".join(next_reasons))
+
+    convert_button.setEnabled(not convert_reasons)
+    convert_button.setToolTip("\n".join(convert_reasons))
+
+
+def _quick_convert(main_window):
+    w = main_window.window
+    preset_list = w.findChild(QListWidget, "presetList")
+    selected = preset_list.selectedItems()
+    if not selected:
+        return  # button is disabled without a selection, but guard anyway
+
+    settings = load_preset(selected[0].data(Qt.ItemDataRole.UserRole))
+
+    file_list = w.findChild(QListWidget, "listWidgetFileInput")
+    epub_paths = [file_list.item(i).text() for i in range(file_list.count())]
+    output_folder = w.findChild(QLineEdit, "lineEditOutputFolder").text()
+
+    w.findChild(QStackedWidget, "stackedWidget").setCurrentIndex(5)
+    start_conversion(main_window, epub_paths, output_folder, settings) 

@@ -13,17 +13,19 @@ from PySide6.QtWidgets import *
 from PySide6.QtUiTools import QUiLoader
 from PySide6.QtGui import QIcon
 
+from gui.config import resolve_lo_python, load_config
+from gui.first_run_dialog import LOPathDialog
+
 from gui.ui import resources_rc  # noqa: F401 — registers Qt resources
 from gui.wiring.page0_wiring import wire_page0
 from gui.wiring.page1_wiring import wire_page1
 from gui.wiring.page2_wiring import wire_page2
 from gui.wiring.page3_wiring import wire_page3
+from gui.wiring.page4_wiring import wire_page4
+from gui.wiring.page5_wiring import wire_page5
 
 _UI_PATH = Path(__file__).parent / "ui" / "screens" / "main_window.ui"
 _QSS_PATH = Path(__file__).parent / "ui" / "res" / "styles" / "dark.qss"
-
-_CIRCLE_EMPTY_ICON   = ":/res/icons/circle_dark.svg"
-_CIRCLE_CHECKED_ICON = ":/res/icons/circle_checked.svg"
 
 
 class MainWindow:
@@ -38,6 +40,8 @@ class MainWindow:
         loader = QUiLoader()
         self.window = loader.load(str(_UI_PATH))
 
+        self._lo_python = self._resolve_lo_on_startup()
+
         self._updating_page_size_controls = False
         self._page_size_aspect_ratio = 1.0
         self._tb_margin_ratio = 1.0
@@ -46,20 +50,20 @@ class MainWindow:
         wire_page1(self)
         wire_page2(self)
         wire_page3(self)
-        self._wire_page4()
+        wire_page4(self)
+        wire_page5(self)
         self._wire_navigation()
 
-    # ------------------------------------------------------------------
-    # Page 4 — Additional Options screen
-    # ------------------------------------------------------------------
-    def _wire_page4(self):
-        w = self.window
-        self._checkSavePreset = w.findChild(QCheckBox, "checkSavePreset")
-        self._presetNameWidget = w.findChild(QWidget, "presetNameWidget")
-
-        self._presetNameWidget.setVisible(self._checkSavePreset.isChecked())
-        self._checkSavePreset.toggled.connect(self._presetNameWidget.setVisible)
-
+    def _resolve_lo_on_startup(self):
+        lo = resolve_lo_python()
+        if lo is not None:
+            return lo
+        cfg = load_config()
+        invalid = cfg.get("lo_python")
+        dialog = LOPathDialog(self.window, invalid_path=invalid)
+        if dialog.exec():
+            return Path(load_config()["lo_python"])
+        return None
     # ------------------------------------------------------------------
     # Navigation
     # ------------------------------------------------------------------

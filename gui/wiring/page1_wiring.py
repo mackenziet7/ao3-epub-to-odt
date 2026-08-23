@@ -310,7 +310,7 @@ def _on_units_changed(main_window):
             spin.setValue(round(old_val * IN_TO_CM, 2))
 
 
-def _page_size_key_for_combo_text(text: str) -> str | None:
+def page_size_key_for_combo_text(text: str) -> str | None:
     if text.startswith("Custom"):
         return None
     for key in PAGE_SIZES_MM:
@@ -367,7 +367,7 @@ def _combo_index_for_page_size_key(main_window, key: str | None) -> int:
         text = main_window._comboPageSize.itemText(idx)
         if key is None and text.startswith("Custom"):
             return idx
-        if key is not None and _page_size_key_for_combo_text(text) == key:
+        if key is not None and page_size_key_for_combo_text(text) == key:
             return idx
     return -1
 
@@ -410,7 +410,7 @@ def _matching_page_size_key(width_mm: float, height_mm: float) -> str | None:
 def _on_page_size_changed(main_window):
     if main_window._updating_page_size_controls:
         return
-    key = _page_size_key_for_combo_text(main_window._comboPageSize.currentText())
+    key = page_size_key_for_combo_text(main_window._comboPageSize.currentText())
     if key is not None:
         main_window._updating_page_size_controls = True
         try:
@@ -439,7 +439,7 @@ def _sync_preview(main_window):
         return value * 25.4 if unit == "in" else value * 10.0
 
     main_window._preview.update_from_settings(
-        page_size_name=_page_size_key_for_combo_text(main_window._comboPageSize.currentText()) or "Custom",
+        page_size_name=page_size_key_for_combo_text(main_window._comboPageSize.currentText()) or "Custom",
         landscape=main_window._radioLandscape.isChecked(),
         mirrored=main_window._checkMirrored.isChecked(),
         custom_w_mm=to_mm("spinCustomWidth"),

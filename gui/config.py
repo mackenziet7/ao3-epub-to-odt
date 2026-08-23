@@ -4,6 +4,9 @@ from pathlib import Path
 APP_NAME = "AO3toODT"
 DEFAULT_LO_PYTHON = Path(r"C:\Program Files\LibreOffice\program\python.exe")
 
+# ------------------------------------------------------------------
+# Config
+# ------------------------------------------------------------------
 def config_path() -> Path:
     return Path.home() / "AppData" / "Roaming" / APP_NAME / "config.json"
 
@@ -21,6 +24,17 @@ def save_config(data: dict):
     p.parent.mkdir (parents=True, exist_ok=True)
     p.write_text(json.dumps(data, indent=2), encoding="utf-8")
 
+# ------------------------------------------------------------------
+# Presets
+# ------------------------------------------------------------------
+def load_preset(path: Path | str) -> dict:
+    p = Path(path)
+    return json.loads(p.read_text(encoding="utf-8"))
+
+
+# ------------------------------------------------------------------
+# Misc
+# ------------------------------------------------------------------
 def resolve_lo_python() -> Path | None:
     """
     Returns the path to LO's python.exe, or None if it can't be found.

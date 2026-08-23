@@ -36,7 +36,7 @@ def get_script_path():
 
 
 # ── Main window ────────────────────────────────────────────────────────────────
-
+ 
 class MainWindow(QMainWindow):
     def __init__(self):
         super().__init__()
@@ -152,65 +152,6 @@ class MainWindow(QMainWindow):
 
         return None
 
-    # ── File list management ───────────────────────────────────────────────────
-
-    def add_epubs(self):
-        """
-        Opens a file picker that allows selecting multiple EPUBs at once.
-        getOpenFileNames (plural) returns a list of paths rather than one.
-        Duplicate entries are silently ignored.
-        """
-        paths, _ = QFileDialog.getOpenFileNames(
-            self,
-            "Select EPUB files",
-            str(Path.home() / "Downloads"),
-            "EPUB files (*.epub);;All files (*.*)"
-        )
-        # Get the set of paths already in the list 
-        existing = {
-            self.epub_list.item(i).text()
-            for i in range(self.epub_list.count())
-        }
-        for path in paths:
-            if path not in existing:
-                self.epub_list.addItem(path)
-
-    def remove_selected(self):
-        """
-        Removes whichever rows the user has selected.
-        iterate in reverse order so that removing one item doesn't shift
-        the indices of the items below it 
-        """
-        for item in reversed(self.epub_list.selectedItems()):
-            self.epub_list.takeItem(self.epub_list.row(item))
-
-    # ── Output folder ──────────────────────────────────────────────────────────
-
-    def pick_folder(self):
-        folder = QFileDialog.getExistingDirectory(
-            self,
-            "Select output folder",
-            str(Path.home() / "Downloads"),
-        )
-        if folder:
-            self.folder_input.setText(folder)
-
-    def suggest_odt_path(self, epub: str, output_folder: str) -> str:
-        """
-        Builds a non-colliding output path for the ODT file.
-        e.g. given epub="my_fic.epub" and folder="C:/output",
-        returns "C:/output/my_fic_book.odt", or
-                "C:/output/my_fic_book_2.odt" if that already exists, etc.
-        """
-        base = Path(output_folder) / (Path(epub).stem + "_book.odt")
-        if not base.exists():
-            return str(base)
-        counter = 2
-        original_stem = base.stem
-        while base.exists():
-            base = base.with_stem(original_stem + f"_{counter}")
-            counter += 1
-        return str(base)
 
     # ── Dependency installer ───────────────────────────────────────────────────
 
