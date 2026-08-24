@@ -15,6 +15,7 @@ from gui.config import (
     load_config,
     config_path,
     load_preset,
+    lo_missing_reason,
 )
 
 from gui.wiring.page5_wiring import start_conversion
@@ -169,18 +170,18 @@ def update_action_buttons(window, main_window):
     has_files = file_list.count() > 0
     has_valid_folder = Path(folder_text).is_dir()
     has_preset = bool(preset_list.selectedItems())
-    has_lo = main_window._lo_python is not None
 
     next_button = window.findChild(QPushButton, "buttonNext")
     convert_button = window.findChild(QPushButton, "buttonConvert")
+    lo_reason = lo_missing_reason(main_window)
 
     next_reasons = []
     if not has_files:
         next_reasons.append("Add at least one EPUB file")
     if not has_valid_folder:
         next_reasons.append("Select a valid output folder")
-    if not has_lo:
-        next_reasons.append("LibreOffice path not set")
+    if lo_reason is not None:
+        next_reasons.append(lo_reason)
 
     convert_reasons = list(next_reasons)
     if not has_preset:

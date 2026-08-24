@@ -6,12 +6,12 @@ custom PagePreviewWidget for the Page Setup screen.
 
 Entry point: call run() from main.py.
 """
+import sys
 
 from pathlib import Path
 
 from PySide6.QtWidgets import *
 from PySide6.QtUiTools import QUiLoader
-from PySide6.QtGui import QIcon
 
 from gui.config import resolve_lo_python, load_config
 from gui.first_run_dialog import LOPathDialog
@@ -58,12 +58,21 @@ class MainWindow:
         lo = resolve_lo_python()
         if lo is not None:
             return lo
+
         cfg = load_config()
         invalid = cfg.get("lo_python")
-        dialog = LOPathDialog(self.window, invalid_path=invalid)
-        if dialog.exec():
+
+        dialog = LOPathDialog(
+            self.window,
+            invalid_path=invalid
+        )
+
+        if dialog.exec() == QDialog.DialogCode.Accepted:
             return Path(load_config()["lo_python"])
-        return None
+
+        # User closed the LibreOffice dialog with X
+        QApplication.quit()
+        sys.exit(0)
     # ------------------------------------------------------------------
     # Navigation
     # ------------------------------------------------------------------
@@ -87,7 +96,7 @@ class MainWindow:
             ("buttonNext_3", 4),  # typography basic → additional options
             ("buttonBack_3", 2),  # typography more options → typography basic
 
-            ("buttonNext_5", 5),  # typography more options → additional options
+            ("buttonNext_5", 5),  # additional options → convert
             ("buttonBack_4", 3),  # additional options → typography #TODO store last typography page state so this takes to appropriate page
             
             ("buttonComplete", 0) 

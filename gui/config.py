@@ -57,3 +57,16 @@ def resolve_lo_python() -> Path | None:
         return DEFAULT_LO_PYTHON
 
     return None
+
+def lo_missing_reason(main_window) -> str | None:
+    """
+    Returns a human-readable reason why LibreOffice/UNO isn't available,
+    or None if main_window._lo_python is set and conversion can proceed.
+
+    Centralized so every page that gates a button on LO availability
+    (page 0's Quick Convert, page 4's wizard Next/Convert, etc.) shows
+    the exact same message.
+    """
+    if getattr(main_window, "_lo_python", None) is None:
+        return "LibreOffice was not found. Set the LibreOffice path in Settings to continue."
+    return None

@@ -6,11 +6,8 @@ from pathlib import Path
 from PySide6.QtWidgets import QTextBrowser, QProgressBar, QPushButton, QFileDialog
 
 from gui.worker import ConversionWorker
-from gui.convert import suggest_odt_path
 
 NO_WINDOW = subprocess.CREATE_NO_WINDOW
-LO_DOWNLOAD_URL = "..."  # TODO: move alongside other app-wide constants
-
 
 def get_script_path() -> Path:
     if hasattr(sys, "_MEIPASS"):
@@ -32,7 +29,6 @@ def wire_page5(main_window):
     w.findChild(QPushButton, "buttonComplete").clicked.connect(
         lambda: _on_complete(main_window)
     )
-
 
 # ------------------------------------------------------------------
 # Conversion
@@ -108,6 +104,22 @@ def _show_summary(main_window):
         for f in main_window._failed:
             main_window._logOutput.append(f"  - {Path(f).name}")
 
+def suggest_odt_path(epub: str, output_folder: str) -> str:
+    """
+    Builds a non-colliding output path for the ODT file.
+    e.g. given epub="my_fic.epub" and folder="C:/output",
+    returns "C:/output/my_fic_book.odt", or
+            "C:/output/my_fic_book_2.odt" if that already exists, etc.
+    """
+    base = Path(output_folder) / (Path(epub).stem + "_book.odt")
+    if not base.exists():
+        return str(base)
+    counter = 2
+    original_stem = base.stem
+    while base.exists():
+        base = base.with_stem(original_stem + f"_{counter}")
+        counter += 1
+    return str(base)
 
 # ------------------------------------------------------------------
 # Export / Complete
