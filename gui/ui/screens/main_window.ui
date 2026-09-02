@@ -28,7 +28,7 @@
     <item>
      <widget class="QStackedWidget" name="stackedWidget">
       <property name="currentIndex">
-       <number>6</number>
+       <number>5</number>
       </property>
       <widget class="QWidget" name="page_0">
        <layout class="QVBoxLayout" name="verticalLayout_2">
@@ -3998,7 +3998,7 @@ so bound pages have a wider inner margin.</string>
         <item>
          <widget class="QPushButton" name="buttonComplete">
           <property name="enabled">
-           <bool>true</bool>
+           <bool>false</bool>
           </property>
           <property name="text">
            <string>Complete</string>
@@ -4023,7 +4023,7 @@ so bound pages have a wider inner margin.</string>
              <x>0</x>
              <y>0</y>
              <width>839</width>
-             <height>454</height>
+             <height>445</height>
             </rect>
            </property>
            <layout class="QVBoxLayout" name="verticalLayout_23">

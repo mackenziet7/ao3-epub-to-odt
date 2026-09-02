@@ -3,7 +3,7 @@ import subprocess
 import sys
 from pathlib import Path
 
-from PySide6.QtWidgets import QTextBrowser, QProgressBar, QPushButton, QFileDialog
+from PySide6.QtWidgets import QTextBrowser, QProgressBar, QPushButton, QFileDialog, QLabel
 
 from gui.worker import ConversionWorker
 
@@ -93,7 +93,11 @@ def on_finished(main_window, success: bool):
     else:
         _show_summary(main_window)
         main_window._progress.setVisible(False)
+        complete_text = main_window.window.findChild(QLabel, "labelCompletionProgress")
+        complete_text.setText("Conversion Complete, you are free to exit the program.")
 
+        complete_button = main_window.window.findChild(QPushButton, "buttonComplete")
+        complete_button.setEnabled(True)
 
 def _show_summary(main_window):
     main_window._logOutput.append("")
