@@ -212,7 +212,7 @@ def _quick_convert(main_window):
     epub_paths = [file_list.item(i).text() for i in range(file_list.count())]
     output_folder = w.findChild(QLineEdit, "lineEditOutputFolder").text()
 
-    w.findChild(QStackedWidget, "stackedWidget").setCurrentIndex(5)
+    main_window._go_to_page(5)
     start_conversion(main_window, epub_paths, output_folder, settings) 
 
 def _ensure_default_preset_exists():

@@ -79,7 +79,7 @@ def _on_typography_advanced_next(main_window):
         if reply != QMessageBox.StandardButton.Yes:
             return  # user chose to go back and review — stay on this page
 
-    main_window.window.findChild(QStackedWidget, "stackedWidget").setCurrentIndex(4)
+    main_window._go_to_page(4)
 
 def _on_typography_advanced_back(main_window):
     reply = QMessageBox.question(
@@ -101,10 +101,4 @@ def _on_typography_advanced_back(main_window):
     main_window._groupList.setCurrentRow(0)
     main_window._groupContentStack.setCurrentIndex(0)
 
-    # NOTE: actual per-style field values aren't reset here yet —
-    # that requires the overrides/backend system we haven't built.
-    # For now this only resets the checklist UI state.
-
-    w = main_window.window
-    stack = w.findChild(QStackedWidget, "stackedWidget")
-    stack.setCurrentIndex(2)
+    main_window._go_back()

@@ -42,6 +42,7 @@ class MainWindow:
         self.window = loader.load(str(_UI_PATH))
 
         self._lo_python = self._resolve_lo_on_startup()
+        self.history = [0]
 
         self._updating_page_size_controls = False
         self._page_size_aspect_ratio = 1.0
@@ -75,41 +76,98 @@ class MainWindow:
         # User closed the LibreOffice dialog with X
         QApplication.quit()
         sys.exit(0)
+    
     # ------------------------------------------------------------------
     # Navigation
     # ------------------------------------------------------------------
+    def _go_to_page(self, index):
+        """Navigate to a page and record it in the history stack."""
+        stack = self.window.findChild(QStackedWidget, "stackedWidget")
+
+        current = stack.currentIndex()
+
+        if current == index:
+            return
+
+        self.history.append(index)
+        stack.setCurrentIndex(index)
+
+    def _go_back(self):
+        """Return to the previous page in the navigation history."""
+        if len(self.history) <= 1:
+            return
+
+        # Remove the current page.
+        self.history.pop()
+
+        # The new last item is the previous page.
+        previous_page = self.history[-1]
+
+        stack = self.window.findChild(QStackedWidget, "stackedWidget")
+        stack.setCurrentIndex(previous_page)
+
+    def _complete_wizard(self):
+        """Finish the wizard and return to the main page."""
+        self.history = [0]
+
+        stack = self.window.findChild(QStackedWidget, "stackedWidget")
+        stack.setCurrentIndex(0)
+
+
     def _wire_navigation(self):
-        w     = self.window
+        w = self.window
         stack = w.findChild(QStackedWidget, "stackedWidget")
         stack.setCurrentIndex(0)  # always start on the main screen
 
-        nav_pairs = [
-            ("buttonConvert", 5), # main → convert
-            ("buttonNext",   1),  # main → page setup
-            ("buttonBack",   0),  # page setup → main
+        # --------------------------------------------------------------
+        # Forward navigation
+        # --------------------------------------------------------------
+        forward_pairs = [
+            ("buttonConvert", 5),       # main → convert
+            ("buttonNext", 1),          # main → page setup
 
-            ("buttonSettings", 6), # main → settings
-            ("buttonBack_5", 0),  # settings → main
+            ("buttonSettings", 6),      # main → settings
 
-            ("buttonNext_2", 2),  # page setup → typography basic
-            ("buttonBack_2", 1),  # typography basic → page setup
+            ("buttonNext_2", 2),        # page setup → typography basic
 
-            ("buttonMoreOptions", 3),  # typography basic → typography more options
-            ("buttonNext_3", 4),  # typography basic → additional options
-            ("buttonBack_3", 2),  # typography more options → typography basic
-
-            ("buttonBack_4", 3),  # additional options → typography #TODO store last typography page state so this takes to appropriate page
-            
-            ("buttonComplete", 0) 
+            ("buttonMoreOptions", 3),   # typography basic → more options
+            ("buttonNext_3", 4),        # typography basic → additional options
         ]
 
-        for button_name, target_index in nav_pairs:
+        for button_name, target_index in forward_pairs:
+            button = w.findChild(QPushButton, button_name)
+
+            if button is None:
+                continue
+
+            button.clicked.connect(
+                lambda checked=False, idx=target_index:
+                    self._go_to_page(idx)
+            )
+
+        # Back navigation
+        back_buttons = [
+            "buttonBack",
+            "buttonBack_2",
+            "buttonBack_4",
+            "buttonBack_5",
+        ]
+
+        for button_name in back_buttons:
             button = w.findChild(QPushButton, button_name)
             if button is None:
                 continue
+
             button.clicked.connect(
-                lambda checked=False, idx=target_index: stack.setCurrentIndex(idx)
+                lambda checked=False:
+                    self._go_back()
             )
+
+        # Complete wizard
+        button_complete = w.findChild(QPushButton, "buttonComplete")
+
+        if button_complete is not None:
+            button_complete.clicked.connect(self._complete_wizard)
 
     # ------------------------------------------------------------------
     # Show
