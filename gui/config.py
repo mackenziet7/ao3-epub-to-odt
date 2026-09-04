@@ -3,6 +3,9 @@ from pathlib import Path
 
 APP_NAME = "AO3toODT"
 DEFAULT_LO_PYTHON = Path(r"C:\Program Files\LibreOffice\program\python.exe")
+INVALID_FILE_CHARS = set('<>:"/\\|?*')
+
+PRESET_SCHEMA = 1
 
 # ------------------------------------------------------------------
 # Config
@@ -31,6 +34,14 @@ def load_preset(path: Path | str) -> dict:
     p = Path(path)
     return json.loads(p.read_text(encoding="utf-8"))
 
+def save_preset(name: str, data: dict) -> None:
+    full_data = {"preset_name": name, "schema_version": PRESET_SCHEMA, **data}
+    p = preset_name_to_path(name)
+    p.write_text(json.dumps(full_data, indent=2), encoding="utf-8")
+
+def preset_name_to_path(name: str) -> Path:
+    n = "preset_" + name.replace(" ", "_") + ".json"
+    return config_path().parent / n
 
 # ------------------------------------------------------------------
 # Misc

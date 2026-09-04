@@ -96,7 +96,6 @@ class MainWindow:
             ("buttonNext_3", 4),  # typography basic → additional options
             ("buttonBack_3", 2),  # typography more options → typography basic
 
-            ("buttonNext_5", 5),  # additional options → convert
             ("buttonBack_4", 3),  # additional options → typography #TODO store last typography page state so this takes to appropriate page
             
             ("buttonComplete", 0) 

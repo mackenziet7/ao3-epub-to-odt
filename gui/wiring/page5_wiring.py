@@ -38,6 +38,10 @@ def start_conversion(main_window, epub_paths, output_folder, settings):
     settings: dict of resolved conversion options (toc, qr, margins, fonts, etc.)
     regardless of whether it came from a preset file or live wizard state.
     """
+    if not epub_paths:
+        main_window._logOutput.append("No files to convert.")
+        return
+    
     main_window._queue = list(epub_paths)
     main_window._succeeded = []
     main_window._failed = []
