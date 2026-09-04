@@ -12,6 +12,7 @@ from PySide6.QtWidgets import (
     QStackedWidget
 )
 
+from gui.wiring.reset import reset_ui
 from gui.worker import ConversionWorker
 
 NO_WINDOW = subprocess.CREATE_NO_WINDOW
@@ -148,4 +149,5 @@ def _export_log(main_window):
 
 
 def _on_complete(main_window):
+    reset_ui(main_window)
     main_window.window.findChild(QStackedWidget, "stackedWidget").setCurrentIndex(0)

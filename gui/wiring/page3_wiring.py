@@ -30,7 +30,6 @@ def wire_page3(main_window):
     for i in range(main_window._groupList.count()):
         main_window._groupList.item(i).setIcon(empty_icon)
 
-
     main_window._groupContentStack = w.findChild(QStackedWidget, "groupContentStack")
     main_window._groupContentStack.setCurrentIndex(0)
 

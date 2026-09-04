@@ -23,6 +23,7 @@ from gui.wiring.page2_wiring import wire_page2
 from gui.wiring.page3_wiring import wire_page3
 from gui.wiring.page4_wiring import wire_page4
 from gui.wiring.page5_wiring import wire_page5
+from gui.wiring.reset import snapshot_wizard_defaults
 
 _UI_PATH = Path(__file__).parent / "ui" / "screens" / "main_window.ui"
 _QSS_PATH = Path(__file__).parent / "ui" / "res" / "styles" / "dark.qss"
@@ -53,6 +54,7 @@ class MainWindow:
         wire_page4(self)
         wire_page5(self)
         self._wire_navigation()
+        snapshot_wizard_defaults(self)
 
     def _resolve_lo_on_startup(self):
         lo = resolve_lo_python()
