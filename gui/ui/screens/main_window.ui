@@ -28,7 +28,7 @@
     <item>
      <widget class="QStackedWidget" name="stackedWidget">
       <property name="currentIndex">
-       <number>5</number>
+       <number>0</number>
       </property>
       <widget class="QWidget" name="page_0">
        <layout class="QVBoxLayout" name="verticalLayout_2">
@@ -153,16 +153,6 @@
                <widget class="QPushButton" name="modeBatchButton">
                 <property name="text">
                  <string>Batch</string>
-                </property>
-                <property name="checkable">
-                 <bool>true</bool>
-                </property>
-               </widget>
-              </item>
-              <item>
-               <widget class="QPushButton" name="modeCollectionButton">
-                <property name="text">
-                 <string>Collection</string>
                 </property>
                 <property name="checkable">
                  <bool>true</bool>

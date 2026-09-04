@@ -4,9 +4,7 @@ from PySide6.QtWidgets import (
     QFontComboBox,
     QDoubleSpinBox,
     QLabel,
-
 )
-
 
 # ------------------------------------------------------------------
 # Page 2 — Basic Typography Setup screen

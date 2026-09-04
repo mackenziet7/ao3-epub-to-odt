@@ -3,7 +3,14 @@ import subprocess
 import sys
 from pathlib import Path
 
-from PySide6.QtWidgets import QTextBrowser, QProgressBar, QPushButton, QFileDialog, QLabel
+from PySide6.QtWidgets import (
+    QTextBrowser,
+    QProgressBar, 
+    QPushButton, 
+    QFileDialog, 
+    QLabel, 
+    QStackedWidget
+)
 
 from gui.worker import ConversionWorker
 
@@ -141,5 +148,4 @@ def _export_log(main_window):
 
 
 def _on_complete(main_window):
-    from PySide6.QtWidgets import QStackedWidget
     main_window.window.findChild(QStackedWidget, "stackedWidget").setCurrentIndex(0)

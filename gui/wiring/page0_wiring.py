@@ -47,7 +47,7 @@ def wire_page0(main_window):
     splitterPage0.setSizes([500, 400])
 
     mode_group = QButtonGroup(w)
-    for name in ("modeSingleButton", "modeBatchButton", "modeCollectionButton"):
+    for name in ("modeSingleButton", "modeBatchButton"):
         mode_group.addButton(w.findChild(QPushButton, name))
     mode_group.setExclusive(True)
     main_window._mode_group = mode_group
