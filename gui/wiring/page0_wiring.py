@@ -1,4 +1,6 @@
 
+import shutil
+
 from PySide6.QtWidgets import (
     QFileDialog,
     QButtonGroup,
@@ -12,10 +14,12 @@ from PySide6.QtWidgets import (
 from PySide6.QtCore import Qt
 from pathlib import Path
 from gui.config import (
+    default_preset_source_path,
     load_config,
     config_path,
     load_preset,
     lo_missing_reason,
+    preset_name_to_path,
 )
 
 from gui.wiring.page5_wiring import start_conversion
@@ -149,9 +153,10 @@ def pick_folder(window):
 # Presets
 # ------------------------------------------------------------------
 def populate_preset_list(window):
+    _ensure_default_preset_exists()
+
     folder = config_path().parent
     presets = list(folder.glob("preset_*"))
-    print(presets)
 
     preset_list = window.findChild(QListWidget, "presetList")
     preset_list.clear()
@@ -209,3 +214,9 @@ def _quick_convert(main_window):
 
     w.findChild(QStackedWidget, "stackedWidget").setCurrentIndex(5)
     start_conversion(main_window, epub_paths, output_folder, settings) 
+
+def _ensure_default_preset_exists():
+    dest = preset_name_to_path("Default Book Layout")
+    if not dest.exists():
+        dest.parent.mkdir(parents=True, exist_ok=True)
+        shutil.copy(default_preset_source_path(), dest)

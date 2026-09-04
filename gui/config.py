@@ -1,5 +1,6 @@
 import json
 from pathlib import Path
+import sys
 
 APP_NAME = "AO3toODT"
 DEFAULT_LO_PYTHON = Path(r"C:\Program Files\LibreOffice\program\python.exe")
@@ -42,6 +43,11 @@ def save_preset(name: str, data: dict) -> None:
 def preset_name_to_path(name: str) -> Path:
     n = "preset_" + name.replace(" ", "_") + ".json"
     return config_path().parent / n
+
+def default_preset_source_path() -> Path:
+    if hasattr(sys, "_MEIPASS"):
+        return Path(sys._MEIPASS) / "gui" / "ui" / "preset" / "preset_default_book_layout.json" 
+    return Path(__file__).parent / "ui" / "preset" / "preset_default_book_layout.json" 
 
 # ------------------------------------------------------------------
 # Misc
