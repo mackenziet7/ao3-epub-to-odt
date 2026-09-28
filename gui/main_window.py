@@ -13,7 +13,7 @@ from pathlib import Path
 from PySide6.QtWidgets import *
 from PySide6.QtUiTools import QUiLoader
 
-from gui.config import resolve_lo_python, load_config
+from gui.config import resolve_lo_python, load_config, save_config
 from gui.first_run_dialog import LOPathDialog
 
 from gui.ui import resources_rc  # noqa: F401 — registers Qt resources
@@ -23,11 +23,11 @@ from gui.wiring.page2_wiring import wire_page2
 from gui.wiring.page3_wiring import wire_page3
 from gui.wiring.page4_wiring import wire_page4
 from gui.wiring.page5_wiring import wire_page5
+from gui.wiring.page6_wiring import wire_page6
 from gui.wiring.reset import snapshot_wizard_defaults
+from gui.theme import apply_theme, refresh_icons
 
 _UI_PATH = Path(__file__).parent / "ui" / "screens" / "main_window.ui"
-_QSS_PATH = Path(__file__).parent / "ui" / "res" / "styles" / "dark.qss"
-
 
 class MainWindow:
     """
@@ -42,6 +42,8 @@ class MainWindow:
         self.window = loader.load(str(_UI_PATH))
 
         self._lo_python = self._resolve_lo_on_startup()
+        self.theme = load_config().get("theme", "dark")
+        self._theme_refresh_hooks = []
         self.history = [0]
 
         self._updating_page_size_controls = False
@@ -54,6 +56,7 @@ class MainWindow:
         wire_page3(self)
         wire_page4(self)
         wire_page5(self)
+        wire_page6(self)
         self._wire_navigation()
         snapshot_wizard_defaults(self)
 
@@ -76,6 +79,21 @@ class MainWindow:
         # User closed the LibreOffice dialog with X
         QApplication.quit()
         sys.exit(0)
+
+    def set_theme(self, text: str):
+        mode = "dark" if text == "Dark" else "light"
+        self.theme = mode
+        apply_theme(mode)
+        refresh_icons(self, mode)
+
+        cfg = load_config()
+        cfg["theme"] = mode
+        save_config(cfg)
+
+    def register_theme_refresh(self, callback):
+        """Pages call this to register a function that re-applies themed
+        icons when the app theme changes. callback receives the mode string."""
+        self._theme_refresh_hooks.append(callback)
     
     # ------------------------------------------------------------------
     # Navigation
@@ -179,9 +197,12 @@ class MainWindow:
 def run():
     import sys
     app = QApplication.instance() or QApplication(sys.argv)
-    app.setStyleSheet(_QSS_PATH.read_text(encoding="utf-8"))
+    cfg = load_config()
+    mode = cfg.get("theme", "dark")
+    apply_theme(mode)
 
     mw = MainWindow()
+    refresh_icons(mw, mode)
     mw.show()
 
     sys.exit(app.exec())

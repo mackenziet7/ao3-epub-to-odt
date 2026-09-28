@@ -8,13 +8,15 @@ from PySide6.QtWidgets import (
 )
 from PySide6.QtGui import QIcon
 
-_CIRCLE_EMPTY_ICON   = ":/res/icons/circle_dark.svg"
 _CIRCLE_CHECKED_ICON = ":/res/icons/circle_checked.svg"
 
 
 # ------------------------------------------------------------------
 # Page 3 — Typography Advanced ("More Options") screen
 # ------------------------------------------------------------------
+def _circle_empty_icon(mode: str) -> QIcon:
+    return QIcon(f":/res/icons/circle_{mode}.svg")
+    
 def wire_page3(main_window):
     w = main_window.window
 
@@ -26,9 +28,8 @@ def wire_page3(main_window):
     main_window._groupList = w.findChild(QListWidget, "groupListWidget")
     main_window._groupList.setSelectionMode(QAbstractItemView.SelectionMode.SingleSelection)
 
-    empty_icon = QIcon(_CIRCLE_EMPTY_ICON)
     for i in range(main_window._groupList.count()):
-        main_window._groupList.item(i).setIcon(empty_icon)
+        main_window._groupList.item(i).setIcon(_circle_empty_icon(main_window.theme))
 
     main_window._groupContentStack = w.findChild(QStackedWidget, "groupContentStack")
     main_window._groupContentStack.setCurrentIndex(0)
@@ -46,6 +47,18 @@ def wire_page3(main_window):
     w.findChild(QPushButton, "buttonBack_3").clicked.connect(
         lambda: _on_typography_advanced_back(main_window)
     )
+
+    main_window.register_theme_refresh(
+        lambda mode: _refresh_circle_icons(main_window, mode)
+    )
+
+
+def _refresh_circle_icons(main_window, mode: str):
+    empty_icon = _circle_empty_icon(mode)
+    checked_icon = QIcon(_CIRCLE_CHECKED_ICON)
+    for i in range(main_window._groupList.count()):
+        is_checked = main_window._typography_group_checked[i]
+        main_window._groupList.item(i).setIcon(checked_icon if is_checked else empty_icon)
 
 
 def _on_typography_group_changed(main_window, row: int):
@@ -77,7 +90,7 @@ def _on_typography_advanced_next(main_window):
             QMessageBox.StandardButton.No,
         )
         if reply != QMessageBox.StandardButton.Yes:
-            return  # user chose to go back and review — stay on this page
+            return
 
     main_window._go_to_page(4)
 
@@ -91,12 +104,10 @@ def _on_typography_advanced_back(main_window):
     if reply != QMessageBox.StandardButton.Yes:
         return
 
-    # Reset checklist state
     main_window._typography_group_checked = [False, False, False]
     main_window._typography_current_row = None
-    empty_icon = QIcon(_CIRCLE_EMPTY_ICON)
     for i in range(main_window._groupList.count()):
-        main_window._groupList.item(i).setIcon(empty_icon)
+        main_window._groupList.item(i).setIcon(_circle_empty_icon(main_window.theme))
 
     main_window._groupList.setCurrentRow(0)
     main_window._groupContentStack.setCurrentIndex(0)

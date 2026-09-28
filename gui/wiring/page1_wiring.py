@@ -110,7 +110,7 @@ def wire_page1(main_window):
     main_window._btnLockSize = w.findChild(QPushButton, "buttonLockPageSize")
 
     for btn in (main_window._btnLockTB, main_window._btnLockLR, main_window._btnLockSize):
-        _wire_lock_button(btn)
+        _wire_lock_button(main_window, btn)
 
     main_window._btnLockSize.toggled.connect(
         lambda checked: _remember_page_size_aspect_ratio(main_window) if checked else None
@@ -188,18 +188,20 @@ def wire_page1(main_window):
 # (blockSignals prevents the mirror write from triggering another sync)
 # ------------------------------------------------------------------
 
-def _wire_lock_button(button: QPushButton):
-    """Swap between lock/unlock icons as the button is toggled.
-    Defaults to unlocked on startup regardless of what the .ui shows."""
-    locked_icon   = QIcon(_LOCK_ICON)
-    unlocked_icon = QIcon(_UNLOCK_ICON)
+def _wire_lock_button(main_window, button: QPushButton):
+    """Swap between lock/unlock icons as the button is toggled, themed
+    to match light/dark mode. Defaults to unlocked on startup regardless
+    of what the .ui shows."""
 
     def apply_icon(checked: bool):
-        button.setIcon(locked_icon if checked else unlocked_icon)
+        name = "lock" if checked else "lock_open"
+        button.setIcon(QIcon(f":/res/icons/{name}_{main_window.theme}.svg"))
 
     button.setChecked(False)
     apply_icon(False)
     button.toggled.connect(apply_icon)
+
+    main_window.register_theme_refresh(lambda mode: apply_icon(button.isChecked()))
 
 
 def _install_preview(main_window):

@@ -1,3 +1,5 @@
+
+/* Buttons */
 QPushButton[iconButton="true"] {
     border: none;
     background: transparent;
@@ -11,4 +13,41 @@ QPushButton[iconButton="true"]:hover {
 
 QPushButton[iconButton="true"]:pressed {
     background-color: rgba(128, 128, 128, 80);
+}
+
+/* Text Styles */ 
+QLabel[textRole="title"] {
+    font-size: 18px;
+    font-weight: bold;
+    color: #353535;
+}
+
+
+/* List Widget */
+QListWidget[flatList="true"] {
+    border: none;
+    background: transparent;
+    outline: none;               /* removes the dotted focus rectangle */
+}
+
+QListWidget[flatList="true"]::item {
+    padding: 8px 12px;
+    border-radius: 6px;
+    margin: 2px 0px;
+}
+
+QListWidget[flatList="true"]::item:hover {
+    background: #e8e8e8; 
+}
+
+QListWidget[flatList="true"]::item:selected {
+    background: #d8d8d8;
+    color: #1a1a1a;
+}
+
+/* Misc */
+
+QSplitter::handle:horizontal {
+    background-color: #cccccc;
+    width: 1px;
 }

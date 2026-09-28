@@ -30,6 +30,7 @@ class LOPathDialog(QDialog):
                 f"  {invalid_path}\n\n"
                 f"It may have been moved or uninstalled. "
                 f"Please locate python.exe inside your LibreOffice installation."
+                f"Or restart this program after installing LibreOffice"
             )
         else:
             msg = (

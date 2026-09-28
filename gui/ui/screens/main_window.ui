@@ -98,6 +98,9 @@
                 <property name="iconButton" stdset="0">
                  <bool>true</bool>
                 </property>
+                <property name="iconBase" stdset="0">
+                 <string>settings</string>
+                </property>
                </widget>
               </item>
               <item>
@@ -373,6 +376,9 @@
                 <property name="iconButton" stdset="0">
                  <bool>true</bool>
                 </property>
+                <property name="iconBase" stdset="0">
+                 <string>back</string>
+                </property>
                </widget>
               </item>
               <item>
@@ -585,6 +591,9 @@ Your printer may need a larger paper with trimming, or booklet printing.</string
                   </property>
                   <property name="iconButton" stdset="0">
                    <bool>true</bool>
+                  </property>
+                  <property name="IconBase" stdset="0">
+                   <string>lock_open</string>
                   </property>
                  </widget>
                 </item>
@@ -1111,6 +1120,9 @@ so bound pages have a wider inner margin.</string>
                 </property>
                 <property name="iconButton" stdset="0">
                  <bool>true</bool>
+                </property>
+                <property name="iconBase" stdset="0">
+                 <string>back</string>
                 </property>
                </widget>
               </item>
@@ -1665,6 +1677,9 @@ so bound pages have a wider inner margin.</string>
                 <property name="iconButton" stdset="0">
                  <bool>true</bool>
                 </property>
+                <property name="iconBase" stdset="0">
+                 <string>back</string>
+                </property>
                </widget>
               </item>
               <item>
@@ -1791,8 +1806,8 @@ so bound pages have a wider inner margin.</string>
                     <rect>
                      <x>0</x>
                      <y>0</y>
-                     <width>362</width>
-                     <height>591</height>
+                     <width>514</width>
+                     <height>613</height>
                     </rect>
                    </property>
                    <layout class="QVBoxLayout" name="verticalLayout_9">
@@ -3758,6 +3773,9 @@ so bound pages have a wider inner margin.</string>
               <property name="iconButton" stdset="0">
                <bool>true</bool>
               </property>
+              <property name="iconBase" stdset="0">
+               <string>back</string>
+              </property>
              </widget>
             </item>
             <item>
@@ -4016,7 +4034,7 @@ so bound pages have a wider inner margin.</string>
              <x>0</x>
              <y>0</y>
              <width>839</width>
-             <height>445</height>
+             <height>408</height>
             </rect>
            </property>
            <layout class="QVBoxLayout" name="verticalLayout_23">
@@ -4060,6 +4078,9 @@ so bound pages have a wider inner margin.</string>
                 </property>
                 <property name="iconButton" stdset="0">
                  <bool>true</bool>
+                </property>
+                <property name="iconBase" stdset="0">
+                 <string>back</string>
                 </property>
                </widget>
               </item>
@@ -4153,30 +4174,6 @@ so bound pages have a wider inner margin.</string>
              </layout>
             </item>
             <item>
-             <layout class="QHBoxLayout" name="horizontalLayout_42">
-              <item>
-               <widget class="QPushButton" name="LOLocation">
-                <property name="text">
-                 <string>Change Libre Office Location</string>
-                </property>
-               </widget>
-              </item>
-              <item>
-               <spacer name="horizontalSpacer_74">
-                <property name="orientation">
-                 <enum>Qt::Orientation::Horizontal</enum>
-                </property>
-                <property name="sizeHint" stdset="0">
-                 <size>
-                  <width>40</width>
-                  <height>20</height>
-                 </size>
-                </property>
-               </spacer>
-              </item>
-             </layout>
-            </item>
-            <item>
              <spacer name="verticalSpacer_30">
               <property name="orientation">
                <enum>Qt::Orientation::Vertical</enum>
@@ -4203,11 +4200,6 @@ so bound pages have a wider inner margin.</string>
               </item>
               <item>
                <widget class="QComboBox" name="comboTheme">
-                <item>
-                 <property name="text">
-                  <string>System Theme</string>
-                 </property>
-                </item>
                 <item>
                  <property name="text">
                   <string>Dark</string>

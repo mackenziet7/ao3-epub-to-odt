@@ -1,3 +1,4 @@
+
 /* Buttons */
 QPushButton[iconButton="true"] {
     border: none;
@@ -36,11 +37,11 @@ QListWidget[flatList="true"]::item {
 }
 
 QListWidget[flatList="true"]::item:hover {
-    background: #3a3a3a;         /* adjust to match your existing hover colors */
+    background: #3a3a3a; 
 }
 
 QListWidget[flatList="true"]::item:selected {
-    background: #4a4a4a;         /* adjust to match your button "checked" color */
+    background: #4a4a4a;
     color: white;
 }
 
