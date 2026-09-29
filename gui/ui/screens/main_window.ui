@@ -28,7 +28,7 @@
     <item>
      <widget class="QStackedWidget" name="stackedWidget">
       <property name="currentIndex">
-       <number>0</number>
+       <number>6</number>
       </property>
       <widget class="QWidget" name="page_0">
        <layout class="QVBoxLayout" name="verticalLayout_2">
@@ -1806,8 +1806,8 @@ so bound pages have a wider inner margin.</string>
                     <rect>
                      <x>0</x>
                      <y>0</y>
-                     <width>514</width>
-                     <height>613</height>
+                     <width>362</width>
+                     <height>591</height>
                     </rect>
                    </property>
                    <layout class="QVBoxLayout" name="verticalLayout_9">
@@ -4240,6 +4240,20 @@ so bound pages have a wider inner margin.</string>
                <widget class="QLineEdit" name="lineEditDefaultSave">
                 <property name="text">
                  <string/>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QPushButton" name="buttonBrowse_2">
+                <property name="text">
+                 <string>Browse</string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QPushButton" name="buttonSaveReset">
+                <property name="text">
+                 <string>Reset to Default</string>
                 </property>
                </widget>
               </item>

@@ -4,6 +4,7 @@ import sys
 
 APP_NAME = "AO3toODT"
 DEFAULT_LO_PYTHON = Path(r"C:\Program Files\LibreOffice\program\python.exe")
+DEFAULT_SAVE_LOCATION = str(Path.home() / "Downloads")
 INVALID_FILE_CHARS = set('<>:"/\\|?*')
 
 PRESET_SCHEMA = 1

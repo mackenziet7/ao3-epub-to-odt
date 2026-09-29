@@ -14,6 +14,7 @@ from PySide6.QtWidgets import (
 from PySide6.QtCore import Qt
 from pathlib import Path
 from gui.config import (
+    DEFAULT_SAVE_LOCATION,
     default_preset_source_path,
     load_config,
     config_path,
@@ -34,12 +35,13 @@ def wire_page0(main_window):
     w = main_window.window
 
     config = load_config()
-    output_folder = Path(config.get("output_folder", str(Path.home() / "Downloads")))
 
-    if output_folder.is_dir():
-        w.findChild(QLineEdit, "lineEditOutputFolder").setText(str(output_folder))
-    else:
-        w.findChild(QLineEdit, "lineEditOutputFolder").setText(str(Path.home() / "Downloads"))
+    saved = config.get("output_folder")
+    output_folder = Path(saved) if saved else Path(DEFAULT_SAVE_LOCATION)
+    if not output_folder.is_dir():
+        output_folder = Path(DEFAULT_SAVE_LOCATION)
+
+    w.findChild(QLineEdit, "lineEditOutputFolder").setText(str(output_folder))
 
     splitterPage0 = w.findChild(QSplitter, "splitter")
     splitterPage0.setCollapsible(0, False)
