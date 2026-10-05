@@ -2,6 +2,7 @@
 from PySide6.QtWidgets import (
     QComboBox, QDoubleSpinBox, QFontComboBox, QCheckBox, QRadioButton,
 )
+DEFAULT_PRESET_STEM = "preset_Default_Book_Layout"
 
 CM_TO_IN = 1 / 2.54
 
