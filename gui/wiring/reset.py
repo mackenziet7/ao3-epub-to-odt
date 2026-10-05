@@ -9,6 +9,10 @@ from PySide6.QtGui import QFont
 # page_0 (quick convert), page_5 (progress), page_6 (settings) are untouched.
 WIZARD_PAGE_NAMES = ["page_1", "page_2", "page_3", "page_4"]
 
+_RESTORE_ORDER = [
+    QPushButton, QComboBox, QFontComboBox, QCheckBox, QRadioButton, QLineEdit, QDoubleSpinBox,
+]
+
 _GETTERS = {
     QDoubleSpinBox: lambda w: w.value(),
     QComboBox: lambda w: w.currentIndex(),
@@ -59,13 +63,17 @@ def snapshot_wizard_defaults(main_window):
 
 
 def restore_wizard_defaults(main_window):
-    for name, entry in main_window._wizard_defaults.items():
-        if name.startswith("__"):
-            continue
-        widget_type, value = entry
-        widget = main_window.window.findChild(widget_type, name)
-        if widget is not None:
-            _SETTERS[widget_type](widget, value)
+    defaults = main_window._wizard_defaults
+    for restore_type in _RESTORE_ORDER:
+        for name, entry in defaults.items():
+            if name.startswith("__"):
+                continue
+            widget_type, value = entry
+            if widget_type is not restore_type:
+                continue
+            widget = main_window.window.findChild(widget_type, name)
+            if widget is not None:
+                _SETTERS[widget_type](widget, value)
 
     group_list = main_window.window.findChild(QListWidget, "groupListWidget")
     group_stack = main_window.window.findChild(QStackedWidget, "groupContentStack")

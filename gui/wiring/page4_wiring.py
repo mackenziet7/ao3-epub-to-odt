@@ -1,5 +1,6 @@
 from PySide6.QtWidgets import (
     QCheckBox,
+    QComboBox,
     QLineEdit,
     QListWidget,
     QMessageBox,
@@ -33,18 +34,34 @@ def wire_page4(main_window):
 
     update_next_button_5(main_window)
 
+def apply_page4_mode(main_window):
+    check = main_window._checkSavePreset
+    name_edit = main_window.window.findChild(QLineEdit, "lineEditPresetName")
+
+    if main_window.preset_only:
+        check.setChecked(True)          # keeps _handle_save_preset working unchanged
+        check.setVisible(False)
+        main_window._presetNameWidget.setVisible(True)
+        main_window._buttonNext_5.setText("Complete")
+        if main_window.editing_preset:
+            name_edit.setText(main_window.editing_preset)
+    else:
+        check.setVisible(True)
+        check.setChecked(False)         # also hides the name widget via the toggled signal
+        main_window._buttonNext_5.setText("Next")
+
+    update_next_button_5(main_window)
 
 def update_next_button_5(main_window):
-    """
-    Gate buttonNext_5 on LibreOffice availability so users don't walk
-    through the whole wizard only to hit a dead end on the last page.
-    """
-    reason = lo_missing_reason(main_window)
     next_reasons = []
-    if reason is not None:
-        next_reasons.append(reason)
 
-    if main_window._presetNameWidget.isVisible():
+    # LibreOffice is only needed if actually converting
+    if not main_window.preset_only:
+        reason = lo_missing_reason(main_window)
+        if reason is not None:
+            next_reasons.append(reason)
+
+    if main_window._checkSavePreset.isChecked():
         text = main_window.window.findChild(QLineEdit, "lineEditPresetName").text().strip()
         if not text:
             next_reasons.append("Please enter a preset name")
@@ -56,12 +73,31 @@ def update_next_button_5(main_window):
     main_window._buttonNext_5.setEnabled(not next_reasons)
     main_window._buttonNext_5.setToolTip("\n".join(next_reasons))
 
-
 def _on_next_5_clicked(main_window):
     settings = collect_wizard_settings(main_window)
     if not _handle_save_preset(main_window, settings):
         return  # user cancelled the overwrite prompt — stop here
+
+    if main_window.preset_only:
+        _finish_preset_only(main_window)
+        return
+
     _wizard_convert(main_window, settings)
+
+def _finish_preset_only(main_window):
+    from gui.wiring.page6_wiring import populate_preset_combo_boxes
+    from gui.wiring.page0_wiring import populate_preset_list
+
+    w = main_window.window
+    new_name = w.findChild(QLineEdit, "lineEditPresetName").text().strip()
+    old_name = main_window.editing_preset
+    if old_name and new_name != old_name:
+        preset_name_to_path(old_name).unlink(missing_ok=True)   # rename = replace the old file
+    w.findChild(QLineEdit, "lineEditPresetName").clear()
+
+    populate_preset_combo_boxes(w, w.findChild(QComboBox, "comboRemovePreset"))
+    populate_preset_list(w)
+    main_window._return_to_settings()   # resets history, flag, and page 4 UI
 
 def _handle_save_preset(main_window, settings: dict) -> bool:
     if not main_window._checkSavePreset.isChecked():
@@ -73,6 +109,9 @@ def _handle_save_preset(main_window, settings: dict) -> bool:
     if not path.exists():
         save_preset(name, settings)
         return True
+    if name == main_window.editing_preset:
+            save_preset(name, settings)
+            return True
 
     # file exists — need to ask the user
     reply = QMessageBox.question(

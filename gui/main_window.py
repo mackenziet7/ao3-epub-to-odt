@@ -21,10 +21,10 @@ from gui.wiring.page0_wiring import wire_page0
 from gui.wiring.page1_wiring import wire_page1
 from gui.wiring.page2_wiring import wire_page2
 from gui.wiring.page3_wiring import wire_page3
-from gui.wiring.page4_wiring import wire_page4
+from gui.wiring.page4_wiring import wire_page4, apply_page4_mode
 from gui.wiring.page5_wiring import wire_page5
 from gui.wiring.page6_wiring import wire_page6
-from gui.wiring.reset import snapshot_wizard_defaults
+from gui.wiring.reset import restore_wizard_defaults, snapshot_wizard_defaults
 from gui.theme import apply_theme, refresh_icons
 
 _UI_PATH = Path(__file__).parent / "ui" / "screens" / "main_window.ui"
@@ -44,6 +44,10 @@ class MainWindow:
         self._lo_python = self._resolve_lo_on_startup()
         self.theme = load_config().get("theme", "dark")
         self._theme_refresh_hooks = []
+
+        self.preset_only = False
+        self.editing_preset = None # name of the preset being edited, or None
+
         self.history = [0]
 
         self._updating_page_size_controls = False
@@ -109,6 +113,7 @@ class MainWindow:
 
         self.history.append(index)
         stack.setCurrentIndex(index)
+        self._sync_preset_mode()
 
     def _go_back(self):
         """Return to the previous page in the navigation history."""
@@ -123,6 +128,7 @@ class MainWindow:
 
         stack = self.window.findChild(QStackedWidget, "stackedWidget")
         stack.setCurrentIndex(previous_page)
+        self._sync_preset_mode()
 
     def _complete_wizard(self):
         """Finish the wizard and return to the main page."""
@@ -187,6 +193,21 @@ class MainWindow:
         if button_complete is not None:
             button_complete.clicked.connect(self._complete_wizard)
 
+    def _sync_preset_mode(self):
+        """Leave preset-only mode once the user is back on home or settings."""
+        stack = self.window.findChild(QStackedWidget, "stackedWidget")
+        if self.preset_only and stack.currentIndex() in (0, 6):
+            self.preset_only = False
+            self.editing_preset = None
+            restore_wizard_defaults(self)
+            apply_page4_mode(self)
+
+    def _return_to_settings(self):
+        """Finish preset-only flow: settings becomes the only page above home."""
+        self.history = [0, 6]
+        stack = self.window.findChild(QStackedWidget, "stackedWidget")
+        stack.setCurrentIndex(6)
+        self._sync_preset_mode()
     # ------------------------------------------------------------------
     # Show
     # ------------------------------------------------------------------

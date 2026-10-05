@@ -11,8 +11,9 @@ from PySide6.QtWidgets import (
 from PySide6.QtCore import QUrl, Qt
 from PySide6.QtGui import QDesktopServices
 
-from gui.config import config_path, DEFAULT_SAVE_LOCATION, load_config, preset_name_to_path, save_config
+from gui.config import config_path, DEFAULT_SAVE_LOCATION, load_config, load_preset, preset_name_to_path, save_config
 from gui.wiring.page0_wiring import populate_preset_list
+from gui.wiring.page4_wiring import apply_page4_mode
 from gui.wiring.preset_builder import DEFAULT_PRESET_STEM
 
 def wire_page6(main_window):
@@ -52,6 +53,12 @@ def wire_page6(main_window):
     w.findChild(QPushButton, "buttonRemovePreset").clicked.connect(
         lambda: remove_preset(w, remove_combo)
     )
+    w.findChild(QPushButton, "buttonAddPreset").clicked.connect(
+        lambda: add_preset(main_window)
+    )
+    w.findChild(QPushButton, "buttonEditPreset").clicked.connect(
+        lambda: edit_preset(main_window)
+    )
 
 # ------------------------------------------------------------------
 # Default save folder
@@ -75,7 +82,6 @@ def save_folder_reset(window):
     save_config(cfg)
     window.findChild(QLineEdit, "lineEditDefaultSave").setText(DEFAULT_SAVE_LOCATION)
     window.findChild(QLineEdit, "lineEditOutputFolder").setText(DEFAULT_SAVE_LOCATION)
-
 
 # ------------------------------------------------------------------
 # Presets
@@ -113,3 +119,28 @@ def remove_preset(window,remove_combo):
     preset.unlink(missing_ok=True)
     populate_preset_combo_boxes(window, remove_combo)
     populate_preset_list(window)
+
+def add_preset(main_window):
+    main_window.preset_only = True
+    apply_page4_mode(main_window)
+    main_window._go_to_page(1)
+
+def edit_preset(main_window):
+    from gui.wiring.page4_wiring import apply_page4_mode
+    from gui.wiring.preset_builder import apply_preset_to_wizard
+    from gui.wiring.reset import restore_wizard_defaults
+
+    combo = main_window.window.findChild(QComboBox, "comboEditPreset")
+    path = combo.currentData()
+    if not path:
+        return
+
+    data = load_preset(Path(path))
+    restore_wizard_defaults(main_window)
+    apply_preset_to_wizard(main_window, data)
+
+    main_window.preset_only = True
+    main_window.editing_preset = data.get("preset_name", combo.currentText())
+    apply_page4_mode(main_window)
+
+    main_window._go_to_page(1)

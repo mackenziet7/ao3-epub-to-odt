@@ -18,9 +18,6 @@ from PySide6.QtGui import QIcon, QCursor
 from gui.widgets.page_preview_widget import PagePreviewWidget
 from gui.widgets.page_preview_widget import PAGE_SIZES_MM
 
-_LOCK_ICON   = ":/res/icons/lock_dark.svg"
-_UNLOCK_ICON = ":/res/icons/lock_open_dark.svg"
-
 ALL_SPIN_NAMES = (
     "spinMarginTop", "spinMarginBottom",
     "spinMarginLeft", "spinMarginRight",
