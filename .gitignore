@@ -1,7 +1,7 @@
 # PyInstaller build output
 build/
 dist/
-
+scratch.py
 
 # Python cache files
 __pycache__/

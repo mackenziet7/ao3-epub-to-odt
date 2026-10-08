@@ -64,7 +64,6 @@ def start_conversion(main_window, epub_paths, output_folder, settings):
     main_window._logOutput.append(f"Starting conversion of {len(main_window._queue)} file(s)...")
     _start_next(main_window)
 
-
 def _start_next(main_window):
     epub = main_window._queue[0]
     odt = suggest_odt_path(epub, main_window._output_folder)
@@ -74,20 +73,17 @@ def _start_next(main_window):
         main_window._worker.log_signal.disconnect()
         main_window._worker.finished_signal.disconnect()
 
-    opts = main_window._conversion_settings.get("additional_options", {})
     main_window._worker = ConversionWorker(
         main_window._lo_python,
         get_script_path(),
         epub, odt,
-        opts.get("include_table_of_contents", True),
-        opts.get("include_qr_code", True),
+        main_window._conversion_settings,
     )
     main_window._worker.log_signal.connect(main_window._logOutput.append)
     main_window._worker.finished_signal.connect(
         lambda success: on_finished(main_window, success)
     )
     main_window._worker.start()
-
 
 def on_finished(main_window, success: bool):
     current = main_window._queue.pop(0)
@@ -147,7 +143,11 @@ def _export_log(main_window):
     if path:
         Path(path).write_text(main_window._logOutput.toPlainText(), encoding="utf-8")
 
-
 def _on_complete(main_window):
     reset_ui(main_window)
+
+    main_window._logOutput.clear()
+    main_window.window.findChild(QLabel, "labelCompletionProgress").setText("Conversion in progress. Please wait until completion before closing program.") 
+    main_window.window.findChild(QPushButton, "buttonComplete").setEnabled(False)
+    main_window._progress.setValue(0)
     main_window.window.findChild(QStackedWidget, "stackedWidget").setCurrentIndex(0)

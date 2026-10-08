@@ -1,3 +1,12 @@
+"""
+script_ao3_to_odt.py — pre-parsed book data → print-ready ODT
+Run with LibreOffice's Python (needs only uno + the standard library):
+
+    python.exe script_ao3_to_odt.py --book book.json --preset preset.json --out out.odt
+
+The GUI parses the EPUB and writes book.json. This script never touches the EPUB.
+"""
+import argparse
 import json
 import sys
 import os
@@ -17,37 +26,27 @@ try:
 except ImportError:
     print("\nERROR: 'uno' module not found.")
     print("You must run this script with LibreOffice's Python, not your system Python.")
-    print()
-    print("Run it like this:")
-    print('  & "C:\\Program Files\\LibreOffice\\program\\python.exe" ao3_to_odt.py your_fic.epub')
     sys.exit(1)
 
-# Suppress BeautifulSoup XML-parsed-as-HTML warnings (AO3 epubs are XHTML)
-from bs4 import XMLParsedAsHTMLWarning
-import warnings
-warnings.filterwarnings("ignore", category=XMLParsedAsHTMLWarning)
-
 # Local
-from scripts.ao3_to_odt.epub.parser import parse_epub
+from scripts.ao3_to_odt.epub.models import book_from_dict
 from scripts.ao3_to_odt.writer.connection import find_soffice, is_port_open, start_lo_listener, connect_uno
 from scripts.ao3_to_odt.writer.uno_utils import prop
 from scripts.ao3_to_odt.writer.styles import setup_page_style, create_para_styles
 from scripts.ao3_to_odt.writer.content import build_content
 from scripts.ao3_to_odt.writer.headers import setup_headers
+from scripts.ao3_to_odt.preset_schema import validate_preset
 
 # ═══════════════════════════════════════════════════════════════════════════════
 # MAIN
 # ═══════════════════════════════════════════════════════════════════════════════
-PRESET_SCHEMA = 1
 
 def load_preset(path):
     with open(path, encoding="utf-8") as f:
         preset = json.load(f)
-    if preset.get("schema_version") != PRESET_SCHEMA:
-        raise ValueError(
-            f"Unsupported preset schema {preset.get('schema_version')!r} "
-            f"(expected {PRESET_SCHEMA})"
-        )
+    errors = validate_preset(preset)
+    if errors:
+        raise ValueError("Invalid preset: " + "; ".join(errors))
     return preset
 
 def save_odt(doc, out_path):
@@ -56,14 +55,13 @@ def save_odt(doc, out_path):
     print(f"  [✓] Saved: {out_path}")
 
 
-def convert_epub(epub_path, out_path, preset, port=2002):
+def convert_epub(book, qr_path, out_path, preset, port=2002):
     opts = preset["additional_options"]
     include_toc = opts["include_table_of_contents"]
     include_qr = opts["include_qr_code"]
 
-    # ── Parse epub ────────────────────────────────────────────────────────────
-    print(f"\n{'='*60}\nParsing EPUB\n{'='*60}")
-    book = parse_epub(epub_path)
+    # ── Book summary ───────────────────────── 
+    print(f"\n{'='*60}\nBook\n{'='*60}")
     print(f"  Title:    {book.metadata.title}")
     print(f"  Author:   {book.metadata.author}")
     print(f"  Chapters: {len(book.chapters)}")
@@ -128,7 +126,7 @@ def convert_epub(epub_path, out_path, preset, port=2002):
         create_para_styles(doc, preset["typography_advanced"])
         print("  Para styles done.")
         toc_objects = []
-        build_content(doc, book, include_toc, toc_objects, include_qr)
+        build_content(doc, book, include_toc, toc_objects, include_qr, qr_path=qr_path)
         print("  Content built.")
         if toc_objects:
             try:
@@ -175,76 +173,19 @@ def convert_epub(epub_path, out_path, preset, port=2002):
     print(f"\n  Output: {out_path}")
 
 def main():
-    if len(sys.argv) < 2:
-        print("Usage: python ao3_to_odt.py book.epub [out.odt] --preset preset.json")
-        sys.exit(1)
+    ap = argparse.ArgumentParser()
+    ap.add_argument("--book", required=True)
+    ap.add_argument("--preset", required=True)
+    ap.add_argument("--out", required=True)
+    args = ap.parse_args()
 
-    epub_path = str(Path(sys.argv[1]).resolve())
-    if not Path(epub_path).exists():
-        print(f"ERROR: File not found: {epub_path}")
-        sys.exit(1)
+    with open(args.book, encoding="utf-8") as f:
+        data = json.load(f)
+    qr_path = data.pop("qr_png", None)
+    book = book_from_dict(data)
+    preset = load_preset(args.preset)
 
-    # --debug-chapter N  dumps the raw HTML of document N (0-indexed) so you
-    # can see exactly how notes are structured in a specific chapter
-    if '--debug-chapter' in sys.argv:
-        idx = sys.argv.index('--debug-chapter')
-        doc_num = int(sys.argv[idx + 1]) if idx + 1 < len(sys.argv) else 0
-        import warnings, ebooklib
-        from ebooklib import epub as _epub
-        with warnings.catch_warnings():
-            warnings.simplefilter("ignore")
-            ebook = _epub.read_epub(epub_path)
-        items = list(ebook.get_items_of_type(ebooklib.ITEM_DOCUMENT))
-        print(f"\nAll {len(items)} documents:")
-        for i, item in enumerate(items):
-            print(f"  [{i}] {item.get_name()}")
-        print(f"\n--- Full HTML of document [{doc_num}]: {items[doc_num].get_name()} ---")
-        print(items[doc_num].get_content().decode('utf-8', errors='replace'))
-        sys.exit(0)
-
-    # --debug-notes  parses the epub and shows all notes found per chapter
-    if '--debug-notes' in sys.argv:
-        book = parse_epub(epub_path)
-        print(f"\n{len(book.chapters)} chapters parsed:")
-        for ch in book.chapters:
-            pre = f"{len(ch.prenotes)} chars" if ch.prenotes else "none"
-            end = f"{len(ch.endnotes)} chars" if ch.endnotes else "none"
-            print(f"  Ch {ch.index}: {ch.title}")
-            print(f"    prenotes: {pre}")
-            if ch.prenotes: print(f"      {ch.prenotes[:200]!r}")
-            print(f"    endnotes: {end}")
-            if ch.endnotes: print(f"      {ch.endnotes[:200]!r}")
-        sys.exit(0)
-
-    if len(sys.argv) > 2 and not sys.argv[2].startswith('--'):
-        out_path = sys.argv[2]
-    else:
-        base = Path(epub_path).parent / (Path(epub_path).stem + "_book.odt")
-        out_path = str(base)
-        # If file already exists, add a counter suffix
-        if Path(out_path).exists():
-            counter = 2
-            original_stem = base.stem
-            while Path(out_path).exists():
-                out_path = str(base.with_stem(original_stem + f"_{counter}"))
-                counter += 1
-            print(f"  Output file already exists, saving as: {Path(out_path).name}")
-
-    if '--preset' not in sys.argv:
-        print("ERROR: --preset <file.json> is required")
-        sys.exit(1)
-    preset = load_preset(sys.argv[sys.argv.index('--preset') + 1])
-
-    # CLI flags still override the preset
-    if '--no-toc' in sys.argv:
-        preset["additional_options"]["include_table_of_contents"] = False
-    if '--no-qr' in sys.argv:
-        preset["additional_options"]["include_qr_code"] = False
-
-    convert_epub(epub_path, out_path, preset)
-
-    print("\n  In LibreOffice Writer:")
-    print("  1. File > Export as PDF when ready to print")
+    convert_epub(book, qr_path, args.out, preset)
 
 if __name__ == "__main__":
     main()

@@ -1,29 +1,81 @@
+import json
 import os
-import sys
-import glob
+import shutil
 import subprocess
+import sys
+import tempfile
 import time
+import warnings
 from pathlib import Path
 from PySide6.QtCore import QThread, Signal
+from bs4 import XMLParsedAsHTMLWarning
+
+from scripts.ao3_to_odt.epub.parser import parse_epub
+from scripts.ao3_to_odt.epub.models import book_to_dict
+from scripts.ao3_to_odt.qr import generate_qr_png
+from scripts.ao3_to_odt.preset_schema import SCHEMA_VERSION, validate_preset
+
+warnings.filterwarnings("ignore", category=XMLParsedAsHTMLWarning)
+
+NO_WINDOW = subprocess.CREATE_NO_WINDOW
+
 
 class ConversionWorker(QThread):
     log_signal      = Signal(str)   # emits a line of text to the log
     finished_signal = Signal(bool)  # emits True=success, False=failure
 
-    def __init__(self, lo_python, script, epub, odt, include_toc=True, include_qr=True):
+    def __init__(self, lo_python, script, epub, odt, preset):
         super().__init__()
-        self.lo_python   = lo_python
-        self.script      = script
-        self.epub        = epub
-        self.odt         = odt
-        self.include_toc = include_toc
-        self.include_qr = include_qr
+        self.lo_python = lo_python
+        self.script    = script
+        self.epub      = epub
+        self.odt       = odt
+        self.preset = preset
 
     def run(self):
+        work_dir = Path(tempfile.mkdtemp(prefix="ao3toodt_"))
+        ok = False
+        try:
+            ok = self._convert(work_dir)
+        except Exception as e:
+            self.log_signal.emit(f"ERROR: {e}")
+        finally:
+            shutil.rmtree(work_dir, ignore_errors=True)
+        self.finished_signal.emit(ok)
+
+    def _convert(self, work_dir: Path) -> bool:
+        errors = validate_preset(self.preset)
+        if errors:
+            self.log_signal.emit("Preset problem: " + "; ".join(errors))
+            return False
+        self.log_signal.emit("Parsing EPUB...")
+        book = parse_epub(self.epub)
+        self.log_signal.emit(
+            f"  {book.metadata.title} by {book.metadata.author} "
+            f"({len(book.chapters)} chapters)"
+        )
+
+        payload = book_to_dict(book)
+        payload["qr_png"] = None
+        opts = self.preset.get("additional_options", {})
+        if opts.get("include_qr_code", True) and book.metadata.ao3_url:
+            qr_file = work_dir / "qr.png"
+            try:
+                generate_qr_png(book.metadata.ao3_url, qr_file)
+                payload["qr_png"] = str(qr_file)
+            except Exception as e:
+                self.log_signal.emit(f"  QR code skipped: {e}")
+
+        book_json = work_dir / "book.json"
+        preset_json = work_dir / "preset.json"
+        book_json.write_text(json.dumps(payload), encoding="utf-8")
+        preset_json.write_text(json.dumps(self.preset), encoding="utf-8")
+
+        # ── 2. Existing cleanup + DLL workaround (unchanged) ─────────────────
         subprocess.run(
             ["taskkill", "/f", "/im", "soffice.exe"],
             capture_output=True,
-            creationflags=subprocess.CREATE_NO_WINDOW
+            creationflags=NO_WINDOW
         )
         time.sleep(2)
 
@@ -41,11 +93,11 @@ class ConversionWorker(QThread):
                     except OSError:
                         pass
 
-        cmd = [self.lo_python, "-u", str(self.script), self.epub, self.odt]
-        if not self.include_toc:
-            cmd.append("--no-toc")
-        if not self.include_qr:
-            cmd.append("--no-qr")
+        # ── 3. Run the LO-Python script ──────────────────────────────────────
+        cmd = [self.lo_python, "-u", str(self.script),
+               "--book", str(book_json),
+               "--preset", str(preset_json),
+               "--out", self.odt]
 
         process = subprocess.Popen(
             cmd,
@@ -53,7 +105,7 @@ class ConversionWorker(QThread):
             stderr=subprocess.STDOUT,
             text=True,
             encoding='utf-8',
-            creationflags=subprocess.CREATE_NO_WINDOW
+            creationflags=NO_WINDOW
         )
 
         # Read character by character so partial lines show up live
@@ -76,10 +128,11 @@ class ConversionWorker(QThread):
             self.log_signal.emit(current_line.strip())
 
         # Wait for process to fully exit — the script kills LO itself
-        # so we just need to wait for the python subprocess to finish
+        timed_out = False
         try:
             process.wait(timeout=60)
         except subprocess.TimeoutExpired:
+            timed_out = True
             self.log_signal.emit("Warning: conversion script timed out, forcing stop.")
             process.kill()
             process.wait()
@@ -88,7 +141,14 @@ class ConversionWorker(QThread):
         subprocess.run(
             ["taskkill", "/f", "/im", "soffice.exe"],
             capture_output=True,
-            creationflags=subprocess.CREATE_NO_WINDOW
+            creationflags=NO_WINDOW
         )
 
-        self.finished_signal.emit(True)  
+        # ── 4. Success = exit code 0 AND the output file exists ──────────────
+        if timed_out or process.returncode != 0:
+            self.log_signal.emit(f"Converter exited with code {process.returncode}")
+            return False
+        if not Path(self.odt).exists():
+            self.log_signal.emit("Converter finished but produced no output file.")
+            return False
+        return True

@@ -16,6 +16,7 @@ from PySide6.QtWidgets import (
 )
 
 from gui.wiring import page1_wiring as p1
+from scripts.ao3_to_odt.preset_schema import SCHEMA_VERSION
 
 DEFAULT_PRESET_STEM = "preset_Default_Book_Layout"
 
@@ -257,6 +258,7 @@ def collect_wizard_settings(main_window) -> dict:
     """
     w = main_window.window
     return {
+        "schema_version": SCHEMA_VERSION,
         "page_setup": _collect_page_setup(w),
         "typography_basic": _read_fields(w, _BASIC_FIELDS),
         "typography_advanced": _collect_advanced(w),

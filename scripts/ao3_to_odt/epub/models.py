@@ -1,4 +1,4 @@
-from dataclasses import dataclass, field
+from dataclasses import asdict, dataclass, field
 from typing import Optional
 
 @dataclass
@@ -49,3 +49,25 @@ class AO3Book:
     chapters: list = field(default_factory=list)
     cover_image: Optional[bytes] = None
     cover_image_ext: str = "jpg"
+
+def book_to_dict(book):
+    d = asdict(book)
+    d.pop("cover_image", None)
+    return d
+
+def book_from_dict(d):
+    chapters = []
+    for c in d["chapters"]:
+        body = [
+            Paragraph(type=p["type"], runs=[Run(**r) for r in p["runs"]])
+            for p in c["body"]
+        ]
+        chapters.append(Chapter(
+            index=c["index"], title=c["title"],
+            prenotes=c["prenotes"], endnotes=c["endnotes"], body=body,
+        ))
+    return AO3Book(
+        metadata=AO3Metadata(**d["metadata"]),
+        chapters=chapters,
+        cover_image_ext=d.get("cover_image_ext", "jpg"),
+    )

@@ -2,12 +2,12 @@ import json
 from pathlib import Path
 import sys
 
+from scripts.ao3_to_odt.preset_schema import SCHEMA_VERSION, validate_preset
+
 APP_NAME = "AO3toODT"
 DEFAULT_LO_PYTHON = Path(r"C:\Program Files\LibreOffice\program\python.exe")
 DEFAULT_SAVE_LOCATION = str(Path.home() / "Downloads")
 INVALID_FILE_CHARS = set('<>:"/\\|?*')
-
-PRESET_SCHEMA = 1
 
 # ------------------------------------------------------------------
 # Config
@@ -32,12 +32,17 @@ def save_config(data: dict):
 # ------------------------------------------------------------------
 # Presets
 # ------------------------------------------------------------------
-def load_preset(path: Path | str) -> dict:
-    p = Path(path)
-    return json.loads(p.read_text(encoding="utf-8"))
+
+def load_preset(path):
+    with open(path, encoding="utf-8") as f:
+        preset = json.load(f)
+    errors = validate_preset(preset)
+    if errors:
+        raise ValueError("Invalid preset: " + "; ".join(errors))
+    return preset
 
 def save_preset(name: str, data: dict) -> None:
-    full_data = {"preset_name": name, "schema_version": PRESET_SCHEMA, **data}
+    full_data = {"preset_name": name, "schema_version": SCHEMA_VERSION, **data}
     p = preset_name_to_path(name)
     p.write_text(json.dumps(full_data, indent=2), encoding="utf-8")
 
