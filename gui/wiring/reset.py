@@ -81,6 +81,7 @@ def restore_wizard_defaults(main_window):
         group_list.setCurrentRow(main_window._wizard_defaults.get("__groupListWidget_row", 0))
     if group_stack is not None:
         group_stack.setCurrentIndex(main_window._wizard_defaults.get("__groupContentStack_index", 0))
+    main_window._advanced_edited = False
 
 def reset_ui(main_window):
     restore_wizard_defaults(main_window)

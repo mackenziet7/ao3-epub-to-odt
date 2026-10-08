@@ -8,6 +8,8 @@ from PySide6.QtWidgets import (
 )
 from PySide6.QtGui import QIcon
 
+from gui.wiring.preset_builder import track_advanced_edits
+
 _CIRCLE_CHECKED_ICON = ":/res/icons/circle_checked.svg"
 
 
@@ -51,7 +53,7 @@ def wire_page3(main_window):
     main_window.register_theme_refresh(
         lambda mode: _refresh_circle_icons(main_window, mode)
     )
-
+    track_advanced_edits(main_window)
 
 def _refresh_circle_icons(main_window, mode: str):
     empty_icon = _circle_empty_icon(mode)

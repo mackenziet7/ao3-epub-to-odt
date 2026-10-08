@@ -27,6 +27,28 @@ _SIZE_PRESET_SLUGS = {
 }
 _SLUG_TO_SIZE_KEY = {slug: key for key, slug in _SIZE_PRESET_SLUGS.items()}
 
+# (widget, source, ratio): source is "header" or "body"
+_DERIVED_SIZES = [
+    ("spinChapHeaderFontSize",        "header", 1.0),
+    ("spinFrontMatterHeadSize",       "header", 1.0),
+    ("spinAppendixHeadSize",          "body",   11.0 / 11.5),
+    ("spinMainBookBodyFontSize",      "body",   1.0),
+    ("spinFrontMatterSize",           "body",   9.0 / 11.5),
+    ("spinQrCaptionSize",             "body",   10.0 / 11.5),
+    ("spinAppendixNoteLabelSize",     "body",   8.0 / 11.5),
+    ("spinAppendixNoteSize",          "body",   8.0 / 11.5),
+]
+
+_DERIVED_FONTS = [
+    ("comboChapHeadFont",            "header"),
+    ("comboFrontMatterHeadFont",     "header"),
+    ("comboAppendixHeaderFont",      "header"),
+    ("comboMainBookBodyFont",        "body"),
+    ("comboFrontMatterFont",         "body"),
+    ("comboQrCaptionFont",           "body"),
+    ("comboAppendixNoteLabelFont",   "body"),
+    ("comboAppendixNoteFont",        "body"),
+]
 
 # ------------------------------------------------------------------
 # Widget access
@@ -307,3 +329,42 @@ def apply_preset_to_wizard(main_window, data: dict) -> None:
         _write_fields(w, fields, _dig(advanced, path))
 
     _write_fields(w, _OPTION_FIELDS, data.get("additional_options", {}))
+    main_window._advanced_edited = True
+
+# ------------------------------------------------------------------
+# Derived values for preset
+# ------------------------------------------------------------------
+def derive_advanced_from_basic(main_window) -> None:
+    """Fill page 3 font/size widgets from the basic fonts/sizes (page 2).
+    No-op once the user has edited page 3."""
+    if main_window._advanced_edited:
+        return
+    w = main_window.window
+
+    fonts = {"header": _get_font(w, "comboHeaderFont"), "body": _get_font(w, "comboBodyFont")}
+    sizes = {"header": _get_spin(w, "spinHeaderFontSize"), "body": _get_spin(w, "spinBodyFontSize")}
+
+    was_edited = main_window._advanced_edited      # derivation must not count as an edit
+    try:
+        for widget, source in _DERIVED_FONTS:
+            _set_font(w, widget, fonts[source])
+        for widget, source, ratio in _DERIVED_SIZES:
+            _set_spin(w, widget, round(sizes[source] * ratio * 2) / 2)
+    finally:
+        main_window._advanced_edited = was_edited
+
+
+def track_advanced_edits(main_window) -> None:
+    """Call once from wire_page3, after the widgets exist."""
+    w = main_window.window
+    mark = lambda *_: setattr(main_window, "_advanced_edited", True)
+    signal_for = {
+        "spin":  lambda x: x.valueChanged,
+        "check": lambda x: x.toggled,
+        "align": lambda x: x.currentIndexChanged,
+        "font":  lambda x: x.currentFontChanged,
+    }
+    cls_for = {"spin": QDoubleSpinBox, "check": QCheckBox, "align": QComboBox, "font": QFontComboBox}
+    for fields in _ADVANCED_FIELDS.values():
+        for _key, widget, kind in fields:
+            signal_for[kind](_widget(w, cls_for[kind], widget)).connect(mark)

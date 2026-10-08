@@ -10,7 +10,7 @@ from PySide6.QtWidgets import (
 )
 
 from gui.config import INVALID_FILE_CHARS, lo_missing_reason, preset_name_to_path, save_preset
-from gui.wiring.preset_builder import collect_wizard_settings
+from gui.wiring.preset_builder import collect_wizard_settings, derive_advanced_from_basic
 from gui.wiring.page5_wiring import start_conversion
 
 # ------------------------------------------------------------------
@@ -74,6 +74,7 @@ def update_next_button_5(main_window):
     main_window._buttonNext_5.setToolTip("\n".join(next_reasons))
 
 def _on_next_5_clicked(main_window):
+    derive_advanced_from_basic(main_window)
     settings = collect_wizard_settings(main_window)
     if not _handle_save_preset(main_window, settings):
         return  # user cancelled the overwrite prompt — stop here

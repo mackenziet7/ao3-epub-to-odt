@@ -24,6 +24,7 @@ from gui.wiring.page3_wiring import wire_page3
 from gui.wiring.page4_wiring import wire_page4, apply_page4_mode
 from gui.wiring.page5_wiring import wire_page5
 from gui.wiring.page6_wiring import wire_page6
+from gui.wiring.preset_builder import derive_advanced_from_basic
 from gui.wiring.reset import restore_wizard_defaults, snapshot_wizard_defaults
 from gui.theme import apply_theme, refresh_icons
 
@@ -46,6 +47,7 @@ class MainWindow:
         self._theme_refresh_hooks = []
 
         self.preset_only = False
+        self._advanced_edited = False
         self.editing_preset = None # name of the preset being edited, or None
 
         self.history = [0]
@@ -113,6 +115,8 @@ class MainWindow:
 
         self.history.append(index)
         stack.setCurrentIndex(index)
+        if index == 3:
+            derive_advanced_from_basic(self)
         self._sync_preset_mode()
 
     def _go_back(self):
