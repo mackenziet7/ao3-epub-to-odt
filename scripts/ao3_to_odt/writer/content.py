@@ -185,13 +185,9 @@ def build_content(doc, book, include_toc=True, toc_objects=None, include_qr=True
         first_para = True
         for para in ch.body:
             if para.type == 'break':
-                cursor.setPropertyValue("ParaStyleName", "MyBody")
-                cursor.setPropertyValue("ParaAdjust", 2)
-                cursor.setPropertyValue("ParaFirstLineIndent", 0)
-                text.insertString(cursor, "* * *", False)
-                text.insertControlCharacter(cursor, PARAGRAPH_BREAK, False)
-                # first_para stays False — paragraph after scene break is indented
-                # (only the very first para of a chapter skips the indent)
+                    cursor.setPropertyValue("ParaStyleName", "SceneBreak")
+                    text.insertString(cursor, "* * *", False)
+                    text.insertControlCharacter(cursor, PARAGRAPH_BREAK, False)
             else:
                 style = "MyBodyFirst" if first_para else "MyBody"
                 cursor.setPropertyValue("ParaStyleName", style)

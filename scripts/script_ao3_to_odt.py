@@ -1,20 +1,4 @@
-"""
-ao3_to_odt.py  —  AO3 EPUB → Print-ready ODT
-==============================================
-Single script, run it with LibreOffice's Python directly.
-
-STEP 1 — find LO's Python (one-time, run in regular PowerShell):
-    dir "C:/Program Files/LibreOffice/program/python.exe"
-
-STEP 2 — run this script with LO's Python every time:
-    & "C:/Program Files/LibreOffice/program/python.exe" ao3_to_odt.py your_fic.epub
-
-Output: your_fic_book.odt in the same folder as the epub.
-
-Requires ebooklib + beautifulsoup4 installed into LO's Python.
-On first run this script installs them automatically.
-"""
-
+import json
 import sys
 import os
 import time
@@ -54,16 +38,145 @@ from scripts.ao3_to_odt.writer.headers import setup_headers
 # ═══════════════════════════════════════════════════════════════════════════════
 # MAIN
 # ═══════════════════════════════════════════════════════════════════════════════
+PRESET_SCHEMA = 1
 
+def load_preset(path):
+    with open(path, encoding="utf-8") as f:
+        preset = json.load(f)
+    if preset.get("schema_version") != PRESET_SCHEMA:
+        raise ValueError(
+            f"Unsupported preset schema {preset.get('schema_version')!r} "
+            f"(expected {PRESET_SCHEMA})"
+        )
+    return preset
 
 def save_odt(doc, out_path):
     url = uno.systemPathToFileUrl(os.path.abspath(out_path))
     doc.storeToURL(url, [prop("FilterName", "writer8"), prop("Overwrite", True)])
     print(f"  [✓] Saved: {out_path}")
 
+
+def convert_epub(epub_path, out_path, preset, port=2002):
+    opts = preset["additional_options"]
+    include_toc = opts["include_table_of_contents"]
+    include_qr = opts["include_qr_code"]
+
+    # ── Parse epub ────────────────────────────────────────────────────────────
+    print(f"\n{'='*60}\nParsing EPUB\n{'='*60}")
+    book = parse_epub(epub_path)
+    print(f"  Title:    {book.metadata.title}")
+    print(f"  Author:   {book.metadata.author}")
+    print(f"  Chapters: {len(book.chapters)}")
+    print(f"  Words:    {book.metadata.words}")
+
+    # ── Start LO listener ─────────────────────────────────────────────────────
+    print(f"\n{'='*60}\nStarting LibreOffice\n{'='*60}")
+    lo_process = None
+    if is_port_open(port):
+        print("  Already running, connecting...")
+    else:
+        soffice = find_soffice()
+        if not soffice:
+            print("ERROR: Cannot find soffice executable.")
+            sys.exit(1)
+        print(f"  Launching: {soffice}")
+        lo_process = start_lo_listener(soffice, port)
+        print("  Waiting for LO to start", end="", flush=True)
+        for _ in range(40):
+            if is_port_open(port):
+                break
+            # Check if process died early
+            if lo_process.poll() is not None:
+                stdout, stderr = lo_process.communicate()
+                print(f"\n  ERROR: LO exited with code {lo_process.returncode}")
+                if stderr: print(f"  stderr: {stderr.decode(errors='replace')[:500]}")
+                sys.exit(1)
+            print(".", end="", flush=True)
+            time.sleep(1)
+        print()
+        # Wait for UNO bridge to be fully initialised (port open != UNO ready)
+        print("  Port open, waiting for UNO bridge...", end="", flush=True)
+        for _ in range(8):
+            time.sleep(1)
+            print(".", end="", flush=True)
+        print(" ready!")
+
+    # ── Build document ────────────────────────────────────────────────────────
+    print(f"\n{'='*60}\nBuilding document\n{'='*60}")
+    try:
+        print("  Connecting...")
+        desktop = connect_uno(port)
+        print("  Connected. Creating document...")
+        doc = None
+        for attempt in range(6):
+            try:
+                doc = desktop.loadComponentFromURL(
+                    "private:factory/swriter", "_blank", 0, [
+                        prop("Hidden", True),
+                        prop("MacroExecutionMode", 4),
+                    ])
+                break
+            except Exception as e:
+                if attempt < 5:
+                    print(f"  Attempt {attempt+1} failed ({e}), retrying in 3s...")
+                    time.sleep(3)
+                else:
+                    raise
+        print("  Document created.")
+        setup_page_style(doc, preset["page_setup"])
+        print("  Page style done.")
+        create_para_styles(doc, preset["typography_advanced"])
+        print("  Para styles done.")
+        toc_objects = []
+        build_content(doc, book, include_toc, toc_objects, include_qr)
+        print("  Content built.")
+        if toc_objects:
+            try:
+                toc_objects[0].update()
+                print("  [✓] TOC refreshed")
+            except Exception as e:
+                print(f"  TOC refresh failed (open in LO and press F9): {e}")
+        setup_headers(doc, book.metadata, preset["typography_advanced"]["main_book"]["body"]["font"])
+        print("  Headers done.")
+        save_odt(doc, out_path)
+        time.sleep(2)
+        print("  Closing document...")
+        import threading
+        close_done = threading.Event()
+
+        def close_doc():
+            try:
+                doc.close(True)
+            except Exception:
+                pass
+            finally:
+                close_done.set()
+
+        t = threading.Thread(target=close_doc, daemon=True)
+        t.start()
+        if close_done.wait(timeout=10):
+            print("  Document closed.")
+        else:
+            print("  Document close timed out, continuing anyway.")
+
+    except Exception as e:
+        print(f"\nERROR during document build:\n  {e}")
+        import traceback; traceback.print_exc()
+        raise
+    finally:
+        if lo_process:
+            lo_process.kill()
+            try: lo_process.wait(timeout=5)
+            except: pass
+            subprocess.run(["taskkill", "/f", "/im", "soffice.exe"], capture_output=True)
+            print("  LO shut down.")
+
+    print(f"\n{'='*60}\nDONE\n{'='*60}")
+    print(f"\n  Output: {out_path}")
+
 def main():
     if len(sys.argv) < 2:
-        print(__doc__)
+        print("Usage: python ao3_to_odt.py book.epub [out.odt] --preset preset.json")
         sys.exit(1)
 
     epub_path = str(Path(sys.argv[1]).resolve())
@@ -117,122 +230,19 @@ def main():
                 counter += 1
             print(f"  Output file already exists, saving as: {Path(out_path).name}")
 
-    PORT = 2002
+    if '--preset' not in sys.argv:
+        print("ERROR: --preset <file.json> is required")
+        sys.exit(1)
+    preset = load_preset(sys.argv[sys.argv.index('--preset') + 1])
 
-    # ── Parse epub ────────────────────────────────────────────────────────────
-    print(f"\n{'='*60}\nParsing EPUB\n{'='*60}")
-    book = parse_epub(epub_path)
-    print(f"  Title:    {book.metadata.title}")
-    print(f"  Author:   {book.metadata.author}")
-    print(f"  Chapters: {len(book.chapters)}")
-    print(f"  Words:    {book.metadata.words}")
+    # CLI flags still override the preset
+    if '--no-toc' in sys.argv:
+        preset["additional_options"]["include_table_of_contents"] = False
+    if '--no-qr' in sys.argv:
+        preset["additional_options"]["include_qr_code"] = False
 
-    # ── Start LO listener ─────────────────────────────────────────────────────
-    print(f"\n{'='*60}\nStarting LibreOffice\n{'='*60}")
-    lo_process = None
-    if is_port_open(PORT):
-        print("  Already running, connecting...")
-    else:
-        soffice = find_soffice()
-        if not soffice:
-            print("ERROR: Cannot find soffice executable.")
-            sys.exit(1)
-        print(f"  Launching: {soffice}")
-        lo_process = start_lo_listener(soffice, PORT)
-        print("  Waiting for LO to start", end="", flush=True)
-        for _ in range(40):
-            if is_port_open(PORT):
-                break
-            # Check if process died early
-            if lo_process.poll() is not None:
-                stdout, stderr = lo_process.communicate()
-                print(f"\n  ERROR: LO exited with code {lo_process.returncode}")
-                if stderr: print(f"  stderr: {stderr.decode(errors='replace')[:500]}")
-                sys.exit(1)
-            print(".", end="", flush=True)
-            time.sleep(1)
-        print()
-        # Wait for UNO bridge to be fully initialised (port open != UNO ready)
-        print("  Port open, waiting for UNO bridge...", end="", flush=True)
-        for _ in range(8):
-            time.sleep(1)
-            print(".", end="", flush=True)
-        print(" ready!")
+    convert_epub(epub_path, out_path, preset)
 
-    # ── Build document ────────────────────────────────────────────────────────
-    print(f"\n{'='*60}\nBuilding document\n{'='*60}")
-    try:
-        print("  Connecting...")
-        desktop = connect_uno(PORT)
-        print("  Connected. Creating document...")
-        doc = None
-        for attempt in range(6):
-            try:
-                doc = desktop.loadComponentFromURL(
-                    "private:factory/swriter", "_blank", 0, [
-                        prop("Hidden", True),
-                        prop("MacroExecutionMode", 4),
-                    ])
-                break
-            except Exception as e:
-                if attempt < 5:
-                    print(f"  Attempt {attempt+1} failed ({e}), retrying in 3s...")
-                    time.sleep(3)
-                else:
-                    raise
-        print("  Document created.")
-        setup_page_style(doc)
-        print("  Page style done.")
-        create_para_styles(doc)
-        print("  Para styles done.")
-        include_toc = '--no-toc' not in sys.argv
-        include_qr = '--no-qr' not in sys.argv
-        toc_objects = []
-        build_content(doc, book, include_toc, toc_objects, include_qr)
-        print("  Content built.")
-        if toc_objects:
-            try:
-                toc_objects[0].update()
-                print("  [✓] TOC refreshed")
-            except Exception as e:
-                print(f"  TOC refresh failed (open in LO and press F9): {e}")
-        setup_headers(doc, book.metadata)
-        print("  Headers done.")
-        save_odt(doc, out_path)
-        time.sleep(2)
-        print("  Closing document...")
-        import threading
-        close_done = threading.Event()
-
-        def close_doc():
-            try:
-                doc.close(True)
-            except Exception:
-                pass
-            finally:
-                close_done.set()
-
-        t = threading.Thread(target=close_doc, daemon=True)
-        t.start()
-        if close_done.wait(timeout=10):
-            print("  Document closed.")
-        else:
-            print("  Document close timed out, continuing anyway.")
-
-    except Exception as e:
-        print(f"\nERROR during document build:\n  {e}")
-        import traceback; traceback.print_exc()
-        raise
-    finally:
-        if lo_process:
-            lo_process.kill()
-            try: lo_process.wait(timeout=5)
-            except: pass
-            subprocess.run(["taskkill", "/f", "/im", "soffice.exe"], capture_output=True)
-            print("  LO shut down.")
-
-    print(f"\n{'='*60}\nDONE\n{'='*60}")
-    print(f"\n  Output: {out_path}")
     print("\n  In LibreOffice Writer:")
     print("  1. File > Export as PDF when ready to print")
 
