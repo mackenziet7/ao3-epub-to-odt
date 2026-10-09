@@ -1,0 +1,233 @@
+"""
+gui/main_window.py
+==================
+MainWindow: loads main_window.ui, wires all signals/slots, and hosts the
+custom PagePreviewWidget for the Page Setup screen.
+
+Entry point: call run() from main.py.
+"""
+import sys
+
+from pathlib import Path
+
+from PySide6.QtWidgets import *
+from PySide6.QtUiTools import QUiLoader
+
+from gui.config import resolve_lo_python, load_config, save_config
+from gui.first_run_dialog import LOPathDialog
+
+from gui.ui import resources_rc  # noqa: F401 — registers Qt resources
+from gui.wiring.page0_wiring import wire_page0
+from gui.wiring.page1_wiring import wire_page1
+from gui.wiring.page2_wiring import wire_page2
+from gui.wiring.page3_wiring import wire_page3
+from gui.wiring.page4_wiring import wire_page4, apply_page4_mode
+from gui.wiring.page5_wiring import wire_page5
+from gui.wiring.page6_wiring import wire_page6
+from gui.wiring.preset_builder import derive_advanced_from_basic
+from gui.wiring.reset import restore_wizard_defaults, snapshot_wizard_defaults
+from gui.theme import apply_theme, refresh_icons
+
+_UI_PATH = Path(__file__).parent / "ui" / "screens" / "main_window.ui"
+
+class MainWindow:
+    """
+    Wraps the QUiLoader window and owns all signal/slot wiring.
+
+    Not a QMainWindow subclass — we load the window from .ui and store it
+    on self.window, matching the established pattern in this project.
+    """
+
+    def __init__(self):
+        loader = QUiLoader()
+        self.window = loader.load(str(_UI_PATH))
+
+        self._lo_python = self._resolve_lo_on_startup()
+        self.theme = load_config().get("theme", "dark")
+        self._theme_refresh_hooks = []
+
+        self.preset_only = False
+        self._advanced_edited = False
+        self.editing_preset = None # name of the preset being edited, or None
+
+        self.history = [0]
+
+        self._updating_page_size_controls = False
+        self._page_size_aspect_ratio = 1.0
+        self._tb_margin_ratio = 1.0
+        self._lr_margin_ratio = 1.0
+        wire_page0(self)
+        wire_page1(self)
+        wire_page2(self)
+        wire_page3(self)
+        wire_page4(self)
+        wire_page5(self)
+        wire_page6(self)
+        self._wire_navigation()
+        snapshot_wizard_defaults(self)
+
+    def _resolve_lo_on_startup(self):
+        lo = resolve_lo_python()
+        if lo is not None:
+            return lo
+
+        cfg = load_config()
+        invalid = cfg.get("lo_python")
+
+        dialog = LOPathDialog(
+            self.window,
+            invalid_path=invalid
+        )
+
+        if dialog.exec() == QDialog.DialogCode.Accepted:
+            return Path(load_config()["lo_python"])
+
+        # User closed the LibreOffice dialog with X
+        QApplication.quit()
+        sys.exit(0)
+
+    def set_theme(self, text: str):
+        mode = "dark" if text == "Dark" else "light"
+        self.theme = mode
+        apply_theme(mode)
+        refresh_icons(self, mode)
+
+        cfg = load_config()
+        cfg["theme"] = mode
+        save_config(cfg)
+
+    def register_theme_refresh(self, callback):
+        """Pages call this to register a function that re-applies themed
+        icons when the app theme changes. callback receives the mode string."""
+        self._theme_refresh_hooks.append(callback)
+    
+    # ------------------------------------------------------------------
+    # Navigation
+    # ------------------------------------------------------------------
+    def _go_to_page(self, index):
+        """Navigate to a page and record it in the history stack."""
+        stack = self.window.findChild(QStackedWidget, "stackedWidget")
+
+        current = stack.currentIndex()
+
+        if current == index:
+            return
+
+        self.history.append(index)
+        stack.setCurrentIndex(index)
+        if index == 3:
+            derive_advanced_from_basic(self)
+        self._sync_preset_mode()
+
+    def _go_back(self):
+        """Return to the previous page in the navigation history."""
+        if len(self.history) <= 1:
+            return
+
+        # Remove the current page.
+        self.history.pop()
+
+        # The new last item is the previous page.
+        previous_page = self.history[-1]
+
+        stack = self.window.findChild(QStackedWidget, "stackedWidget")
+        stack.setCurrentIndex(previous_page)
+        self._sync_preset_mode()
+
+    def _complete_wizard(self):
+        """Finish the wizard and return to the main page."""
+        self.history = [0]
+
+        stack = self.window.findChild(QStackedWidget, "stackedWidget")
+        stack.setCurrentIndex(0)
+
+
+    def _wire_navigation(self):
+        w = self.window
+        stack = w.findChild(QStackedWidget, "stackedWidget")
+        stack.setCurrentIndex(0)  # always start on the main screen
+
+        # --------------------------------------------------------------
+        # Forward navigation
+        # --------------------------------------------------------------
+        forward_pairs = [
+            ("buttonConvert", 5),       # main → convert
+            ("buttonNext", 1),          # main → page setup
+
+            ("buttonSettings", 6),      # main → settings
+
+            ("buttonNext_2", 2),        # page setup → typography basic
+
+            ("buttonMoreOptions", 3),   # typography basic → more options
+            ("buttonNext_3", 4),        # typography basic → additional options
+        ]
+
+        for button_name, target_index in forward_pairs:
+            button = w.findChild(QPushButton, button_name)
+
+            if button is None:
+                continue
+
+            button.clicked.connect(
+                lambda checked=False, idx=target_index:
+                    self._go_to_page(idx)
+            )
+
+        # Back navigation
+        back_buttons = [
+            "buttonBack",
+            "buttonBack_2",
+            "buttonBack_4",
+            "buttonBack_5",
+        ]
+
+        for button_name in back_buttons:
+            button = w.findChild(QPushButton, button_name)
+            if button is None:
+                continue
+
+            button.clicked.connect(
+                lambda checked=False:
+                    self._go_back()
+            )
+
+        # Complete wizard
+        button_complete = w.findChild(QPushButton, "buttonComplete")
+
+        if button_complete is not None:
+            button_complete.clicked.connect(self._complete_wizard)
+
+    def _sync_preset_mode(self):
+        """Leave preset-only mode once the user is back on home or settings."""
+        stack = self.window.findChild(QStackedWidget, "stackedWidget")
+        if self.preset_only and stack.currentIndex() in (0, 6):
+            self.preset_only = False
+            self.editing_preset = None
+            restore_wizard_defaults(self)
+            apply_page4_mode(self)
+
+    def _return_to_settings(self):
+        """Finish preset-only flow: settings becomes the only page above home."""
+        self.history = [0, 6]
+        stack = self.window.findChild(QStackedWidget, "stackedWidget")
+        stack.setCurrentIndex(6)
+        self._sync_preset_mode()
+    # ------------------------------------------------------------------
+    # Show
+    # ------------------------------------------------------------------
+    def show(self):
+        self.window.show()
+
+
+def run():
+    import sys
+    app = QApplication.instance() or QApplication(sys.argv)
+    cfg = load_config()
+    mode = cfg.get("theme", "dark")
+    apply_theme(mode)
+
+    mw = MainWindow()
+    refresh_icons(mw, mode)
+    mw.show()
+
+    sys.exit(app.exec())

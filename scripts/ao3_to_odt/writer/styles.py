@@ -3,6 +3,8 @@ import uno
 
 from .uno_utils import inches, pt, prop, fixed_ls, prop_ls
 
+ALIGN = {"left": 0, "right": 1, "justify": 2, "center": 3}
+
 def get_or_create_style(doc, name, parent="Standard"):
     styles = doc.getStyleFamilies().getByName("ParagraphStyles")
     if not styles.hasByName(name):
@@ -27,62 +29,62 @@ def get_or_create_page_style(doc, name):
         page_styles.insertByName(name, s)
     return page_styles.getByName(name)
 
-# Apply 5.5x8.5 mirrored layout to a page style.
-def apply_book_page_dims(ps):
-    ps.IsLandscape     = False
-    ps.Width           = inches(5.5)
-    ps.Height          = inches(8.5)
-    ps.PageStyleLayout = MIRRORED
-    ps.TopMargin       = inches(0.64)
-    ps.BottomMargin    = inches(0.60)
-    ps.LeftMargin      = inches(0.90)
-    ps.RightMargin     = inches(0.60)
-    ps.FooterIsOn      = False
+def _apply_dims(ps, page):
+    w, h = page["width_in"], page["height_in"]
+    landscape = page["orientation"] == "landscape"
+    if landscape and w < h:          # preset stores portrait dims
+        w, h = h, w
+    ps.IsLandscape  = landscape
+    ps.Width        = inches(w)
+    ps.Height       = inches(h)
+    ps.TopMargin    = inches(page["margins"]["top"])
+    ps.BottomMargin = inches(page["margins"]["bottom"])
+    ps.FooterIsOn   = False
 
-def apply_frontmatter_page_dims(ps, is_verso=False):
-    ps.IsLandscape     = False
-    ps.Width           = inches(5.5)
-    ps.Height          = inches(8.5)
-    ps.PageStyleLayout = ALL          # no recto/verso enforcement → no auto blanks
-    ps.TopMargin       = inches(0.64)
-    ps.BottomMargin    = inches(0.60)
-    # Manually mirror: spine (wider) margin swaps side depending on recto/verso
-    if is_verso:
-        ps.LeftMargin  = inches(0.60)   # outer
-        ps.RightMargin = inches(0.90)   # spine
+def apply_book_page_dims(ps, page):
+    _apply_dims(ps, page)
+    m = page["margins"]
+    ps.PageStyleLayout = MIRRORED if page["mirrored_margins"] else ALL
+    ps.LeftMargin  = inches(m["inside"])    # in MIRRORED, Left = inside
+    ps.RightMargin = inches(m["outside"])
+
+def apply_frontmatter_page_dims(ps, page, is_verso=False):
+    _apply_dims(ps, page)
+    m = page["margins"]
+    ps.PageStyleLayout = ALL                # no recto/verso enforcement → no auto blanks
+    if page["mirrored_margins"] and is_verso:
+        ps.LeftMargin, ps.RightMargin = inches(m["outside"]), inches(m["inside"])
     else:
-        ps.LeftMargin  = inches(0.90)   # spine
-        ps.RightMargin = inches(0.60)   # outer
-    ps.FooterIsOn      = False
+        ps.LeftMargin, ps.RightMargin = inches(m["inside"]), inches(m["outside"])
 
-def setup_page_style(doc):
+def setup_page_style(doc,  page):
     # ── Default Page Style: running headers on, mirrored ──────────────────
     ps = get_default_page_style(doc)
-    apply_book_page_dims(ps)
+    apply_book_page_dims(ps, page)
     ps.HeaderIsOn         = True
     ps.HeaderIsShared     = False
     ps.HeaderBodyDistance = pt(18)
 
     # ── ChapterFirstPage: same dims, NO header ─────────────────────────────
     cfp = get_or_create_page_style(doc, "ChapterFirstPage")
-    apply_book_page_dims(cfp)
+    apply_book_page_dims(cfp, page)
     cfp.HeaderIsOn  = False
     default_name    = get_default_page_style(doc).Name
     cfp.FollowStyle = default_name
 
     # ── FrontMatterRecto: odd/right pages — no header ─────────────────────
     fmr = get_or_create_page_style(doc, "FrontMatterRecto")
-    apply_frontmatter_page_dims(fmr, is_verso=False)
+    apply_frontmatter_page_dims(fmr, page, is_verso=False)
     fmr.HeaderIsOn  = False
 
     # ── FrontMatterVerso: even/left pages — no header ─────────────────────
     fmv = get_or_create_page_style(doc, "FrontMatterVerso")
-    apply_frontmatter_page_dims(fmv, is_verso=True)
+    apply_frontmatter_page_dims(fmv, page, is_verso=True)
     fmv.HeaderIsOn  = False
 
     # ── AppendixPage: same dims, NO header ────────────────────────────────────
     ap = get_or_create_page_style(doc, "AppendixPage")
-    apply_book_page_dims(ap)
+    apply_book_page_dims(ap, page)
     ap.HeaderIsOn  = False
     ap.FollowStyle = "AppendixPage"  # stays in appendix mode for all subsequent pages
 
@@ -93,92 +95,83 @@ def setup_page_style(doc):
         except Exception:
             pass  # property may not exist in this LO version
 
-    print("  [✓] Page: 5.5×8.5\", mirrored margins, page styles created")
+    print(f"  [✓] Page: {page['size_preset']}, mirrored={page['mirrored_margins']}, page styles created")
 
-def create_para_styles(doc):
+def _apply(s, d):
+    """Apply preset keys to a style; missing/None keys are skipped (inherit)."""
+    def has(k): return d.get(k) is not None
+    if has("font"):                 s.CharFontName = d["font"]
+    if has("size_pt"):              s.CharHeight = d["size_pt"]
+    if has("bold"):                 s.CharWeight = 150 if d["bold"] else 100
+    if has("italic"):               s.CharPosture = 2 if d["italic"] else 0
+    if has("alignment"):            s.ParaAdjust = ALIGN[d["alignment"]]
+    if has("top_margin_in"):        s.ParaTopMargin = inches(d["top_margin_in"])
+    if has("bottom_margin_in"):     s.ParaBottomMargin = inches(d["bottom_margin_in"])
+    if has("left_margin_in"):       s.ParaLeftMargin = inches(d["left_margin_in"])
+    if has("first_line_indent_in"): s.ParaFirstLineIndent = inches(d["first_line_indent_in"])
+    if has("line_spacing_in"):      s.ParaLineSpacing = fixed_ls(inches(d["line_spacing_in"]))
+
+def create_para_styles(doc, adv):
+    mb, fm, ap = adv["main_book"], adv["front_matter"], adv["appendix"]
+
     body = get_or_create_style(doc, "MyBody")
-    body.CharHeight           = 11.5
-    body.CharFontName         = "Garamond"
-    body.ParaAdjust           = 0        # left
-    body.ParaFirstLineIndent  = inches(0.30)
-    body.ParaLineSpacing      = fixed_ls(pt(16))
-    body.ParaTopMargin        = 0
-    body.ParaBottomMargin     = 0
-    body.ParaOrphans          = 2
-    body.ParaWidows           = 2
+    _apply(body, mb["body"])
+    body.ParaTopMargin = 0
+    body.ParaBottomMargin = 0
+    body.ParaOrphans = 2
+    body.ParaWidows = 2
 
     first = get_or_create_style(doc, "MyBodyFirst", "MyBody")
-    first.ParaFirstLineIndent = 0
+    first.ParaFirstLineIndent = (
+        0 if mb["body"]["no_indent_on_first_paragraph_after_heading"]
+        else inches(mb["body"]["first_line_indent_in"])
+    )
+
+    sb = get_or_create_style(doc, "SceneBreak", "MyBody")
+    sb.ParaAdjust = 3
+    sb.ParaFirstLineIndent = 0
 
     front = get_or_create_style(doc, "FrontMatter")
-    front.CharHeight          = 9.0
-    front.CharFontName        = "Garamond"
-    front.ParaAdjust          = 0        # left
+    _apply(front, fm["body"])
     front.ParaFirstLineIndent = 0
-    front.ParaLineSpacing     = prop_ls(100)
+    front.ParaLineSpacing = prop_ls(100)
 
-    # ── ChapHeads: chapter titles only — OutlineLevel=1 so TOC picks them up
     chap = get_or_create_style(doc, "ChapHeads")
-    chap.CharHeight           = 18.0
-    chap.CharFontName         = "Garamond"
-    chap.CharWeight           = 150      # bold
-    chap.ParaAdjust           = 3        # center (block center)
-    chap.ParaFirstLineIndent  = 0
-    chap.ParaTopMargin        = pt(24)
-    chap.ParaBottomMargin     = pt(18)
-    chap.OutlineLevel         = 1        # ← indexed by TOC
+    _apply(chap, mb["chapter_headers"])
+    chap.ParaFirstLineIndent = 0
+    chap.OutlineLevel = 1
 
-    # ── FrontMatterHead: same visual style as ChapHeads but OutlineLevel=0
     fmhead = get_or_create_style(doc, "FrontMatterHead")
-    fmhead.CharHeight          = 18.0
-    fmhead.CharFontName        = "Garamond"
-    fmhead.CharWeight          = 150
-    fmhead.ParaAdjust          = 3
+    _apply(fmhead, fm["head"])
     fmhead.ParaFirstLineIndent = 0
-    fmhead.ParaTopMargin       = pt(24)
-    fmhead.ParaBottomMargin    = pt(18)
-    fmhead.OutlineLevel        = 0
+    fmhead.OutlineLevel = 0
 
     qr = get_or_create_style(doc, "QRCodeBlock")
-    qr.CharHeight          = 12.0
-    qr.CharFontName        = "Garamond"
-    qr.ParaAdjust          = 3              # CENTER
+    _apply(qr, fm["qr_code"])
+    qr.CharHeight = 12.0
     qr.ParaFirstLineIndent = 0
-    qr.ParaTopMargin       = pt(18)         # space above QR
-    qr.ParaBottomMargin    = pt(6)          # tight gap to caption
-    qr.OutlineLevel        = 0
+    qr.OutlineLevel = 0
 
     qrcap = get_or_create_style(doc, "QRCodeCaption")
-    qrcap.CharHeight          = 10.0         # slightly smaller
-    qrcap.CharFontName        = "Garamond"
-    qrcap.CharPosture         = 2            # italic (optional, but very “book-like”)
-    qrcap.ParaAdjust          = 3            # CENTER
+    _apply(qrcap, fm["qr_caption"])
+    qrcap.ParaAdjust = 3
     qrcap.ParaFirstLineIndent = 0
-    qrcap.ParaTopMargin       = pt(0)
-    qrcap.ParaBottomMargin    = pt(18)       # space below block
-    qrcap.OutlineLevel        = 0
+    qrcap.ParaTopMargin = 0
+    qrcap.ParaBottomMargin = pt(18)
+    qrcap.OutlineLevel = 0
 
     note_label = get_or_create_style(doc, "AppendixNoteLabel")
-    note_label.CharHeight          = 8.0
-    note_label.CharFontName        = "Garamond"
-    note_label.ParaAdjust          = 0
+    _apply(note_label, ap["note_label"])
     note_label.ParaFirstLineIndent = 0
-    note_label.ParaLeftMargin      = 0
-    note_label.ParaLineSpacing     = prop_ls(100)
+    note_label.ParaLeftMargin = 0
+    note_label.ParaLineSpacing = prop_ls(100)
 
     note = get_or_create_style(doc, "AppendixNote")
-    note.CharHeight           = 8.0
-    note.CharFontName         = "Garamond"
-    note.ParaAdjust           = 0
-    note.ParaFirstLineIndent  = 0
-    note.ParaLeftMargin       = inches(0.25)
-    note.ParaLineSpacing      = prop_ls(100)
+    _apply(note, ap["note"])
+    note.ParaFirstLineIndent = 0
+    note.ParaLineSpacing = prop_ls(100)
 
     ahead = get_or_create_style(doc, "AppendixHead")
-    ahead.CharHeight          = 11.0
-    ahead.CharFontName        = "Garamond"
-    ahead.CharWeight          = 150
-    ahead.ParaTopMargin       = pt(12)
-    ahead.ParaBottomMargin    = pt(4)
+    _apply(ahead, ap["head"])
 
     print("  [✓] Paragraph styles created")

@@ -3,7 +3,7 @@ from .uno_utils import inches, pt
 from .styles import get_default_page_style
 
 
-def setup_headers(doc, meta):
+def setup_headers(doc, meta, font=None):
     """
     Running headers using HeaderTextRight (odd/right pages) and HeaderTextLeft
     (even/left pages) — the correct UNO property names for mirrored page styles.
@@ -24,7 +24,8 @@ def setup_headers(doc, meta):
         tab.DecimalChar = ord('.')
         return tab
 
-    tab = make_tab_stop(inches(4.0))
+    text_width = ps.Width - ps.LeftMargin - ps.RightMargin
+    tab = make_tab_stop(text_width)
 
     # ── Right page header (odd pages): TITLE <tab> pagenum ──────────────────
     rh_text = ps.getPropertyValue("HeaderTextRight")
@@ -34,6 +35,8 @@ def setup_headers(doc, meta):
     uno.invoke(rc, "setPropertyValue", ("ParaTabStops", uno.Any(
         "[]com.sun.star.style.TabStop", (tab,))))
     rc.setPropertyValue("CharHeight", 8.0)
+    if font:
+        rc.setPropertyValue("CharFontName", font)
     rc.gotoEnd(False)
     rh_text.insertString(rc, title_upper + "\t", False)
     pf = doc.createInstance("com.sun.star.text.TextField.PageNumber")
@@ -49,6 +52,8 @@ def setup_headers(doc, meta):
     uno.invoke(lc, "setPropertyValue", ("ParaTabStops", uno.Any(
         "[]com.sun.star.style.TabStop", (tab,))))
     lc.setPropertyValue("CharHeight", 8.0)
+    if font:
+        lc.setPropertyValue("CharFontName", font) 
     lc.gotoEnd(False)
     pf2 = doc.createInstance("com.sun.star.text.TextField.PageNumber")
     pf2.setPropertyValue("SubType", 1)

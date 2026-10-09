@@ -1,9 +1,17 @@
 import json
 from pathlib import Path
+import sys
+
+from scripts.ao3_to_odt.preset_schema import SCHEMA_VERSION, validate_preset
 
 APP_NAME = "AO3toODT"
 DEFAULT_LO_PYTHON = Path(r"C:\Program Files\LibreOffice\program\python.exe")
+DEFAULT_SAVE_LOCATION = str(Path.home() / "Downloads")
+INVALID_FILE_CHARS = set('<>:"/\\|?*')
 
+# ------------------------------------------------------------------
+# Config
+# ------------------------------------------------------------------
 def config_path() -> Path:
     return Path.home() / "AppData" / "Roaming" / APP_NAME / "config.json"
 
@@ -11,7 +19,7 @@ def load_config() -> dict:
     p = config_path()
     if p.exists():
         try: 
-            json.loads(p.read_text(encoding="utf-8"))
+            return json.loads(p.read_text(encoding="utf-8"))
         except Exception:
             return {}
     return {}
@@ -21,6 +29,35 @@ def save_config(data: dict):
     p.parent.mkdir (parents=True, exist_ok=True)
     p.write_text(json.dumps(data, indent=2), encoding="utf-8")
 
+# ------------------------------------------------------------------
+# Presets
+# ------------------------------------------------------------------
+
+def load_preset(path):
+    with open(path, encoding="utf-8") as f:
+        preset = json.load(f)
+    errors = validate_preset(preset)
+    if errors:
+        raise ValueError("Invalid preset: " + "; ".join(errors))
+    return preset
+
+def save_preset(name: str, data: dict) -> None:
+    full_data = {"preset_name": name, "schema_version": SCHEMA_VERSION, **data}
+    p = preset_name_to_path(name)
+    p.write_text(json.dumps(full_data, indent=2), encoding="utf-8")
+
+def preset_name_to_path(name: str) -> Path:
+    n = "preset_" + name.replace(" ", "_") + ".json"
+    return config_path().parent / n
+
+def default_preset_source_path() -> Path:
+    if hasattr(sys, "_MEIPASS"):
+        return Path(sys._MEIPASS) / "gui" / "ui" / "preset" / "preset_default_book_layout.json" 
+    return Path(__file__).parent / "ui" / "preset" / "preset_default_book_layout.json" 
+
+# ------------------------------------------------------------------
+# Misc
+# ------------------------------------------------------------------
 def resolve_lo_python() -> Path | None:
     """
     Returns the path to LO's python.exe, or None if it can't be found.
@@ -42,4 +79,17 @@ def resolve_lo_python() -> Path | None:
         save_config({"lo_python": str(DEFAULT_LO_PYTHON)})
         return DEFAULT_LO_PYTHON
 
+    return None
+
+def lo_missing_reason(main_window) -> str | None:
+    """
+    Returns a human-readable reason why LibreOffice/UNO isn't available,
+    or None if main_window._lo_python is set and conversion can proceed.
+
+    Centralized so every page that gates a button on LO availability
+    (page 0's Quick Convert, page 4's wizard Next/Convert, etc.) shows
+    the exact same message.
+    """
+    if getattr(main_window, "_lo_python", None) is None:
+        return "LibreOffice was not found. Set the LibreOffice path in Settings to continue."
     return None

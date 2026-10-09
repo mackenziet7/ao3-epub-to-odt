@@ -1,0 +1,106 @@
+{
+  "preset_name": "Default Book Layout",
+  "schema_version": 1,
+
+  "page_setup": {
+    "size_preset": "5.5x8.5_paperback",
+    "width_in": 5.5,
+    "height_in": 8.5,
+    "display_unit": "in",
+    "orientation": "portrait",
+    "mirrored_margins": true,
+    "margins": {
+      "top": 0.64,
+      "inside": 0.90,
+      "outside": 0.60,
+      "bottom": 0.60
+    }
+  },
+
+  "typography_basic": {
+    "header_font": "Garamond",
+    "header_size_pt": 18.0,
+    "body_font": "Garamond",
+    "body_size_pt": 11.5
+  },
+
+  "typography_advanced": {
+    "main_book": {
+      "chapter_headers": {
+        "font": "Garamond",
+        "size_pt": 18.0,
+        "bold": true,
+        "alignment": "center",
+        "display_unit": "in",
+        "top_margin_in": 0.33,
+        "bottom_margin_in": 0.25
+      },
+      "body": {
+        "font": "Garamond",
+        "size_pt": 11.5,
+        "alignment": "left",
+        "display_unit": "in",
+        "first_line_indent_in": 0.30,
+        "line_spacing_in": 0.22,
+        "no_indent_on_first_paragraph_after_heading": true
+      }
+    },
+
+    "front_matter": {
+      "head": {
+        "font": "Garamond",
+        "size_pt": 18.0,
+        "bold": true,
+        "alignment": "center",
+        "display_unit": "in",
+        "top_margin_in": 0.33,
+        "bottom_margin_in": 0.25
+      },
+      "body": {
+        "font": "Garamond",
+        "size_pt": 9.0,
+        "alignment": "left"
+      },
+      "qr_code": {
+        "alignment": "center",
+        "display_unit": "in",
+        "top_margin_in": 0.25,
+        "bottom_margin_in": 0.08
+      },
+      "qr_caption": {
+        "font": "Garamond",
+        "size_pt": 10.0,
+        "italic": true
+      }
+    },
+
+    "appendix": {
+      "head": {
+        "font": "Garamond",
+        "size_pt": 11.0,
+        "bold": true,
+        "alignment": "left",
+        "display_unit": "in",
+        "top_margin_in": 0.17,
+        "bottom_margin_in": 0.06
+      },
+      "note_label": {
+        "font": "Garamond",
+        "size_pt": 8.0,
+        "alignment": "left"
+      },
+      "note": {
+        "font": "Garamond",
+        "size_pt": 8.0,
+        "alignment": "left",
+        "display_unit": "in",
+        "left_margin_in": 0.25
+      }
+    }
+  },
+
+  "additional_options": {
+    "include_table_of_contents": true,
+    "include_qr_code": true
+  }
+}
