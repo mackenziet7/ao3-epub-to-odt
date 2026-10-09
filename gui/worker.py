@@ -18,10 +18,11 @@ from scripts.ao3_to_odt.preset_schema import SCHEMA_VERSION, validate_preset
 warnings.filterwarnings("ignore", category=XMLParsedAsHTMLWarning)
 
 NO_WINDOW = subprocess.CREATE_NO_WINDOW
-
+PROGRESS_PREFIX = "@@PROGRESS|"
 
 class ConversionWorker(QThread):
     log_signal      = Signal(str)   # emits a line of text to the log
+    progress_signal = Signal(int, str)
     finished_signal = Signal(bool)  # emits True=success, False=failure
 
     def __init__(self, lo_python, script, epub, odt, preset):
@@ -49,6 +50,7 @@ class ConversionWorker(QThread):
             self.log_signal.emit("Preset problem: " + "; ".join(errors))
             return False
         self.log_signal.emit("Parsing EPUB...")
+        self.progress_signal.emit(2, "Parsing EPUB")
         book = parse_epub(self.epub)
         self.log_signal.emit(
             f"  {book.metadata.title} by {book.metadata.author} "
@@ -70,6 +72,7 @@ class ConversionWorker(QThread):
         preset_json = work_dir / "preset.json"
         book_json.write_text(json.dumps(payload), encoding="utf-8")
         preset_json.write_text(json.dumps(self.preset), encoding="utf-8")
+        self.progress_signal.emit(10, "Starting LibreOffice")
 
         # ── 2. Existing cleanup + DLL workaround (unchanged) ─────────────────
         subprocess.run(
@@ -116,7 +119,7 @@ class ConversionWorker(QThread):
                 break
             if char == "\n":
                 if current_line.strip():
-                    self.log_signal.emit(current_line.strip())
+                    self._handle_line(current_line.strip())
                 current_line = ""
             elif char == "\r":
                 pass
@@ -125,7 +128,7 @@ class ConversionWorker(QThread):
 
         # Emit any remaining text that didn't end with a newline
         if current_line.strip():
-            self.log_signal.emit(current_line.strip())
+            self._handle_line(current_line.strip())
 
         # Wait for process to fully exit — the script kills LO itself
         timed_out = False
@@ -152,3 +155,13 @@ class ConversionWorker(QThread):
             self.log_signal.emit("Converter finished but produced no output file.")
             return False
         return True
+
+    def _handle_line(self, line: str):
+        if line.startswith(PROGRESS_PREFIX):
+            try:
+                _, pct, msg = line.split("|", 2)
+                self.progress_signal.emit(int(pct), msg)
+                return
+            except ValueError:
+                pass                      # malformed: fall through and show it in the log
+        self.log_signal.emit(line)

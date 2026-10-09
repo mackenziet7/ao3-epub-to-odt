@@ -57,7 +57,8 @@ def insert_image(doc, text, cursor, image_path, width_inches=1.2):
 
     text.insertTextContent(cursor, image, False)
 
-def build_content(doc, book, include_toc=True, toc_objects=None, include_qr=True, qr_path=None):
+def build_content(doc, book, include_toc=True, toc_objects=None, include_qr=True,
+                  qr_path=None, on_chapter=None):
     text   = doc.getText()
     cursor = text.createTextCursor()
     cursor.gotoStart(False)
@@ -104,7 +105,6 @@ def build_content(doc, book, include_toc=True, toc_objects=None, include_qr=True
         ins(text, cursor, "Summary:", "FrontMatter")
         ins(text, cursor, m.summary,  "FrontMatter")
 
-    # ── QR code ───────────────────────────────────────────────────────────────
     # ── QR code ───────────────────────────────────────────────────────────────
     if include_qr and qr_path:
         try:
@@ -159,6 +159,9 @@ def build_content(doc, book, include_toc=True, toc_objects=None, include_qr=True
                 text.insertControlCharacter(cursor, PARAGRAPH_BREAK, False)
                 first_para = False
         print(f"  [✓] Chapter {ch.index}: {ch.title}")
+
+        if on_chapter:
+            on_chapter(i + 1, len(book.chapters))
 
     # ── Appendix ──────────────────────────────────────────────────────────────
     noted = [c for c in book.chapters if c.prenotes or c.endnotes]

@@ -38,8 +38,14 @@ from scripts.ao3_to_odt.writer.headers import setup_headers
 from scripts.ao3_to_odt.preset_schema import validate_preset
 
 # ═══════════════════════════════════════════════════════════════════════════════
-# MAIN
+# Helpers
 # ═══════════════════════════════════════════════════════════════════════════════
+
+def progress(pct, msg):
+    print(f"@@PROGRESS|{pct}|{msg}", flush=True)
+
+def on_chapter(done, total):
+    progress(35 + int(50 * done / total), f"Chapter {done}/{total}")
 
 def load_preset(path):
     with open(path, encoding="utf-8") as f:
@@ -54,7 +60,9 @@ def save_odt(doc, out_path):
     doc.storeToURL(url, [prop("FilterName", "writer8"), prop("Overwrite", True)])
     print(f"  [✓] Saved: {out_path}")
 
-
+# ═══════════════════════════════════════════════════════════════════════════════
+# MAIN
+# ═══════════════════════════════════════════════════════════════════════════════
 def convert_epub(book, qr_path, out_path, preset, port=2002):
     opts = preset["additional_options"]
     include_toc = opts["include_table_of_contents"]
@@ -69,9 +77,11 @@ def convert_epub(book, qr_path, out_path, preset, port=2002):
 
     # ── Start LO listener ─────────────────────────────────────────────────────
     print(f"\n{'='*60}\nStarting LibreOffice\n{'='*60}")
+    progress(10, "Starting LibreOffice")
     lo_process = None
     if is_port_open(port):
         print("  Already running, connecting...")
+        progress(30, "LibreOffice ready")
     else:
         soffice = find_soffice()
         if not soffice:
@@ -80,6 +90,7 @@ def convert_epub(book, qr_path, out_path, preset, port=2002):
         print(f"  Launching: {soffice}")
         lo_process = start_lo_listener(soffice, port)
         print("  Waiting for LO to start", end="", flush=True)
+        progress(25, "Waiting for LibreOffice")
         for _ in range(40):
             if is_port_open(port):
                 break
@@ -98,6 +109,7 @@ def convert_epub(book, qr_path, out_path, preset, port=2002):
             time.sleep(1)
             print(".", end="", flush=True)
         print(" ready!")
+        progress(30, "LibreOffice ready")
 
     # ── Build document ────────────────────────────────────────────────────────
     print(f"\n{'='*60}\nBuilding document\n{'='*60}")
@@ -121,22 +133,30 @@ def convert_epub(book, qr_path, out_path, preset, port=2002):
                 else:
                     raise
         print("  Document created.")
+        progress(32, "Creating document")
         setup_page_style(doc, preset["page_setup"])
         print("  Page style done.")
         create_para_styles(doc, preset["typography_advanced"])
         print("  Para styles done.")
+        progress(35, "Building chapters")
+
         toc_objects = []
-        build_content(doc, book, include_toc, toc_objects, include_qr, qr_path=qr_path)
+        build_content(doc, book, include_toc, toc_objects, include_qr,
+                      qr_path=qr_path, on_chapter=on_chapter)
         print("  Content built.")
+        progress(86, "Updating contents")
         if toc_objects:
             try:
                 toc_objects[0].update()
                 print("  [✓] TOC refreshed")
             except Exception as e:
                 print(f"  TOC refresh failed (open in LO and press F9): {e}")
+        progress(91, "Adding running headers")
         setup_headers(doc, book.metadata, preset["typography_advanced"]["main_book"]["body"]["font"])
         print("  Headers done.")
+        progress(94, "Saving file")
         save_odt(doc, out_path)
+        progress(98, "Finishing")
         time.sleep(2)
         print("  Closing document...")
         import threading

@@ -29,7 +29,7 @@ def wire_page5(main_window):
     main_window._logOutput = w.findChild(QTextBrowser, "textBrowser")
     main_window._progress = w.findChild(QProgressBar, "progressBar")
     main_window._progress.setVisible(False)
-    main_window._progress.setFormat("%v / %m files")
+    main_window._progress.setFormat("%p%")
 
     w.findChild(QPushButton, "buttonExport").clicked.connect(
         lambda: _export_log(main_window)
@@ -57,7 +57,7 @@ def start_conversion(main_window, epub_paths, output_folder, settings):
     main_window._output_folder = output_folder
     main_window._conversion_settings = settings
 
-    main_window._progress.setMaximum(len(main_window._queue))
+    main_window._progress.setFormat(f"File {len(main_window._succeeded) + len(main_window._failed) + 1}/{main_window._progress.maximum() // 100}  ·  %p%")
     main_window._progress.setValue(0)
     main_window._progress.setVisible(True)
 
@@ -71,6 +71,7 @@ def _start_next(main_window):
 
     if main_window._worker is not None:
         main_window._worker.log_signal.disconnect()
+        main_window._worker.progress_signal.disconnect()
         main_window._worker.finished_signal.disconnect()
 
     main_window._worker = ConversionWorker(
@@ -80,10 +81,18 @@ def _start_next(main_window):
         main_window._conversion_settings,
     )
     main_window._worker.log_signal.connect(main_window._logOutput.append)
+    main_window._worker.progress_signal.connect(                # NEW
+        lambda pct, msg: _on_progress(main_window, pct, msg)
+    )
     main_window._worker.finished_signal.connect(
         lambda success: on_finished(main_window, success)
     )
     main_window._worker.start()
+
+def _on_progress(main_window, pct, msg):
+    bar = main_window._progress
+    done = len(main_window._succeeded) + len(main_window._failed)
+    bar.setValue(done * 100 + max(0, min(99, pct)))     # capped at 99: only finishing completes a file
 
 def on_finished(main_window, success: bool):
     current = main_window._queue.pop(0)
@@ -94,7 +103,7 @@ def on_finished(main_window, success: bool):
         main_window._failed.append(current)
         main_window._logOutput.append(f"✗ Failed: {Path(current).name}")
 
-    main_window._progress.setValue(len(main_window._succeeded) + len(main_window._failed))
+    main_window._progress.setValue((len(main_window._succeeded) + len(main_window._failed)) * 100)
 
     if main_window._queue:
         _start_next(main_window)
