@@ -38,6 +38,7 @@ class LOPathDialog(QDialog):
                 "install location.\n\n"
                 "Please browse to find LibreOffice, usually located at:\n"
                 r"  C:\Program Files\LibreOffice"
+                "Or download it using the button below and restart this program."
             )
 
         label = QLabel(msg)

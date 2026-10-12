@@ -12,6 +12,9 @@ from pathlib import Path
 
 from PySide6.QtWidgets import *
 from PySide6.QtUiTools import QUiLoader
+from PySide6.QtCore import QEvent, QObject, Qt
+from PySide6.QtGui import QCursor
+from PySide6.QtWidgets import QToolTip
 
 from gui.config import resolve_lo_python, load_config, update_config
 from gui.first_run_dialog import LOPathDialog
@@ -30,6 +33,28 @@ from gui.theme import apply_theme, refresh_icons
 
 _UI_PATH = Path(__file__).parent / "ui" / "screens" / "main_window.ui"
 
+
+class _HelpButtonFilter(QObject):
+    """Keep help buttons hoverable while preventing button activation."""
+
+    def eventFilter(self, watched, event):
+        if event.type() == QEvent.Type.Enter:
+            tooltip = watched.toolTip()
+            if tooltip:
+                QToolTip.showText(QCursor.pos(), tooltip, watched)
+        elif event.type() == QEvent.Type.Leave:
+            QToolTip.hideText()
+        elif event.type() in (
+            QEvent.Type.MouseButtonPress,
+            QEvent.Type.MouseButtonRelease,
+            QEvent.Type.MouseButtonDblClick,
+            QEvent.Type.KeyPress,
+            QEvent.Type.KeyRelease,
+        ):
+            return True
+        return False
+
+
 class MainWindow:
     """
     Wraps the QUiLoader window and owns all signal/slot wiring.
@@ -41,6 +66,9 @@ class MainWindow:
     def __init__(self):
         loader = QUiLoader()
         self.window = loader.load(str(_UI_PATH))
+        self._help_button_filter = _HelpButtonFilter(self.window)
+        self._configure_icon_buttons()
+        self._configure_help_buttons()
 
         self._lo_python = self._resolve_lo_on_startup()
         self.theme = load_config().get("theme", "dark")
@@ -65,6 +93,30 @@ class MainWindow:
         wire_page6(self)
         self._wire_navigation()
         snapshot_wizard_defaults(self)
+
+    def _configure_icon_buttons(self):
+        """Give navigation and settings icons the same hover footprint."""
+        names = (
+            "buttonSettings",
+            "buttonBack",
+            "buttonBack_2",
+            "buttonBack_3",
+            "buttonBack_4",
+            "buttonBack_5",
+        )
+        for name in names:
+            button = self.window.findChild(QPushButton, name)
+            if button is not None:
+                button.setFixedSize(36, 36)
+
+    def _configure_help_buttons(self):
+        for button in self.window.findChildren(QPushButton):
+            if button.text().strip() != "?":
+                continue
+            button.setFocusPolicy(Qt.FocusPolicy.NoFocus)
+            button.setAutoDefault(False)
+            button.setDefault(False)
+            button.installEventFilter(self._help_button_filter)
 
     def _resolve_lo_on_startup(self):
         lo = resolve_lo_python()

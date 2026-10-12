@@ -41,21 +41,27 @@ def _apply_dims(ps, page):
     ps.BottomMargin = inches(page["margins"]["bottom"])
     ps.FooterIsOn   = False
 
+def _side_margins(page):
+    """Return (left, right) in inches. In MIRRORED layout, Left=inside, Right=outside."""
+    m = page["margins"]
+    if page["mirrored_margins"]:
+        return m["inside"], m["outside"]
+    return m["left"], m["right"]
+
 def apply_book_page_dims(ps, page):
     _apply_dims(ps, page)
-    m = page["margins"]
+    left, right = _side_margins(page)
     ps.PageStyleLayout = MIRRORED if page["mirrored_margins"] else ALL
-    ps.LeftMargin  = inches(m["inside"])    # in MIRRORED, Left = inside
-    ps.RightMargin = inches(m["outside"])
+    ps.LeftMargin  = inches(left)
+    ps.RightMargin = inches(right)
 
 def apply_frontmatter_page_dims(ps, page, is_verso=False):
     _apply_dims(ps, page)
-    m = page["margins"]
-    ps.PageStyleLayout = ALL                # no recto/verso enforcement → no auto blanks
+    left, right = _side_margins(page)
+    ps.PageStyleLayout = ALL
     if page["mirrored_margins"] and is_verso:
-        ps.LeftMargin, ps.RightMargin = inches(m["outside"]), inches(m["inside"])
-    else:
-        ps.LeftMargin, ps.RightMargin = inches(m["inside"]), inches(m["outside"])
+        left, right = right, left          # verso swaps inside/outside
+    ps.LeftMargin, ps.RightMargin = inches(left), inches(right)
 
 def setup_page_style(doc,  page):
     # ── Default Page Style: running headers on, mirrored ──────────────────

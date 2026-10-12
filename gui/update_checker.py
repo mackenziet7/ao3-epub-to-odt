@@ -8,7 +8,7 @@ from PySide6.QtWidgets import QWidget
 
 from gui.config import load_config, update_config
 
-__version__ = "1.2.0"
+__version__ = "1.3.0"
 
 API_URL = "https://api.github.com/repos/mackenziet7/ao3-epub-to-odt/releases/latest"
 CHECK_INTERVAL = timedelta(hours=24)
