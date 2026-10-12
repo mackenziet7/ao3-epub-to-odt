@@ -7,7 +7,7 @@ from PySide6.QtWidgets import (
 from PySide6.QtGui import QDesktopServices
 from PySide6.QtCore import QUrl
 
-from gui.config import save_config
+from gui.config import update_config
 
 class LOPathDialog(QDialog):
     """
@@ -98,6 +98,6 @@ class LOPathDialog(QDialog):
             return
 
         # Save to config and close successfully
-        save_config({"lo_python": str(p)})
+        update_config({"lo_python": str(p)})
         self.accept()  # signals to the caller that a valid path was saved
         

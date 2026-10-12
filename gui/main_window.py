@@ -13,7 +13,7 @@ from pathlib import Path
 from PySide6.QtWidgets import *
 from PySide6.QtUiTools import QUiLoader
 
-from gui.config import resolve_lo_python, load_config, save_config
+from gui.config import resolve_lo_python, load_config, update_config
 from gui.first_run_dialog import LOPathDialog
 
 from gui.ui import resources_rc  # noqa: F401 — registers Qt resources
@@ -92,9 +92,7 @@ class MainWindow:
         apply_theme(mode)
         refresh_icons(self, mode)
 
-        cfg = load_config()
-        cfg["theme"] = mode
-        save_config(cfg)
+        update_config(theme=mode)
 
     def register_theme_refresh(self, callback):
         """Pages call this to register a function that re-applies themed

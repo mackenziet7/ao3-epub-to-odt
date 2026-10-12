@@ -9,25 +9,40 @@ DEFAULT_LO_PYTHON = Path(r"C:\Program Files\LibreOffice\program\python.exe")
 DEFAULT_SAVE_LOCATION = str(Path.home() / "Downloads")
 INVALID_FILE_CHARS = set('<>:"/\\|?*')
 
+CONFIG_DEFAULTS = {
+    "output_folder": DEFAULT_SAVE_LOCATION,
+}
+
 # ------------------------------------------------------------------
 # Config
 # ------------------------------------------------------------------
 def config_path() -> Path:
     return Path.home() / "AppData" / "Roaming" / APP_NAME / "config.json"
 
-def load_config() -> dict:
+
+def _read_config_file() -> dict:
     p = config_path()
     if p.exists():
-        try: 
+        try:
             return json.loads(p.read_text(encoding="utf-8"))
         except Exception:
             return {}
     return {}
 
+def load_config() -> dict:
+    return {**CONFIG_DEFAULTS, **_read_config_file()}
+
 def save_config(data: dict):
     p = config_path()
     p.parent.mkdir (parents=True, exist_ok=True)
     p.write_text(json.dumps(data, indent=2), encoding="utf-8")
+
+def update_config(**changes) -> dict:
+    """Merge keys into the existing config instead of overwriting it."""
+    cfg = _read_config_file()   # raw file, so defaults aren't written to disk
+    cfg.update(changes)
+    save_config(cfg)
+    return {**CONFIG_DEFAULTS, **cfg}
 
 # ------------------------------------------------------------------
 # Presets
@@ -76,7 +91,7 @@ def resolve_lo_python() -> Path | None:
 
     # No config yet — try the default
     if DEFAULT_LO_PYTHON.exists():
-        save_config({"lo_python": str(DEFAULT_LO_PYTHON)})
+        update_config(lo_python=str(DEFAULT_LO_PYTHON))
         return DEFAULT_LO_PYTHON
 
     return None

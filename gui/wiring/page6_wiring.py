@@ -6,12 +6,16 @@ from PySide6.QtWidgets import (
     QLineEdit,
     QMessageBox, 
     QPushButton,
-    QWidget
+    QWidget,
+    QAbstractButton,
+    QCheckBox,
+    QLabel
 )
 from PySide6.QtCore import QUrl, Qt
 from PySide6.QtGui import QDesktopServices
 
-from gui.config import config_path, DEFAULT_SAVE_LOCATION, load_config, load_preset, preset_name_to_path, save_config
+from gui.config import config_path, DEFAULT_SAVE_LOCATION, load_config, load_preset, preset_name_to_path, update_config
+from gui.update_checker import BadgeDot, UpdateChecker, update_state
 from gui.wiring.page0_wiring import populate_preset_list
 from gui.wiring.page4_wiring import apply_page4_mode
 from gui.wiring.preset_builder import DEFAULT_PRESET_STEM
@@ -23,6 +27,7 @@ def wire_page6(main_window):
     button_git.clicked.connect(lambda:    QDesktopServices.openUrl(
                 QUrl("https://github.com/mackenziet7/ao3-epub-to-odt")
             ))
+    _wire_updates(main_window)
 
     button_config_location = w.findChild(QPushButton, "buttonFileLocation")
     button_config_location.clicked.connect(lambda:    QDesktopServices.openUrl(
@@ -61,6 +66,76 @@ def wire_page6(main_window):
     )
 
 # ------------------------------------------------------------------
+# Updates
+# ------------------------------------------------------------------
+def _wire_updates(main_window):
+    w = main_window.window
+    settings_btn = w.findChild(QAbstractButton, "buttonSettings")
+    note = w.findChild(QLabel, "labelUpdateNote")
+    skip_btn = w.findChild(QPushButton, "buttonSkipVersion")
+    skip_row = w.findChild(QWidget, "widgetSkipUpdate")
+    check_btn = w.findChild(QPushButton, "buttonCheckUpdates")
+    startup_cb = w.findChild(QCheckBox, "checkUpdatesOnStartup")
+
+    note.setOpenExternalLinks(True)
+    dot = BadgeDot(settings_btn)
+    base_tip = settings_btn.toolTip() or "Settings"
+    checker = UpdateChecker(w)
+    main_window.update_checker = checker  # keep a reference
+    manual = [False]
+
+    def refresh(message: str | None = None):
+        cfg = load_config()
+        newer, badge = update_state(cfg)
+        latest = cfg.get("latest_known_version", "")
+        skipped = newer and not badge
+
+        dot.setVisible(badge)
+        settings_btn.setToolTip(f"{base_tip} (update {latest} available)" if badge else base_tip)
+
+        if newer:
+            url = cfg.get("latest_known_url", "")
+            text = f'<a href="{url}">New update available: {latest}</a>'
+            if skipped:
+                text += " (skipped)"
+        else:
+            text = message or ""
+        note.setText(text)
+        note.setVisible(bool(text))
+        skip_row.setVisible(badge)
+
+    def on_skip():
+        update_config(skipped_version=load_config().get("latest_known_version", ""))
+        refresh()
+
+    def on_check_clicked():
+        manual[0] = True
+        check_btn.setEnabled(False)
+        checker.check(force=True)
+
+    def on_finished(ok: bool):
+        check_btn.setEnabled(True)
+        message = None
+        if manual[0]:
+            manual[0] = False
+            if not ok:
+                message = "Couldn't reach GitHub."
+            elif not update_state(load_config())[0]:
+                message = "You're up to date."
+        refresh(message)
+
+    cfg = load_config()
+    startup_cb.setChecked(cfg.get("check_updates_on_startup", True))
+    startup_cb.toggled.connect(lambda on: update_config(check_updates_on_startup=on))
+    skip_btn.clicked.connect(on_skip)
+    check_btn.clicked.connect(on_check_clicked)
+    checker.finished.connect(on_finished)
+
+    refresh()  # show the cached state immediately
+    if startup_cb.isChecked():
+        checker.check()  # network only if the 24h throttle has elapsed
+
+# ------------------------------------------------------------------
 # Default save folder
 # ------------------------------------------------------------------
 def pick_folder(window):
@@ -70,16 +145,12 @@ def pick_folder(window):
             DEFAULT_SAVE_LOCATION,
         )
     if folder:
-        cfg = load_config()
-        cfg["output_folder"] = folder
-        save_config(cfg)
+        update_config(output_folder=folder)
         window.findChild(QLineEdit, "lineEditDefaultSave").setText(folder)
         window.findChild(QLineEdit, "lineEditOutputFolder").setText(folder)
 
 def save_folder_reset(window):
-    cfg = load_config()
-    cfg["output_folder"] = DEFAULT_SAVE_LOCATION
-    save_config(cfg)
+    update_config(output_folder=DEFAULT_SAVE_LOCATION)
     window.findChild(QLineEdit, "lineEditDefaultSave").setText(DEFAULT_SAVE_LOCATION)
     window.findChild(QLineEdit, "lineEditOutputFolder").setText(DEFAULT_SAVE_LOCATION)
 
